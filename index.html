@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servisný Protokol</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      margin-left: 220px; /* miesto pre sidebar */
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100%;
+      background-color: #2c3e50;
+      padding: 20px;
+      color: white;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    .sidebar h2 { font-size: 18px; margin-bottom: 20px; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar ul li { margin-bottom: 10px; }
+    .sidebar ul li a { color: white; text-decoration: none; font-weight: bold; display: block; padding: 8px 12px; border-radius: 4px; }
+    .sidebar ul li a:hover { background-color: #34495e; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .navigation { margin-top: 20px; display: flex; justify-content: space-between; }
+    input, textarea, select { width: 100%; margin-bottom: 10px; padding: 8px; font-size: 14px; }
+    button { padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('sidebar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('sidebar-container').innerHTML = html;
+      });
+  </script>
+
+  <h1>Servisný protokol</h1>
+  <button onclick="window.location.href='pridaniezakaznika.html'">Pridanie zákazníka</button>
+
+  <form id="protokolForm">
+    <div class="step active" id="step-0">
+      <h2>Údaje o prevádzke</h2>
+      <label for="zakaznik-select">Vyber zákazníka:</label>
+      <select id="zakaznik-select" onchange="vyplnitZakaznika()">
+        <option value="">-- Vyberte zákazníka --</option>
+      </select>
+      <label for="prevadzka-select">Vyber prevádzku:</label>
+      <select id="prevadzka-select">
+        <option value="">-- Vyberte prevádzku --</option>
+      </select>
+
+      <input id="nz_nazov" name="nazov" placeholder="Názov firmy" required />
+      <input id="nz_ico" name="ico" placeholder="IČO" required />
+      <input id="nz_dic" name="dic" placeholder="DIČ" />
+      <input id="nz_icdph" name="icdph" placeholder="IČ DPH" />
+      <input id="nz_sidlo" name="sidlo" placeholder="Sídlo" />
+      <input id="nz_osoba" name="osoba" placeholder="Kontaktná osoba" />
+      <input id="nz_tel" name="telefon" placeholder="Telefón" />
+      <input id="nz_email" name="email" placeholder="Email" type="email" />
+      <input type="text" name="cislo" id="cislo" placeholder="Číslo protokolu" readonly />
+      <input type="text" name="datum" placeholder="Dátum" />
+    </div>
+
+    <!-- ...ostatné kroky formulára ostávajú rovnaké... -->
+
+    <div class="step" id="step-1">
+      <h2>Klapky</h2>
+      <input type="text" name="klapky_pr" placeholder="Stav klapky - prívod" />
+      <input type="text" name="klapky_od" placeholder="Stav klapky - odvod" />
+    </div>
+    <div class="step" id="step-2">
+      <h2>Filtrácia</h2>
+      <input type="text" name="filtracia_pr" placeholder="Stav filtrácie - prívod" />
+      <input type="text" name="filtracia_od" placeholder="Stav filtrácie - odvod" />
+    </div>
+    <div class="step" id="step-3">
+      <h2>Rekuperácia</h2>
+      <input type="text" name="rekuperacia" placeholder="Stav rekuperácie" />
+    </div>
+    <div class="step" id="step-4">
+      <h2>Ventilátor</h2>
+      <input type="text" name="ventilator" placeholder="Stav ventilátora" />
+    </div>
+    <div class="step" id="step-5">
+      <h2>Ohrievač</h2>
+      <input type="text" name="ohri" placeholder="Stav ohrievača" />
+    </div>
+    <div class="step" id="step-6">
+      <h2>Plynový horák</h2>
+      <input type="text" name="horak" placeholder="Stav plynového horáka" />
+    </div>
+    <div class="step" id="step-7">
+      <h2>Chladič</h2>
+      <input type="text" name="chladic" placeholder="Stav chladiča" />
+    </div>
+    <div class="step" id="step-8">
+      <h2>Zvukový tlmič</h2>
+      <input type="text" name="tlmic" placeholder="Stav zvukového tlmiča" />
+    </div>
+    <div class="step" id="step-9">
+      <h2>Poznámka</h2>
+      <textarea name="poznamka" placeholder="Poznámka"></textarea>
+      <button type="button" onclick="generatePDF()">Generovať PDF</button>
+      <button type="button" onclick="generateExcel()">Generovať Excel</button>
+    </div>
+
+    <div class="navigation">
+      <button type="button" onclick="prevStep()">Späť</button>
+      <button type="button" onclick="nextStep()">Ďalej</button>
+    </div>
+  </form>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    let currentStep = 0;
+    const steps = document.querySelectorAll('.step');
+
+    function showStep(index) {
+      steps.forEach((step, i) => {
+        step.classList.toggle('active', i === index);
+      });
+    }
+
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    }
+
+    function vyplnitZakaznika() {
+      const select = document.getElementById('zakaznik-select');
+      const vybranyNazov = select.value;
+      if (!window.zakazniciData) return;
+      const zakaznik = window.zakazniciData.find(z => z.nazov === vybranyNazov);
+      const polia = [
+        ['nazov', 'nz_nazov'],
+        ['ico', 'nz_ico'],
+        ['dic', 'nz_dic'],
+        ['icdph', 'nz_icdph'],
+        ['sidlo', 'nz_sidlo'],
+        ['osoba', 'nz_osoba'],
+        ['telefon', 'nz_tel'],
+        ['email', 'nz_email']
+      ];
+      polia.forEach(([dataKey, inputId]) => {
+        const input = document.getElementById(inputId);
+        if (input) {
+          input.value = zakaznik ? (zakaznik[dataKey] || '') : '';
+        }
+      });
+
+      // Vyčisti prevádzky a načítaj nové, keď sa zmení zákazník
+      const prevadzkaSelect = document.getElementById('prevadzka-select');
+      prevadzkaSelect.innerHTML = '<option value="">-- Vyberte prevádzku --</option>';
+      if (zakaznik && zakaznik.id) {
+        nacitajPrevadzky(zakaznik.id);
+      }
+    }
+
+    function nacitatZakaznikov() {
+      fetch('nacitat-zakaznikov.php')
+        .then(response => response.json())
+        .then(data => {
+          window.zakazniciData = data;
+          const select = document.getElementById('zakaznik-select');
+          select.innerHTML = '<option value="">-- Vyberte zákazníka --</option>';
+          data.forEach(z => {
+            const option = document.createElement('option');
+            option.value = z.nazov;
+            option.textContent = `${z.nazov} (${z.ico})`;
+            select.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error("Chyba pri načítaní zákazníkov:", error);
+        });
+    }
+
+    function nacitajPrevadzky(zakaznikId) {
+      fetch('nacitat-prevadzky.php?zakaznik_id=' + encodeURIComponent(zakaznikId))
+        .then(r => r.json())
+        .then(prevadzky => {
+          const select = document.getElementById('prevadzka-select');
+          select.innerHTML = '<option value="">-- Vyberte prevádzku --</option>';
+          prevadzky.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.id;
+            option.textContent = `${p.nazov} (${p.mesto})`;
+            select.appendChild(option);
+          });
+        });
+    }
+
+    // automatické číslo protokolu a načítanie zákazníkov
+    window.onload = function() {
+      const today = new Date();
+      const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+      const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      document.getElementById('cislo').value = `P-${dateStr}-${randomPart}`;
+      nacitatZakaznikov();
+    };
+
+    window.generatePDF = async function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const form = document.getElementById("protokolForm");
+      const data = new FormData(form);
+
+      doc.setFontSize(14);
+      doc.text("SERVISNÝ PROTOKOL", 10, 15);
+
+      const prevadzkaText = document.getElementById('prevadzka-select').selectedOptions[0]?.textContent || "";
+      const info = [
+        ["Miesto prevádzky", prevadzkaText],
+        ["Názov firmy", data.get("nazov")],
+        ["IČO", data.get("ico")],
+        ["DIČ", data.get("dic")],
+        ["IČ DPH", data.get("icdph")],
+        ["Sídlo", data.get("sidlo")],
+        ["Kontaktná osoba", data.get("osoba")],
+        ["Telefón", data.get("telefon")],
+        ["Email", data.get("email")],
+        ["Číslo protokolu", data.get("cislo")],
+        ["Dátum", data.get("datum")],
+      ];
+      doc.autoTable({ startY: 20, head: [["Položka", "Hodnota"]], body: info });
+
+      const components = [
+        ["Klapka prívod", data.get("klapky_pr")],
+        ["Klapka odvod", data.get("klapky_od")],
+        ["Filtrácia prívod", data.get("filtracia_pr")],
+        ["Filtrácia odvod", data.get("filtracia_od")],
+        ["Rekuperácia", data.get("rekuperacia")],
+        ["Ventilátor", data.get("ventilator")],
+        ["Ohrievač", data.get("ohri")],
+        ["Plynový horák", data.get("horak")],
+        ["Chladič", data.get("chladic")],
+        ["Zvukový tlmič", data.get("tlmic")],
+      ];
+      doc.autoTable({ head: [["Komponent", "Stav"]], body: components, startY: doc.lastAutoTable.finalY + 10 });
+
+      const pozn = data.get("poznamka") || '';
+      doc.text("Poznámka:", 10, doc.lastAutoTable.finalY + 15);
+      doc.setFontSize(10);
+      doc.text(doc.splitTextToSize(pozn, 180), 10, doc.lastAutoTable.finalY + 20);
+
+      doc.save("servisny-protokol.pdf");
+    };
+
+    function generateExcel() {
+      const form = document.getElementById('protokolForm');
+      const formData = new FormData(form);
+      const data = {};
+
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+      // Pridať prevádzku do exportu
+      const prevadzkaText = document.getElementById('prevadzka-select').selectedOptions[0]?.textContent || "";
+      data["prevadzka"] = prevadzkaText;
+
+      const wsData = Object.entries(data).map(([k, v]) => [k, v]);
+      const ws = XLSX.utils.aoa_to_sheet([
+        ["Položka", "Hodnota"],
+        ...wsData
+      ]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Servisny protokol");
+      XLSX.writeFile(wb, "servisny-protokol.xlsx");
+    }
+  </script>
+</body>
+</html>

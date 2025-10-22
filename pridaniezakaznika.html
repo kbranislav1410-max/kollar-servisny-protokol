@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servisný Protokol</title>
+  <style>
+
+      body {
+  font-family: sans-serif;
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+  margin-left: 220px; /* miesto pre sidebar */
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #2c3e50;
+  padding: 20px;
+  color: white;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+.sidebar h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar ul li {
+  margin-bottom: 10px;
+}
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  display: block;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+.sidebar ul li a:hover {
+  background-color: #34495e;
+}
+
+    body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .navigation { margin-top: 20px; display: flex; justify-content: space-between; }
+    input, textarea, select { width: 100%; margin-bottom: 10px; padding: 8px; font-size: 14px; }
+    button { padding: 10px 20px; cursor: pointer; }
+
+
+  </style>
+</head>
+<body>
+        <div id="sidebar-container"></div>
+<script>
+  fetch('sidebar.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('sidebar-container').innerHTML = html;
+    });
+</script>
+  <h1>Servisný protokol</h1>
+  <h2>Pridať zákazníka</h2>
+<form id="zakaznikForm" onsubmit="event.preventDefault(); pridatZakaznika();">
+  <input id="nz_nazov" name="nazov" placeholder="Názov firmy" required />
+  <input id="nz_ico" name="ico" placeholder="IČO" required />
+  <input id="nz_dic" name="dic" placeholder="DIČ" />
+  <input id="nz_icdph" name="icdph" placeholder="IČ DPH" />
+  <input id="nz_sidlo" name="sidlo" placeholder="Sídlo" />
+  <input id="nz_osoba" name="osoba" placeholder="Kontaktná osoba" />
+  <input id="nz_tel" name="telefon" placeholder="Telefón" />
+  <input id="nz_email" name="email" placeholder="Email" type="email" />
+  <button type="submit">Pridať zákazníka</button>
+
+
+
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script>
+  function pridatZakaznika() {
+  const data = {
+    nazov: document.getElementById('nz_nazov').value,
+    ico: document.getElementById('nz_ico').value,
+    dic: document.getElementById('nz_dic').value,
+    icdph: document.getElementById('nz_icdph').value,
+    sidlo: document.getElementById('nz_sidlo').value,
+    osoba: document.getElementById('nz_osoba').value,
+    telefon: document.getElementById('nz_tel').value,
+    email: document.getElementById('nz_email').value,
+  };
+
+  fetch('pridat-zakaznika.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(data)
+  })
+  .then(response => response.text())
+  .then(text => {
+    if (text.trim() === "OK") {
+      alert("Zákazník bol úspešne pridaný.");
+      document.getElementById('zakaznikForm').reset(); // vyčisti formulár
+    } else {
+      alert("Chyba pri ukladaní: " + text);
+    }
+  })
+  .catch(error => {
+    alert("Nastala chyba spojenia: " + error);
+  });
+}
+</script>
+</body>
+</html>

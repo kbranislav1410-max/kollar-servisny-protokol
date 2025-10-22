@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoznam zákazníkov</title>
+  <style>
+
+      body {
+  font-family: sans-serif;
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+  margin-left: 220px; /* miesto pre sidebar */
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #2c3e50;
+  padding: 20px;
+  color: white;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+.sidebar h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar ul li {
+  margin-bottom: 10px;
+}
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  display: block;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+.sidebar ul li a:hover {
+  background-color: #34495e;
+}
+
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      margin-left: 220px; /* miesto pre sidebar */
+    }
+  
+    h1 {
+      margin-top: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: #fff;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    .search-box {
+      margin-bottom: 20px;
+    }
+    .search-box input {
+      font-size: 14px;
+      padding: 6px 10px;
+      width: 300px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+<script>
+  fetch('sidebar.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('sidebar-container').innerHTML = html;
+    });
+</script>
+  <h1>Zoznam zákazníkov</h1>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Hľadať podľa názvu, IČO, osoby alebo emailu..." oninput="filterTable()">
+  </div>
+  <table id="zakazniciTable">
+    <thead>
+      <tr>
+        <th>Názov firmy</th>
+        <th>IČO</th>
+        <th>DIČ</th>
+        <th>IČ DPH</th>
+        <th>Sídlo</th>
+        <th>Kontaktná osoba</th>
+        <th>Telefón</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- údaje sa doplnia JS -->
+    </tbody>
+  </table>
+  <script>
+     function naplnitTabulku(zakaznici) {
+    const tbody = document.querySelector("#zakazniciTable tbody");
+    tbody.innerHTML = "";
+    zakaznici.forEach(z => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><a href="zakaznik-detail.html?id=${z.id}" style="color:#2c3e50; font-weight:bold; text-decoration:underline;">${z.nazov}</a></td>
+        <td>${z.ico}</td>
+        <td>${z.dic}</td>
+        <td>${z.icdph}</td>
+        <td>${z.sidlo}</td>
+        <td>${z.osoba}</td>
+        <td>${z.telefon}</td>
+        <td>${z.email}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+    let zakazniciData = [];
+
+    function nacitatZakaznikov() {
+      fetch('nacitat-zakaznikov.php')
+        .then(response => response.json())
+        .then(data => {
+          zakazniciData = data;
+          naplnitTabulku(zakazniciData);
+        })
+        .catch(error => {
+          document.querySelector("#zakazniciTable tbody").innerHTML = 
+            `<tr><td colspan="8" style="color:red;">Chyba pri načítaní zákazníkov: ${error}</td></tr>`;
+        });
+    }
+
+    function filterTable() {
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      let filtered = zakazniciData;
+      if (search) {
+        filtered = zakazniciData.filter(z =>
+          (z.nazov || '').toLowerCase().includes(search) ||
+          (z.ico || '').toLowerCase().includes(search) ||
+          (z.osoba || '').toLowerCase().includes(search) ||
+          (z.email || '').toLowerCase().includes(search)
+        );
+      }
+      naplnitTabulku(filtered);
+    }
+
+    window.onload = nacitatZakaznikov;
+  </script>
+</body>
+</html>

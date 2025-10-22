@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail zákazníka</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      margin-left: 220px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100%;
+      background-color: #2c3e50;
+      padding: 20px;
+      color: white;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    .sidebar h2 { font-size: 18px; margin-bottom: 20px; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar ul li { margin-bottom: 10px; }
+    .sidebar ul li a { color: white; text-decoration: none; font-weight: bold; display: block; padding: 8px 12px; border-radius: 4px; }
+    .sidebar ul li a:hover { background-color: #34495e; }
+    .detail-box {
+      background: #fff;
+      box-shadow: 0 0 8px rgba(0,0,0,0.07);
+      border-radius: 7px;
+      padding: 25px;
+      margin-top: 30px;
+    }
+    .detail-box h1 { margin-top: 0; }
+    .label { color: #888; width: 180px; display: inline-block; font-weight: bold; }
+    .field { font-size: 16px; }
+    .back-link { margin-top: 15px; display: inline-block; color: #2c3e50; text-decoration: underline; }
+    .prevadzky-box {margin-top: 30px;}
+  </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('sidebar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('sidebar-container').innerHTML = html;
+      });
+  </script>
+
+  <div class="detail-box" id="detail"></div>
+  <div class="prevadzky-box">
+    <h2>Prevádzky zákazníka</h2>
+    <ul id="prevadzky-list"></ul>
+    <form id="prevadzkaForm">
+      <input name="nazov" placeholder="Názov prevádzky" required>
+      <input name="adresa" placeholder="Adresa" required>
+      <input name="mesto" placeholder="Mesto" required>
+      <input type="hidden" name="zakaznik_id" id="zakaznik_id">
+      <button type="submit">Pridať prevádzku</button>
+    </form>
+  </div>
+  <a href="zoznam-zakaznikov.html" class="back-link">&larr; Späť na zoznam zákazníkov</a>
+
+  <script>
+    function getIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+    function zobrazZakaznika(z) {
+      if (!z) {
+        document.getElementById('detail').innerHTML = '<b style="color:red;">Zákazník nebol nájdený.</b>';
+        return;
+      }
+      document.getElementById('detail').innerHTML = `
+        <h1>${z.nazov}</h1>
+        <div><span class="label">IČO:</span> <span class="field">${z.ico || '-'}</span></div>
+        <div><span class="label">DIČ:</span> <span class="field">${z.dic || '-'}</span></div>
+        <div><span class="label">IČ DPH:</span> <span class="field">${z.icdph || '-'}</span></div>
+        <div><span class="label">Sídlo:</span> <span class="field">${z.sidlo || '-'}</span></div>
+        <div><span class="label">Kontaktná osoba:</span> <span class="field">${z.osoba || '-'}</span></div>
+        <div><span class="label">Telefón:</span> <span class="field">${z.telefon || '-'}</span></div>
+        <div><span class="label">Email:</span> <span class="field">${z.email || '-'}</span></div>
+      `;
+    }
+    function nacitajPrevadzky(zakaznikId) {
+  fetch('nacitat-prevadzky.php?zakaznik_id=' + zakaznikId)
+    .then(r => r.json())
+    .then(list => {
+      const ul = document.getElementById('prevadzky-list');
+      ul.innerHTML = '';
+      // list môže byť pole alebo objekt – over, že je to pole a má aspoň jeden prvok
+      if (Array.isArray(list) && list.length > 0) {
+        list.forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = `${p.nazov}, ${p.adresa}, ${p.mesto}`;
+          ul.appendChild(li);
+        });
+      } else {
+        ul.innerHTML = '<li><i>Žiadna prevádzka zatiaľ nebola pridaná.</i></li>';
+      }
+    })
+    .catch(e => {
+      document.getElementById('prevadzky-list').innerHTML = `<li style="color:red;"><i>Chyba pri načítaní prevádzok</i></li>`;
+    });
+}
+    window.onload = function() {
+  const zakaznikId = getIdFromUrl();
+  document.getElementById('zakaznik_id').value = zakaznikId;
+  fetch(`zakaznik-detail.php?id=${zakaznikId}`)
+    .then(r => r.json())
+    .then(z => zobrazZakaznika(z));
+  nacitajPrevadzky(zakaznikId);
+
+  document.getElementById('prevadzkaForm').onsubmit = function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    fetch('pridat-prevadzku.php', {method:'POST',body:fd})
+      .then(r => r.text())
+      .then(() => {
+        this.reset();
+        nacitajPrevadzky(zakaznikId);
+      });
+  };
+};
+  </script>
+</body>
+</html>
