@@ -91,6 +91,73 @@ function loadLocations(customerId) {
 }
 
 /**
+ * Načítanie zariadení pre prevádzku
+ */
+function loadDevices(locationId) {
+    if (!locationId) return;
+    
+    fetch(`index.php?action=api_devices&location_id=${locationId}`)
+        .then(response => response.json())
+        .then(devices => {
+            const select = document.getElementById('device_select');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">-- Vyberte zariadenie (voliteľné) --</option>';
+            devices.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.id;
+                option.textContent = `${d.nazov}${d.typ ? ' (' + d.typ + ')' : ''}`;
+                select.appendChild(option);
+            });
+            
+            // Nastaviť aktuálnu hodnotu zo session
+            if (window.reportData && window.reportData.device_id) {
+                select.value = window.reportData.device_id;
+            }
+        })
+        .catch(err => console.error('Chyba pri načítaní zariadení:', err));
+}
+
+/**
+ * Použitie údajov zákazníka ako prevádzky
+ */
+function useCustomerAsLocation() {
+    const customerId = document.getElementById('customer_select').value;
+    if (!customerId) {
+        alert('Najprv vyberte zákazníka v kroku 1');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'add_location_from_customer');
+    formData.append('customer_id', customerId);
+    
+    fetch('index.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Prevádzka bola vytvorená s údajmi spoločnosti');
+            loadLocations(customerId);
+            // Nastaviť novú prevádzku ako vybranú
+            setTimeout(() => {
+                const locationSelect = document.getElementById('location_select');
+                locationSelect.value = result.id;
+                loadDevices(result.id);
+            }, 500);
+        } else {
+            alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba pripojenia');
+        console.error(err);
+    });
+}
+
+/**
  * Inicializácia signature padov
  */
 function initSignaturePads() {
@@ -254,6 +321,56 @@ function setupFormHandlers() {
                     setTimeout(() => {
                         const locationSelect = document.getElementById('location_select');
                         locationSelect.value = result.id;
+                    }, 500);
+                } else {
+                    alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                }
+            })
+            .catch(err => {
+                alert('Chyba pripojenia');
+                console.error(err);
+            });
+        });
+    }
+    
+    // Výber prevádzky - načítanie zariadení
+    const locationSelect = document.getElementById('location_select');
+    if (locationSelect) {
+        locationSelect.addEventListener('change', function() {
+            loadDevices(this.value);
+        });
+    }
+    
+    // Pridanie nového zariadenia
+    const newDeviceForm = document.getElementById('newDeviceForm');
+    if (newDeviceForm) {
+        newDeviceForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const locationId = document.getElementById('location_select').value;
+            if (!locationId) {
+                alert('Najprv vyberte prevádzku v kroku 2');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            formData.append('action', 'add_device');
+            formData.append('location_id', locationId);
+            
+            fetch('index.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Zariadenie bolo pridané');
+                    this.reset();
+                    loadDevices(locationId);
+                    // Nastaviť nové zariadenie ako vybrané
+                    setTimeout(() => {
+                        const deviceSelect = document.getElementById('device_select');
+                        deviceSelect.value = result.id;
                     }, 500);
                 } else {
                     alert('Chyba: ' + (result.error || 'Neznáma chyba'));
@@ -445,12 +562,9 @@ function collectStepData(stepIndex) {
             break;
             
         case 2: // Zariadenie
-            const deviceForm = document.getElementById('deviceForm');
-            if (deviceForm) {
-                const formData = new FormData(deviceForm);
-                for (const [key, value] of formData.entries()) {
-                    data[key] = value;
-                }
+            const deviceSelect = document.getElementById('device_select');
+            if (deviceSelect) {
+                data.device_id = deviceSelect.value;
             }
             break;
             
@@ -497,12 +611,8 @@ function updateSummary() {
         <div class="summary-section">
             <h4>Zariadenie</h4>
             <div class="summary-row">
-                <span class="summary-label">Názov:</span>
-                <span class="summary-value">${data.device_nazov || '-'}</span>
-            </div>
-            <div class="summary-row">
-                <span class="summary-label">Typ:</span>
-                <span class="summary-value">${data.device_typ || '-'}</span>
+                <span class="summary-label">Zariadenie ID:</span>
+                <span class="summary-value">${data.device_id || 'Nevybrané (voliteľné)'}</span>
             </div>
         </div>
         

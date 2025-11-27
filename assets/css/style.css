@@ -381,6 +381,25 @@ select {
     transform: rotate(45deg);
 }
 
+/* Same as customer section */
+.same-as-customer-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #e8f4fd;
+    border-radius: 8px;
+    border: 1px solid #b8daff;
+}
+
+.same-as-customer-section .btn {
+    margin-bottom: 10px;
+}
+
+.help-text {
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
 /* Signature */
 .signature-section {
     margin-bottom: 30px;

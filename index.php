@@ -31,6 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'add_location':
             addLocation();
             break;
+        case 'add_location_from_customer':
+            addLocationFromCustomer();
+            break;
+        case 'add_device':
+            addDevice();
+            break;
         case 'upload_signature':
             uploadSignature();
             break;
@@ -104,6 +110,67 @@ function addLocation(): void
         post('nazov'),
         post('adresa'),
         post('mesto'),
+        post('poznamka', ''),
+    ]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+function addLocationFromCustomer(): void
+{
+    $pdo = getDbConnection();
+    $customerId = (int)post('customer_id', 0);
+    
+    if (!$customerId) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID zákazníka']);
+        exit;
+    }
+    
+    // Načítanie dát zákazníka
+    $stmt = $pdo->prepare("SELECT nazov_firmy, sidlo FROM customers WHERE id = ?");
+    $stmt->execute([$customerId]);
+    $customer = $stmt->fetch();
+    
+    if (!$customer) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Zákazník nebol nájdený']);
+        exit;
+    }
+    
+    // Vytvorenie prevádzky s údajmi zákazníka
+    $stmt = $pdo->prepare("
+        INSERT INTO locations (customer_id, nazov, adresa, mesto, poznamka)
+        VALUES (?, ?, ?, '', 'Údaje prevádzky sú rovnaké ako údaje spoločnosti')
+    ");
+    
+    $stmt->execute([
+        $customerId,
+        $customer['nazov_firmy'],
+        $customer['sidlo'] ?? '',
+    ]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+function addDevice(): void
+{
+    $pdo = getDbConnection();
+    
+    $stmt = $pdo->prepare("
+        INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, poznamka)
+        VALUES (?, ?, ?, ?, ?)
+    ");
+    
+    $stmt->execute([
+        post('location_id'),
+        post('nazov'),
+        post('typ'),
+        post('vyrobne_cislo'),
         post('poznamka', ''),
     ]);
     
@@ -247,22 +314,8 @@ function finalizeReport(): void
         exit;
     }
     
-    // Uloženie zariadenia ak existuje
-    $deviceId = null;
-    if (!empty($report['device_nazov'])) {
-        $stmt = $pdo->prepare("
-            INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, poznamka)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $report['location_id'] ?? null,
-            $report['device_nazov'],
-            $report['device_typ'] ?? '',
-            $report['device_vyrobne_cislo'] ?? '',
-            $report['device_poznamka'] ?? '',
-        ]);
-        $deviceId = $pdo->lastInsertId();
-    }
+    // Zariadenie - použijeme existujúce ID z výberu
+    $deviceId = !empty($report['device_id']) ? (int)$report['device_id'] : null;
     
     // Uloženie reportu
     $stmt = $pdo->prepare("
@@ -486,6 +539,19 @@ function getLocations(): void
     exit;
 }
 
+function getDevices(): void
+{
+    $locationId = (int)get('location_id', 0);
+    
+    $pdo = getDbConnection();
+    $stmt = $pdo->prepare("SELECT * FROM devices WHERE location_id = ? ORDER BY nazov ASC");
+    $stmt->execute([$locationId]);
+    
+    header('Content-Type: application/json');
+    echo json_encode($stmt->fetchAll());
+    exit;
+}
+
 function getReports(): void
 {
     $pdo = getDbConnection();
@@ -539,6 +605,9 @@ switch ($action) {
         break;
     case 'api_locations':
         getLocations();
+        break;
+    case 'api_devices':
+        getDevices();
         break;
     case 'api_reports':
         getReports();
@@ -663,9 +732,16 @@ $reportData = $_SESSION['report'] ?? [];
                 </select>
             </div>
 
+            <div class="same-as-customer-section">
+                <button type="button" class="btn btn-outline" id="sameAsCustomerBtn" onclick="useCustomerAsLocation()">
+                    📋 Použiť údaje spoločnosti ako prevádzku
+                </button>
+                <p class="help-text">Ak má zákazník len jednu prevádzku s rovnakou adresou ako sídlo firmy.</p>
+            </div>
+
             <div class="collapsible-section">
                 <button type="button" class="collapsible-toggle" onclick="toggleCollapsible(this)">
-                    <span class="toggle-icon">+</span> Pridať novú prevádzku
+                    <span class="toggle-icon">+</span> Pridať novú prevádzku manuálne
                 </button>
                 <div class="collapsible-content">
                     <form id="newLocationForm">
@@ -694,22 +770,39 @@ $reportData = $_SESSION['report'] ?? [];
 
         <!-- Step 2: Zariadenie -->
         <div class="step <?= $currentStep === 2 ? 'active' : '' ?>" id="step-2">
-            <h2>Krok 3: Údaje o zariadení (voliteľné)</h2>
+            <h2>Krok 3: Výber/pridanie zariadenia</h2>
             
-            <form id="deviceForm">
-                <div class="form-group">
-                    <input type="text" name="device_nazov" placeholder="Názov zariadenia">
+            <div class="form-group">
+                <label for="device_select">Existujúce zariadenie na prevádzke:</label>
+                <select id="device_select" name="device_id">
+                    <option value="">-- Vyberte zariadenie (voliteľné) --</option>
+                </select>
+            </div>
+
+            <div class="collapsible-section">
+                <button type="button" class="collapsible-toggle" onclick="toggleCollapsible(this)">
+                    <span class="toggle-icon">+</span> Pridať nové zariadenie
+                </button>
+                <div class="collapsible-content">
+                    <form id="newDeviceForm">
+                        <div class="form-group">
+                            <input type="text" name="nazov" placeholder="Názov zariadenia *" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="typ" placeholder="Typ zariadenia">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="vyrobne_cislo" placeholder="Výrobné číslo">
+                        </div>
+                        <div class="form-group">
+                            <textarea name="poznamka" placeholder="Poznámka k zariadeniu"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Pridať zariadenie</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <input type="text" name="device_typ" placeholder="Typ zariadenia">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="device_vyrobne_cislo" placeholder="Výrobné číslo">
-                </div>
-                <div class="form-group">
-                    <textarea name="device_poznamka" placeholder="Poznámka k zariadeniu"></textarea>
-                </div>
-            </form>
+            </div>
+
+            <p class="help-text">Zariadenie je voliteľné. Ak nechcete vybrať ani pridať zariadenie, pokračujte ďalej.</p>
 
             <div class="navigation">
                 <button type="button" class="btn btn-outline" onclick="prevStep(2)">Späť</button>
