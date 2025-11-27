@@ -1,0 +1,21 @@
+# Composer
+/vendor/
+composer.lock
+
+# Data and uploads directories
+/data/
+/uploads/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
