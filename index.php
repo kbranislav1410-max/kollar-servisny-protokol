@@ -167,8 +167,9 @@ function uploadPhoto(): void
     
     $file = $_FILES['photo'];
     
-    // Kontrola veľkosti
-    if ($file['size'] > MAX_FILE_SIZE) {
+    // Kontrola veľkosti - použitie skutočnej veľkosti súboru
+    $actualFileSize = filesize($file['tmp_name']);
+    if ($actualFileSize === false || $actualFileSize > MAX_FILE_SIZE) {
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Súbor je príliš veľký (max 5MB)']);
         exit;
@@ -227,8 +228,24 @@ function finalizeReport(): void
     $report = $_SESSION['report'];
     $pdo = getDbConnection();
     
-    // Generovanie čísla protokolu
-    $cisloProtokolu = 'P-' . date('Ymd') . '-' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT);
+    // Generovanie unikátneho čísla protokolu
+    $maxAttempts = 10;
+    $cisloProtokolu = null;
+    for ($i = 0; $i < $maxAttempts; $i++) {
+        $candidate = 'P-' . date('Ymd') . '-' . str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM reports WHERE cislo_protokolu = ?");
+        $stmt->execute([$candidate]);
+        if ($stmt->fetchColumn() == 0) {
+            $cisloProtokolu = $candidate;
+            break;
+        }
+    }
+    
+    if (!$cisloProtokolu) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Nepodarilo sa vygenerovať unikátne číslo protokolu']);
+        exit;
+    }
     
     // Uloženie zariadenia ak existuje
     $deviceId = null;

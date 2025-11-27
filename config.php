@@ -31,10 +31,17 @@ define('MAIL_FROM_NAME', 'Servisný Protokol');
 // Nastavenie timezone
 date_default_timezone_set('Europe/Bratislava');
 
-// Zapnutie error reportingu (pre vývoj)
-// V produkcii nastaviť na 0
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Prostredie: 'development' alebo 'production'
+define('APP_ENV', 'development');
+
+// Error reporting - automaticky podľa prostredia
+if (APP_ENV === 'production') {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+}
 
 /**
  * Získanie PDO spojenia s databázou

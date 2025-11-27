@@ -33,13 +33,22 @@ class SignaturePad {
         this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
         
         // Event listeners pre dotyk (mobil/tablet)
-        this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
-        this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+        this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
         this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
-        
-        // Zabránenie scrollovaniu pri kreslení
-        this.canvas.addEventListener('touchstart', (e) => e.preventDefault());
-        this.canvas.addEventListener('touchmove', (e) => e.preventDefault());
+    }
+    
+    /**
+     * Kontrola či je dotyk vo vnútri canvasu
+     */
+    isTouchInsideCanvas(touch) {
+        const rect = this.canvas.getBoundingClientRect();
+        return (
+            touch.clientX >= rect.left &&
+            touch.clientX <= rect.right &&
+            touch.clientY >= rect.top &&
+            touch.clientY <= rect.bottom
+        );
     }
     
     getCoordinates(e) {
@@ -73,10 +82,14 @@ class SignaturePad {
     }
     
     handleTouchStart(e) {
-        this.isDrawing = true;
-        const coords = this.getTouchCoordinates(e);
-        this.lastX = coords.x;
-        this.lastY = coords.y;
+        const touch = e.touches[0];
+        if (this.isTouchInsideCanvas(touch)) {
+            e.preventDefault();
+            this.isDrawing = true;
+            const coords = this.getTouchCoordinates(e);
+            this.lastX = coords.x;
+            this.lastY = coords.y;
+        }
     }
     
     draw(e) {
@@ -101,20 +114,24 @@ class SignaturePad {
     handleTouchMove(e) {
         if (!this.isDrawing) return;
         
-        this.isEmpty = false;
-        const coords = this.getTouchCoordinates(e);
-        
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = this.options.strokeStyle;
-        this.ctx.lineWidth = this.options.lineWidth;
-        this.ctx.lineCap = 'round';
-        this.ctx.lineJoin = 'round';
-        this.ctx.moveTo(this.lastX, this.lastY);
-        this.ctx.lineTo(coords.x, coords.y);
-        this.ctx.stroke();
-        
-        this.lastX = coords.x;
-        this.lastY = coords.y;
+        const touch = e.touches[0];
+        if (this.isTouchInsideCanvas(touch)) {
+            e.preventDefault();
+            this.isEmpty = false;
+            const coords = this.getTouchCoordinates(e);
+            
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = this.options.strokeStyle;
+            this.ctx.lineWidth = this.options.lineWidth;
+            this.ctx.lineCap = 'round';
+            this.ctx.lineJoin = 'round';
+            this.ctx.moveTo(this.lastX, this.lastY);
+            this.ctx.lineTo(coords.x, coords.y);
+            this.ctx.stroke();
+            
+            this.lastX = coords.x;
+            this.lastY = coords.y;
+        }
     }
     
     stopDrawing() {

@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Servisný protokol <?= htmlspecialchars($report['cislo_protokolu'] ?? '') ?></title>
+<?php
+/**
+ * Pomocná funkcia pre konverziu obrázka na data URI pre Dompdf
+ */
+function getImageDataUri($path) {
+    if (!file_exists($path)) {
+        return null;
+    }
+    $imageData = file_get_contents($path);
+    if ($imageData === false) {
+        return null;
+    }
+    $mimeType = mime_content_type($path);
+    return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+}
+?>
     <style>
         * {
             margin: 0;
@@ -299,8 +315,11 @@
         <div class="signature-box">
             <div class="signature-label">Podpis technika</div>
             <div class="signature-image">
-                <?php if (!empty($report['podpis_technik']) && file_exists(SIGNATURES_PATH . '/' . $report['podpis_technik'])): ?>
-                <img src="<?= SIGNATURES_PATH . '/' . $report['podpis_technik'] ?>" alt="Podpis technika">
+                <?php 
+                $technikPath = SIGNATURES_PATH . '/' . ($report['podpis_technik'] ?? '');
+                $technikDataUri = !empty($report['podpis_technik']) ? getImageDataUri($technikPath) : null;
+                if ($technikDataUri): ?>
+                <img src="<?= $technikDataUri ?>" alt="Podpis technika">
                 <?php else: ?>
                 <span style="color: #999;">Bez podpisu</span>
                 <?php endif; ?>
@@ -310,8 +329,11 @@
         <div class="signature-box">
             <div class="signature-label">Podpis zákazníka</div>
             <div class="signature-image">
-                <?php if (!empty($report['podpis_zakaznik']) && file_exists(SIGNATURES_PATH . '/' . $report['podpis_zakaznik'])): ?>
-                <img src="<?= SIGNATURES_PATH . '/' . $report['podpis_zakaznik'] ?>" alt="Podpis zákazníka">
+                <?php 
+                $zakaznikPath = SIGNATURES_PATH . '/' . ($report['podpis_zakaznik'] ?? '');
+                $zakaznikDataUri = !empty($report['podpis_zakaznik']) ? getImageDataUri($zakaznikPath) : null;
+                if ($zakaznikDataUri): ?>
+                <img src="<?= $zakaznikDataUri ?>" alt="Podpis zákazníka">
                 <?php else: ?>
                 <span style="color: #999;">Bez podpisu</span>
                 <?php endif; ?>

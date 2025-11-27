@@ -31,9 +31,22 @@ foreach ($directories as $dir) {
 }
 
 // Vytvorenie .htaccess pre ochranu data/ adresára
+// Kompatibilné s Apache 2.2 aj 2.4+
 $htaccessPath = BASE_PATH . '/data/.htaccess';
 if (!file_exists($htaccessPath)) {
-    file_put_contents($htaccessPath, "Deny from all\n");
+    $htaccessContent = <<<HTACCESS
+# Apache 2.4+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache 2.2
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+HTACCESS;
+    file_put_contents($htaccessPath, $htaccessContent);
     echo "✓ Vytvorený .htaccess pre ochranu data/\n";
 }
 
