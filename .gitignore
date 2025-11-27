@@ -1,0 +1,29 @@
+# Dependencies
+vendor/
+
+# Uploads (user-generated content)
+uploads/photos/*
+uploads/signatures/*
+uploads/pdfs/*
+!uploads/photos/.gitkeep
+!uploads/signatures/.gitkeep
+!uploads/pdfs/.gitkeep
+
+# Data directory (SQLite database)
+data/*.db
+!data/.gitkeep
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
