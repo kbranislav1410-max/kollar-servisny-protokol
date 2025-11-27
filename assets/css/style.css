@@ -323,6 +323,64 @@ select {
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
+/* Collapsible sections */
+.collapsible-section {
+    margin-top: 20px;
+}
+
+.collapsible-toggle {
+    width: 100%;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #34495e;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.collapsible-toggle:hover {
+    background: #ecf0f1;
+    border-color: #bdc3c7;
+}
+
+.collapsible-toggle .toggle-icon {
+    font-size: 18px;
+    font-weight: bold;
+    color: #3498db;
+    width: 20px;
+    text-align: center;
+}
+
+.collapsible-content {
+    display: none;
+    padding: 20px;
+    margin-top: -2px;
+    background: #f8f9fa;
+    border: 2px solid #ecf0f1;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.collapsible-section.open .collapsible-toggle {
+    border-radius: 8px 8px 0 0;
+    background: #ecf0f1;
+}
+
+.collapsible-section.open .collapsible-content {
+    display: block;
+}
+
+.collapsible-section.open .toggle-icon {
+    transform: rotate(45deg);
+}
+
 /* Signature */
 .signature-section {
     margin-bottom: 30px;

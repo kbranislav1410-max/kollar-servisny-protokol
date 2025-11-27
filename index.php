@@ -607,40 +607,44 @@ $reportData = $_SESSION['report'] ?? [];
                 </select>
             </div>
 
-            <div class="divider">alebo</div>
-
-            <h3>Pridať nového zákazníka</h3>
-            <form id="newCustomerForm">
-                <div class="form-group">
-                    <input type="text" name="nazov_firmy" placeholder="Názov firmy *" required>
+            <div class="collapsible-section">
+                <button type="button" class="collapsible-toggle" onclick="toggleCollapsible(this)">
+                    <span class="toggle-icon">+</span> Pridať nového zákazníka
+                </button>
+                <div class="collapsible-content">
+                    <form id="newCustomerForm">
+                        <div class="form-group">
+                            <input type="text" name="nazov_firmy" placeholder="Názov firmy *" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" name="ico" placeholder="IČO">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="dic" placeholder="DIČ">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="ic_dph" placeholder="IČ DPH">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="sidlo" placeholder="Sídlo">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="kontakt_osoba" placeholder="Kontaktná osoba">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="tel" name="telefon" placeholder="Telefón">
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" placeholder="Email">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Pridať zákazníka</button>
+                    </form>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <input type="text" name="ico" placeholder="IČO">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="dic" placeholder="DIČ">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="ic_dph" placeholder="IČ DPH">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="sidlo" placeholder="Sídlo">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="kontakt_osoba" placeholder="Kontaktná osoba">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <input type="tel" name="telefon" placeholder="Telefón">
-                    </div>
-                    <div class="form-group">
-                        <input type="email" name="email" placeholder="Email">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-secondary">Pridať zákazníka</button>
-            </form>
+            </div>
 
             <div class="navigation">
                 <div></div>
@@ -659,24 +663,28 @@ $reportData = $_SESSION['report'] ?? [];
                 </select>
             </div>
 
-            <div class="divider">alebo</div>
-
-            <h3>Pridať novú prevádzku</h3>
-            <form id="newLocationForm">
-                <div class="form-group">
-                    <input type="text" name="nazov" placeholder="Názov prevádzky *" required>
+            <div class="collapsible-section">
+                <button type="button" class="collapsible-toggle" onclick="toggleCollapsible(this)">
+                    <span class="toggle-icon">+</span> Pridať novú prevádzku
+                </button>
+                <div class="collapsible-content">
+                    <form id="newLocationForm">
+                        <div class="form-group">
+                            <input type="text" name="nazov" placeholder="Názov prevádzky *" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="adresa" placeholder="Adresa">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="mesto" placeholder="Mesto">
+                        </div>
+                        <div class="form-group">
+                            <textarea name="poznamka" placeholder="Poznámka"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Pridať prevádzku</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <input type="text" name="adresa" placeholder="Adresa">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="mesto" placeholder="Mesto">
-                </div>
-                <div class="form-group">
-                    <textarea name="poznamka" placeholder="Poznámka"></textarea>
-                </div>
-                <button type="submit" class="btn btn-secondary">Pridať prevádzku</button>
-            </form>
+            </div>
 
             <div class="navigation">
                 <button type="button" class="btn btn-outline" onclick="prevStep(1)">Späť</button>

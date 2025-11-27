@@ -7,6 +7,14 @@ let signaturePadTechnik = null;
 let signaturePadZakaznik = null;
 let uploadedPhotos = [];
 
+/**
+ * Prepnutie collapsible sekcie
+ */
+function toggleCollapsible(button) {
+    const section = button.closest('.collapsible-section');
+    section.classList.toggle('open');
+}
+
 // Inicializácia po načítaní DOM
 document.addEventListener('DOMContentLoaded', function() {
     // Načítanie zákazníkov
