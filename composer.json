@@ -1,0 +1,17 @@
+{
+    "name": "kollar/servisny-protokol",
+    "description": "Servisný protokol MVP - webový formulár, SQLite, podpisy, PDF, email",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.4",
+        "dompdf/dompdf": "^2.0",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {}
+    },
+    "config": {
+        "vendor-dir": "vendor"
+    }
+}
