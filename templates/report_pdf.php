@@ -144,16 +144,35 @@ function getImageDataUri($path) {
         .attachments {
             margin-top: 20px;
         }
-        .attachments ul {
-            list-style: none;
-            padding-left: 15px;
+        .photos-grid {
+            display: block;
         }
-        .attachments li {
-            padding: 3px 0;
+        .photo-item {
+            display: inline-block;
+            width: 48%;
+            margin: 1%;
+            vertical-align: top;
+            text-align: center;
+            page-break-inside: avoid;
         }
-        .attachments li:before {
-            content: "• ";
-            color: #2c3e50;
+        .photo-item img {
+            max-width: 100%;
+            max-height: 200px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        .photo-caption {
+            font-size: 8pt;
+            color: #666;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        .photo-placeholder {
+            background: #f8f9fa;
+            border: 1px dashed #bdc3c7;
+            padding: 20px;
+            color: #666;
+            font-size: 9pt;
         }
     </style>
 </head>
@@ -302,12 +321,24 @@ function getImageDataUri($path) {
 
     <?php if (!empty($attachments)): ?>
     <div class="section attachments">
-        <div class="section-title">Prílohy (fotografie)</div>
-        <ul>
-            <?php foreach ($attachments as $att): ?>
-            <li><?= htmlspecialchars($att['file_name']) ?></li>
+        <div class="section-title">Fotografie zariadenia</div>
+        <div class="photos-grid">
+            <?php foreach ($attachments as $att): 
+                $photoPath = BASE_PATH . '/' . $att['file_path'];
+                $photoDataUri = getImageDataUri($photoPath);
+            ?>
+            <div class="photo-item">
+                <?php if ($photoDataUri): ?>
+                <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
+                <?php else: ?>
+                <div class="photo-placeholder">
+                    <span>📷 <?= htmlspecialchars($att['file_name']) ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="photo-caption"><?= htmlspecialchars($att['file_name']) ?></div>
+            </div>
             <?php endforeach; ?>
-        </ul>
+        </div>
     </div>
     <?php endif; ?>
 
