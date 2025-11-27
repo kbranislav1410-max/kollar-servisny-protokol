@@ -14,9 +14,35 @@ if (!isset($attachments)) {
     $attachments = [];
 }
 
-// Helper function to get absolute path for images
+// Helper function to get absolute path for images with path traversal protection
 $getImagePath = function($relativePath) {
-    $fullPath = BASE_PATH . '/' . $relativePath;
+    // Sanitize path - remove any directory traversal attempts
+    $sanitizedPath = str_replace(['../', '..\\', '..'], '', $relativePath);
+    
+    // Ensure path starts with expected directories only
+    $allowedPrefixes = ['uploads/photos/', 'uploads/signatures/'];
+    $isAllowed = false;
+    foreach ($allowedPrefixes as $prefix) {
+        if (strpos($sanitizedPath, $prefix) === 0) {
+            $isAllowed = true;
+            break;
+        }
+    }
+    
+    if (!$isAllowed) {
+        return '';
+    }
+    
+    $fullPath = BASE_PATH . '/' . $sanitizedPath;
+    
+    // Verify the resolved path is within allowed directories
+    $realPath = realpath($fullPath);
+    $uploadsDir = realpath(BASE_PATH . '/uploads');
+    
+    if ($realPath === false || $uploadsDir === false || strpos($realPath, $uploadsDir) !== 0) {
+        return '';
+    }
+    
     if (file_exists($fullPath)) {
         $type = pathinfo($fullPath, PATHINFO_EXTENSION);
         $data = file_get_contents($fullPath);

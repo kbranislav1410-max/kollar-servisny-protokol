@@ -762,25 +762,39 @@ function generatePdf(array $report, array $attachments): string {
  * Send report email
  */
 function sendReportEmail(array $report, string $pdfPath): bool {
-    $to = $report['email'];
-    $subject = 'Servisný protokol ' . $report['cislo_protokolu'];
+    // Validate and sanitize email address
+    $to = filter_var($report['email'] ?? '', FILTER_VALIDATE_EMAIL);
+    if (!$to) {
+        return false;
+    }
+    
+    // Sanitize subject to prevent header injection
+    $subject = preg_replace('/[\r\n]/', '', 'Servisný protokol ' . ($report['cislo_protokolu'] ?? ''));
     
     $boundary = md5(uniqid((string)time()));
     
+    // Sanitize header values to prevent header injection
+    $sanitizedFromName = preg_replace('/[\r\n]/', '', MAIL_FROM_NAME);
+    $sanitizedFrom = preg_replace('/[\r\n]/', '', MAIL_FROM);
+    
     $headers = [
-        'From: ' . MAIL_FROM_NAME . ' <' . MAIL_FROM . '>',
+        'From: ' . $sanitizedFromName . ' <' . $sanitizedFrom . '>',
         'MIME-Version: 1.0',
         'Content-Type: multipart/mixed; boundary="' . $boundary . '"'
     ];
+    
+    // Sanitize content for HTML
+    $cisloProtokolu = htmlspecialchars($report['cislo_protokolu'] ?? '', ENT_QUOTES, 'UTF-8');
+    $datum = htmlspecialchars($report['datum'] ?? '', ENT_QUOTES, 'UTF-8');
     
     $message = "--{$boundary}\r\n";
     $message .= "Content-Type: text/html; charset=utf-8\r\n";
     $message .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
     $message .= "<html><body>";
     $message .= "<p>Dobrý deň,</p>";
-    $message .= "<p>v prílohe Vám posielame servisný protokol číslo: <strong>{$report['cislo_protokolu']}</strong>.</p>";
-    $message .= "<p>Dátum servisu: {$report['datum']}</p>";
-    $message .= "<p>S pozdravom,<br>" . MAIL_FROM_NAME . "</p>";
+    $message .= "<p>v prílohe Vám posielame servisný protokol číslo: <strong>{$cisloProtokolu}</strong>.</p>";
+    $message .= "<p>Dátum servisu: {$datum}</p>";
+    $message .= "<p>S pozdravom,<br>" . htmlspecialchars($sanitizedFromName, ENT_QUOTES, 'UTF-8') . "</p>";
     $message .= "</body></html>\r\n\r\n";
     
     // Attach PDF

@@ -39,8 +39,16 @@
     /**
      * Make API request
      */
-    async function apiRequest(action, method = 'GET', data = null) {
-        const url = `${API_BASE}?action=${action}`;
+    async function apiRequest(action, method = 'GET', data = null, queryParams = null) {
+        let url = `${API_BASE}?action=${encodeURIComponent(action)}`;
+        
+        // Add query parameters for GET requests
+        if (queryParams && typeof queryParams === 'object') {
+            for (const [key, value] of Object.entries(queryParams)) {
+                url += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+        }
+        
         const options = {
             method: method,
             headers: {}
@@ -101,7 +109,7 @@
         if (!select || !customerId) return;
         
         try {
-            const locations = await apiRequest(`locations&customer_id=${customerId}`);
+            const locations = await apiRequest('locations', 'GET', null, { customer_id: customerId });
             select.innerHTML = '<option value="">-- Vyberte prevádzku --</option>';
             
             locations.forEach(location => {
@@ -123,7 +131,7 @@
         if (!select || !locationId) return;
         
         try {
-            const devices = await apiRequest(`devices&location_id=${locationId}`);
+            const devices = await apiRequest('devices', 'GET', null, { location_id: locationId });
             select.innerHTML = '<option value="">-- Vyberte zariadenie --</option>';
             select.innerHTML += '<option value="new">+ Pridať nové zariadenie</option>';
             
