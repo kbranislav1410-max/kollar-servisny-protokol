@@ -1086,6 +1086,75 @@ select {
     color: white;
 }
 
+/* ===== CAMERA / PHOTO SECTION ===== */
+.photo-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.photo-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.btn-camera {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.btn-camera:hover {
+    background: linear-gradient(135deg, #219a52, #27ae60);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+.btn-camera:active {
+    transform: translateY(0);
+}
+
+.camera-icon, .gallery-icon {
+    font-size: 24px;
+}
+
+.photo-section .btn-outline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    font-size: 16px;
+}
+
+.photo-count {
+    display: none;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #d4edda;
+    color: #155724;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.photo-section .help-text {
+    margin: 10px 0;
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
 /* Responsive for new pages */
 @media (max-width: 900px) {
     .stats-grid {
@@ -1125,5 +1194,14 @@ select {
     
     .tabs {
         flex-direction: column;
+    }
+    
+    .photo-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-camera, .photo-section .btn-outline {
+        width: 100%;
+        justify-content: center;
     }
 }

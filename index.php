@@ -1147,10 +1147,24 @@ $pageView = $pageView ?? 'home';
                     <textarea name="poznamka" placeholder="Poznámka k servisu"></textarea>
                 </div>
 
-                <h3>Fotografie</h3>
-                <div class="form-group">
-                    <input type="file" id="photoInput" accept="image/*" multiple>
+                <h3>📷 Fotografie</h3>
+                <div class="photo-section">
+                    <div class="photo-buttons">
+                        <button type="button" class="btn btn-camera" onclick="openCamera()">
+                            <span class="camera-icon">📸</span>
+                            Odfotiť zariadenie
+                        </button>
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                        
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInput').click()">
+                            <span class="gallery-icon">🖼️</span>
+                            Vybrať z galérie
+                        </button>
+                        <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                    </div>
+                    <p class="help-text">Kliknite na "Odfotiť zariadenie" pre spustenie fotoaparátu alebo "Vybrať z galérie" pre nahratie existujúcich fotiek.</p>
                     <div id="photoPreview" class="photo-preview"></div>
+                    <div id="photoCount" class="photo-count"></div>
                 </div>
             </form>
 

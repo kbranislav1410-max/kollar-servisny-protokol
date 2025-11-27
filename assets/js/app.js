@@ -388,16 +388,51 @@ function setupFormHandlers() {
  * Nastavenie nahrávania fotiek
  */
 function setupPhotoUpload() {
-    const photoInput = document.getElementById('photoInput');
-    if (!photoInput) return;
+    // Camera input - opens device camera directly
+    const cameraInput = document.getElementById('cameraInput');
+    if (cameraInput) {
+        cameraInput.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i]);
+            }
+            this.value = ''; // Reset input
+        });
+    }
     
-    photoInput.addEventListener('change', function() {
-        const files = this.files;
-        for (let i = 0; i < files.length; i++) {
-            uploadPhoto(files[i]);
-        }
-        this.value = ''; // Reset input
-    });
+    // Gallery input - for selecting existing photos
+    const galleryInput = document.getElementById('galleryInput');
+    if (galleryInput) {
+        galleryInput.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i]);
+            }
+            this.value = ''; // Reset input
+        });
+    }
+    
+    // Legacy support for old photoInput
+    const photoInput = document.getElementById('photoInput');
+    if (photoInput) {
+        photoInput.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i]);
+            }
+            this.value = ''; // Reset input
+        });
+    }
+}
+
+/**
+ * Otvorenie fotoaparátu
+ */
+function openCamera() {
+    const cameraInput = document.getElementById('cameraInput');
+    if (cameraInput) {
+        cameraInput.click();
+    }
 }
 
 /**
@@ -452,6 +487,17 @@ function updatePhotoPreview() {
         `;
         preview.appendChild(div);
     });
+    
+    // Update photo count
+    const countEl = document.getElementById('photoCount');
+    if (countEl) {
+        if (uploadedPhotos.length > 0) {
+            countEl.textContent = `📷 ${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'fotografia' : (uploadedPhotos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.style.display = 'block';
+        } else {
+            countEl.style.display = 'none';
+        }
+    }
 }
 
 /**
