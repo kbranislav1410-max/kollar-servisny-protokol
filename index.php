@@ -612,19 +612,142 @@ switch ($action) {
     case 'api_reports':
         getReports();
         break;
+    case 'api_customer_detail':
+        getCustomerDetail();
+        break;
+    case 'api_customer_reports':
+        getCustomerReports();
+        break;
+    case 'api_stats':
+        getStats();
+        break;
     case 'download_pdf':
         downloadPdf();
         break;
     case 'new_report':
+    case 'protocol':
         // Reset session pre nový report
-        unset($_SESSION['report']);
-        $_SESSION['current_step'] = 0;
+        if ($action === 'new_report') {
+            unset($_SESSION['report']);
+            $_SESSION['current_step'] = 0;
+        }
+        $pageView = 'protocol';
         break;
+    case 'customers':
+        $pageView = 'customers';
+        break;
+    case 'customer_detail':
+        $pageView = 'customer_detail';
+        break;
+    case 'home':
+    default:
+        $pageView = 'home';
+        break;
+}
+
+// API funkcie pre nové endpointy
+function getCustomerDetail(): void
+{
+    $customerId = (int)get('customer_id', 0);
+    
+    $pdo = getDbConnection();
+    
+    // Zákazník
+    $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+    $stmt->execute([$customerId]);
+    $customer = $stmt->fetch();
+    
+    if (!$customer) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Customer not found']);
+        exit;
+    }
+    
+    // Prevádzky
+    $stmt = $pdo->prepare("SELECT * FROM locations WHERE customer_id = ? ORDER BY nazov ASC");
+    $stmt->execute([$customerId]);
+    $locations = $stmt->fetchAll();
+    
+    // Zariadenia pre každú prevádzku
+    foreach ($locations as &$loc) {
+        $stmt = $pdo->prepare("SELECT * FROM devices WHERE location_id = ? ORDER BY nazov ASC");
+        $stmt->execute([$loc['id']]);
+        $loc['devices'] = $stmt->fetchAll();
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'customer' => $customer,
+        'locations' => $locations
+    ]);
+    exit;
+}
+
+function getCustomerReports(): void
+{
+    $customerId = (int)get('customer_id', 0);
+    
+    $pdo = getDbConnection();
+    $stmt = $pdo->prepare("
+        SELECT r.*, l.nazov as location_name, d.nazov as device_name
+        FROM reports r
+        LEFT JOIN locations l ON r.location_id = l.id
+        LEFT JOIN devices d ON r.device_id = d.id
+        WHERE r.customer_id = ?
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->execute([$customerId]);
+    
+    header('Content-Type: application/json');
+    echo json_encode($stmt->fetchAll());
+    exit;
+}
+
+function getStats(): void
+{
+    $pdo = getDbConnection();
+    
+    // Počet zákazníkov
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM customers");
+    $customersCount = $stmt->fetch()['count'];
+    
+    // Počet prevádzok
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM locations");
+    $locationsCount = $stmt->fetch()['count'];
+    
+    // Počet zariadení
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM devices");
+    $devicesCount = $stmt->fetch()['count'];
+    
+    // Počet protokolov
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM reports");
+    $reportsCount = $stmt->fetch()['count'];
+    
+    // Posledné protokoly
+    $stmt = $pdo->query("
+        SELECT r.id, r.cislo_protokolu, r.datum, r.created_at, c.nazov_firmy
+        FROM reports r
+        LEFT JOIN customers c ON r.customer_id = c.id
+        ORDER BY r.created_at DESC
+        LIMIT 5
+    ");
+    $recentReports = $stmt->fetchAll();
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'customers' => $customersCount,
+        'locations' => $locationsCount,
+        'devices' => $devicesCount,
+        'reports' => $reportsCount,
+        'recent_reports' => $recentReports
+    ]);
+    exit;
 }
 
 // Získanie aktuálnych dát pre zobrazenie
 $currentStep = $_SESSION['current_step'] ?? 0;
 $reportData = $_SESSION['report'] ?? [];
+$pageView = $pageView ?? 'home';
 
 ?>
 <!DOCTYPE html>
@@ -639,15 +762,174 @@ $reportData = $_SESSION['report'] ?? [];
     <nav class="sidebar">
         <h2>Menu</h2>
         <ul>
-            <li><a href="index.html">Pôvodný protokol</a></li>
-            <li><a href="index.php">MVP Protokol</a></li>
-            <li><a href="index.php?action=new_report">Nový report</a></li>
-            <li><a href="zoznam-zakaznikov.html">Zoznam zákazníkov</a></li>
+            <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">🏠 Domov</a></li>
+            <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">📝 Servisný protokol</a></li>
+            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' ? 'active' : '' ?>">👥 Zákazníci</a></li>
         </ul>
     </nav>
 
     <main class="content">
-        <h1>Servisný Protokol MVP</h1>
+        <?php if ($pageView === 'home'): ?>
+        <!-- HOMEPAGE -->
+        <h1>🏠 Prehľad</h1>
+        
+        <div class="dashboard">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" id="statCustomers">-</div>
+                    <div class="stat-label">Zákazníci</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-number" id="statLocations">-</div>
+                    <div class="stat-label">Prevádzky</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚙️</div>
+                    <div class="stat-number" id="statDevices">-</div>
+                    <div class="stat-label">Zariadenia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-number" id="statReports">-</div>
+                    <div class="stat-label">Protokoly</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>🚀 Rýchle akcie</h3>
+                    <div class="quick-actions">
+                        <a href="index.php?action=new_report" class="action-btn primary">
+                            <span class="action-icon">📝</span>
+                            <span>Nový servisný protokol</span>
+                        </a>
+                        <a href="index.php?action=customers" class="action-btn secondary">
+                            <span class="action-icon">👥</span>
+                            <span>Zoznam zákazníkov</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3>📋 Posledné protokoly</h3>
+                    <div class="recent-reports" id="recentReports">
+                        <p class="loading">Načítavam...</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card full-width">
+                    <h3>📅 Nadchádzajúce úlohy</h3>
+                    <div class="upcoming-tasks">
+                        <p class="placeholder-text">Tu sa budú zobrazovať nadchádzajúce servisné úlohy a pripomienky.</p>
+                        <ul class="task-list placeholder">
+                            <li class="task-item">
+                                <span class="task-icon">🔧</span>
+                                <span class="task-text">Pravidelná údržba - Firma ABC s.r.o.</span>
+                                <span class="task-date">Čoskoro</span>
+                            </li>
+                            <li class="task-item">
+                                <span class="task-icon">📞</span>
+                                <span class="task-text">Kontaktovať zákazníka - XYZ a.s.</span>
+                                <span class="task-date">Čoskoro</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'customers'): ?>
+        <!-- CUSTOMERS LIST -->
+        <h1>👥 Zoznam zákazníkov</h1>
+        
+        <div class="customers-page">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="toggleAddCustomerForm()">+ Pridať zákazníka</button>
+            </div>
+            
+            <div class="collapsible-section" id="addCustomerSection">
+                <div class="collapsible-content" style="display: none;">
+                    <h3>Nový zákazník</h3>
+                    <form id="addCustomerForm">
+                        <div class="form-group">
+                            <input type="text" name="nazov_firmy" placeholder="Názov firmy *" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" name="ico" placeholder="IČO">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="dic" placeholder="DIČ">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="ic_dph" placeholder="IČ DPH">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="sidlo" placeholder="Sídlo">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="kontakt_osoba" placeholder="Kontaktná osoba">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="tel" name="telefon" placeholder="Telefón">
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" placeholder="Email">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Pridať zákazníka</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="customerSearch" placeholder="🔍 Hľadať zákazníka..." onkeyup="filterCustomers()">
+            </div>
+            
+            <div class="customers-list" id="customersList">
+                <p class="loading">Načítavam zákazníkov...</p>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'customer_detail'): ?>
+        <!-- CUSTOMER DETAIL -->
+        <div class="customer-detail-page">
+            <div class="page-header">
+                <a href="index.php?action=customers" class="back-link">← Späť na zoznam</a>
+                <h1 id="customerName">Načítavam...</h1>
+            </div>
+            
+            <div class="customer-info" id="customerInfo">
+                <p class="loading">Načítavam údaje zákazníka...</p>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('locations')">🏢 Prevádzky</button>
+                <button class="tab-btn" onclick="showTab('reports')">📋 Protokoly</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-locations">
+                <h3>Prevádzky a zariadenia</h3>
+                <div id="locationsContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tab-reports">
+                <h3>História servisných protokolov</h3>
+                <div id="reportsContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+        </div>
+        
+        <?php else: ?>
+        <!-- PROTOCOL FORM -->
+        <h1>📝 Servisný Protokol</h1>
 
         <!-- Progress bar -->
         <div class="progress-bar">
@@ -949,6 +1231,7 @@ $reportData = $_SESSION['report'] ?? [];
                 </div>
             </div>
         </div>
+        <?php endif; ?>
     </main>
 
     <script src="assets/js/signature_pad.js"></script>
@@ -957,6 +1240,231 @@ $reportData = $_SESSION['report'] ?? [];
         // Inicializácia s dátami zo session
         window.reportData = <?= json_encode($reportData) ?>;
         window.currentStep = <?= $currentStep ?>;
+        window.pageView = '<?= $pageView ?>';
+        
+        // Inicializácia podľa stránky
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.pageView === 'home') {
+                loadDashboardStats();
+            } else if (window.pageView === 'customers') {
+                loadCustomersList();
+            } else if (window.pageView === 'customer_detail') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const customerId = urlParams.get('customer_id');
+                if (customerId) {
+                    loadCustomerDetail(customerId);
+                }
+            }
+        });
+        
+        // Dashboard funkcie
+        function loadDashboardStats() {
+            fetch('index.php?action=api_stats')
+                .then(response => response.json())
+                .then(stats => {
+                    document.getElementById('statCustomers').textContent = stats.customers;
+                    document.getElementById('statLocations').textContent = stats.locations;
+                    document.getElementById('statDevices').textContent = stats.devices;
+                    document.getElementById('statReports').textContent = stats.reports;
+                    
+                    // Posledné protokoly
+                    const recentEl = document.getElementById('recentReports');
+                    if (stats.recent_reports.length === 0) {
+                        recentEl.innerHTML = '<p class="no-data">Zatiaľ žiadne protokoly</p>';
+                    } else {
+                        let html = '<ul class="report-list">';
+                        stats.recent_reports.forEach(r => {
+                            html += `<li class="report-item">
+                                <span class="report-number">${r.cislo_protokolu}</span>
+                                <span class="report-customer">${r.nazov_firmy || 'N/A'}</span>
+                                <span class="report-date">${r.datum}</span>
+                            </li>`;
+                        });
+                        html += '</ul>';
+                        recentEl.innerHTML = html;
+                    }
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        // Customers list funkcie
+        function loadCustomersList() {
+            fetch('index.php?action=api_customers')
+                .then(response => response.json())
+                .then(customers => {
+                    window.allCustomers = customers;
+                    renderCustomersList(customers);
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function renderCustomersList(customers) {
+            const container = document.getElementById('customersList');
+            if (customers.length === 0) {
+                container.innerHTML = '<p class="no-data">Zatiaľ žiadni zákazníci</p>';
+                return;
+            }
+            
+            let html = '<div class="customers-grid">';
+            customers.forEach(c => {
+                html += `
+                    <div class="customer-card" onclick="window.location.href='index.php?action=customer_detail&customer_id=${c.id}'">
+                        <div class="customer-card-header">
+                            <h3>${escapeHtml(c.nazov_firmy)}</h3>
+                            ${c.ico ? '<span class="customer-ico">IČO: ' + escapeHtml(c.ico) + '</span>' : ''}
+                        </div>
+                        <div class="customer-card-body">
+                            ${c.sidlo ? '<p><strong>Sídlo:</strong> ' + escapeHtml(c.sidlo) + '</p>' : ''}
+                            ${c.kontakt_osoba ? '<p><strong>Kontakt:</strong> ' + escapeHtml(c.kontakt_osoba) + '</p>' : ''}
+                            ${c.telefon ? '<p><strong>Tel:</strong> ' + escapeHtml(c.telefon) + '</p>' : ''}
+                        </div>
+                        <div class="customer-card-footer">
+                            <span class="view-detail">Zobraziť detail →</span>
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function filterCustomers() {
+            const query = document.getElementById('customerSearch').value.toLowerCase();
+            const filtered = window.allCustomers.filter(c => 
+                c.nazov_firmy.toLowerCase().includes(query) ||
+                (c.ico && c.ico.includes(query)) ||
+                (c.sidlo && c.sidlo.toLowerCase().includes(query))
+            );
+            renderCustomersList(filtered);
+        }
+        
+        function toggleAddCustomerForm() {
+            const content = document.querySelector('#addCustomerSection .collapsible-content');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Customer detail funkcie
+        function loadCustomerDetail(customerId) {
+            // Načítanie detailu zákazníka
+            fetch('index.php?action=api_customer_detail&customer_id=' + customerId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Zákazník nebol nájdený');
+                        return;
+                    }
+                    
+                    const c = data.customer;
+                    document.getElementById('customerName').textContent = c.nazov_firmy;
+                    
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += `<div class="info-item"><strong>IČO:</strong> ${c.ico || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>DIČ:</strong> ${c.dic || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>IČ DPH:</strong> ${c.ic_dph || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Sídlo:</strong> ${c.sidlo || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Kontakt:</strong> ${c.kontakt_osoba || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Telefón:</strong> ${c.telefon || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Email:</strong> ${c.email || '-'}</div>`;
+                    infoHtml += '</div>';
+                    document.getElementById('customerInfo').innerHTML = infoHtml;
+                    
+                    // Prevádzky a zariadenia
+                    let locHtml = '';
+                    if (data.locations.length === 0) {
+                        locHtml = '<p class="no-data">Žiadne prevádzky</p>';
+                    } else {
+                        data.locations.forEach(loc => {
+                            locHtml += `
+                                <div class="location-card">
+                                    <h4>🏢 ${escapeHtml(loc.nazov)}</h4>
+                                    <p>${loc.adresa || ''} ${loc.mesto || ''}</p>
+                                    ${loc.poznamka ? '<p class="note">' + escapeHtml(loc.poznamka) + '</p>' : ''}
+                                    <div class="devices-list">
+                                        <h5>Zariadenia:</h5>`;
+                            
+                            if (loc.devices.length === 0) {
+                                locHtml += '<p class="no-data small">Žiadne zariadenia</p>';
+                            } else {
+                                locHtml += '<ul>';
+                                loc.devices.forEach(d => {
+                                    locHtml += `<li>⚙️ ${escapeHtml(d.nazov)} ${d.typ ? '(' + escapeHtml(d.typ) + ')' : ''}</li>`;
+                                });
+                                locHtml += '</ul>';
+                            }
+                            
+                            locHtml += '</div></div>';
+                        });
+                    }
+                    document.getElementById('locationsContent').innerHTML = locHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+            
+            // Načítanie protokolov zákazníka
+            fetch('index.php?action=api_customer_reports&customer_id=' + customerId)
+                .then(response => response.json())
+                .then(reports => {
+                    let html = '';
+                    if (reports.length === 0) {
+                        html = '<p class="no-data">Žiadne protokoly</p>';
+                    } else {
+                        html = '<div class="reports-table"><table>';
+                        html += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Prevádzka</th><th>Zariadenie</th><th>Akcia</th></tr></thead>';
+                        html += '<tbody>';
+                        reports.forEach(r => {
+                            html += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.location_name || '-'}</td>
+                                <td>${r.device_name || '-'}</td>
+                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">📄 PDF</a></td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                    }
+                    document.getElementById('reportsContent').innerHTML = html;
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Add customer form handler pro customers page
+        const addCustomerFormEl = document.getElementById('addCustomerForm');
+        if (addCustomerFormEl) {
+            addCustomerFormEl.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('action', 'add_customer');
+                
+                fetch('index.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Zákazník bol pridaný');
+                        this.reset();
+                        toggleAddCustomerForm();
+                        loadCustomersList();
+                    } else {
+                        alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                    }
+                })
+                .catch(err => alert('Chyba pripojenia'));
+            });
+        }
     </script>
 </body>
 </html>
