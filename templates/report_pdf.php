@@ -18,6 +18,20 @@ function getImageDataUri($path) {
     $mimeType = mime_content_type($path);
     return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
 }
+
+// Defensive initialization of variables that should be passed from including file
+if (!isset($sekcieData)) {
+    $sekcieData = [];
+}
+if (!isset($photosBefore)) {
+    $photosBefore = [];
+}
+if (!isset($photosAfter)) {
+    $photosAfter = [];
+}
+if (!isset($photosGeneral)) {
+    $photosGeneral = [];
+}
 ?>
     <style>
         * {

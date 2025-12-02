@@ -216,9 +216,11 @@ try {
         try {
             $pdo->exec($sql);
         } catch (PDOException $e) {
-            // Ignorujeme chyby "duplicate column" - stĺpec už existuje
+            // SQLite returns "duplicate column name" for existing columns
+            // We safely ignore these errors as they indicate the column already exists
             if (strpos($e->getMessage(), 'duplicate column') === false) {
-                // Log other errors but don't fail
+                // Log non-duplicate column errors for debugging
+                echo "⚠ Migration warning: " . $e->getMessage() . "\n";
             }
         }
     }

@@ -645,13 +645,20 @@ function removePhotoByType(photoType, index) {
 }
 
 /**
- * Helper function to escape HTML
+ * Helper function to escape HTML - using string replacement for better performance
  */
 function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text).replace(/[&<>"']/g, function(match) {
+        const escapeMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        };
+        return escapeMap[match];
+    });
 }
 
 /**
