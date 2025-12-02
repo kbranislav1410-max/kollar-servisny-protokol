@@ -395,7 +395,7 @@ if (!isset($photosGeneral)) {
     <?php if (!empty($photosBefore)): ?>
     <div class="photos-section">
         <div class="photos-row">
-            <div class="photos-row-title">📷 Fotografie PRED servisom</div>
+            <div class="photos-row-title">Fotografie PRED servisom</div>
             <div class="photos-grid">
                 <?php foreach ($photosBefore as $att): 
                     $photoPath = BASE_PATH . '/' . $att['file_path'];
@@ -405,7 +405,7 @@ if (!isset($photosGeneral)) {
                     <?php if ($photoDataUri): ?>
                     <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
                     <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;">📷 <?= htmlspecialchars($att['file_name']) ?></div>
+                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
@@ -418,7 +418,7 @@ if (!isset($photosGeneral)) {
     <?php if (!empty($photosAfter)): ?>
     <div class="photos-section">
         <div class="photos-row">
-            <div class="photos-row-title">📷 Fotografie PO servise</div>
+            <div class="photos-row-title">Fotografie PO servise</div>
             <div class="photos-grid">
                 <?php foreach ($photosAfter as $att): 
                     $photoPath = BASE_PATH . '/' . $att['file_path'];
@@ -428,7 +428,7 @@ if (!isset($photosGeneral)) {
                     <?php if ($photoDataUri): ?>
                     <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
                     <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;">📷 <?= htmlspecialchars($att['file_name']) ?></div>
+                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
@@ -441,7 +441,7 @@ if (!isset($photosGeneral)) {
     <?php if (!empty($photosGeneral)): ?>
     <div class="photos-section">
         <div class="photos-row">
-            <div class="photos-row-title">📷 Fotografie zariadenia</div>
+            <div class="photos-row-title">Fotografie zariadenia</div>
             <div class="photos-grid">
                 <?php foreach ($photosGeneral as $att): 
                     $photoPath = BASE_PATH . '/' . $att['file_path'];
@@ -451,7 +451,7 @@ if (!isset($photosGeneral)) {
                     <?php if ($photoDataUri): ?>
                     <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
                     <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;">📷 <?= htmlspecialchars($att['file_name']) ?></div>
+                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>

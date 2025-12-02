@@ -894,16 +894,16 @@ $pageView = $pageView ?? 'home';
     <nav class="sidebar">
         <h2>Menu</h2>
         <ul>
-            <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">🏠 Domov</a></li>
-            <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">📝 Servisný protokol</a></li>
-            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' ? 'active' : '' ?>">👥 Zákazníci</a></li>
+            <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
+            <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
+            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' ? 'active' : '' ?>">Zákazníci</a></li>
         </ul>
     </nav>
 
     <main class="content">
         <?php if ($pageView === 'home'): ?>
         <!-- HOMEPAGE -->
-        <h1>🏠 Prehľad</h1>
+        <h1>Prehľad</h1>
         
         <div class="dashboard">
             <div class="stats-grid" id="statsGrid">
@@ -931,38 +931,34 @@ $pageView = $pageView ?? 'home';
             
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3>🚀 Rýchle akcie</h3>
+                    <h3>Rýchle akcie</h3>
                     <div class="quick-actions">
                         <a href="index.php?action=new_report" class="action-btn primary">
-                            <span class="action-icon">📝</span>
                             <span>Nový servisný protokol</span>
                         </a>
                         <a href="index.php?action=customers" class="action-btn secondary">
-                            <span class="action-icon">👥</span>
                             <span>Zoznam zákazníkov</span>
                         </a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3>📋 Posledné protokoly</h3>
+                    <h3>Posledné protokoly</h3>
                     <div class="recent-reports" id="recentReports">
                         <p class="loading">Načítavam...</p>
                     </div>
                 </div>
                 
                 <div class="dashboard-card full-width">
-                    <h3>📅 Nadchádzajúce úlohy</h3>
+                    <h3>Nadchádzajúce úlohy</h3>
                     <div class="upcoming-tasks">
                         <p class="placeholder-text">Tu sa budú zobrazovať nadchádzajúce servisné úlohy a pripomienky.</p>
                         <ul class="task-list placeholder">
                             <li class="task-item">
-                                <span class="task-icon">🔧</span>
                                 <span class="task-text">Pravidelná údržba - Firma ABC s.r.o.</span>
                                 <span class="task-date">Čoskoro</span>
                             </li>
                             <li class="task-item">
-                                <span class="task-icon">📞</span>
                                 <span class="task-text">Kontaktovať zákazníka - XYZ a.s.</span>
                                 <span class="task-date">Čoskoro</span>
                             </li>
@@ -974,7 +970,7 @@ $pageView = $pageView ?? 'home';
         
         <?php elseif ($pageView === 'customers'): ?>
         <!-- CUSTOMERS LIST -->
-        <h1>👥 Zoznam zákazníkov</h1>
+        <h1>Zoznam zákazníkov</h1>
         
         <div class="customers-page">
             <div class="page-actions">
@@ -1040,8 +1036,8 @@ $pageView = $pageView ?? 'home';
             </div>
             
             <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('locations')">🏢 Prevádzky</button>
-                <button class="tab-btn" onclick="showTab('reports')">📋 Protokoly</button>
+                <button class="tab-btn active" onclick="showTab('locations')">Prevádzky</button>
+                <button class="tab-btn" onclick="showTab('reports')">Protokoly</button>
             </div>
             
             <div class="tab-content active" id="tab-locations">
@@ -1061,7 +1057,7 @@ $pageView = $pageView ?? 'home';
         
         <?php else: ?>
         <!-- PROTOCOL FORM -->
-        <h1>📝 Servisný Protokol</h1>
+        <h1>Servisný Protokol</h1>
 
         <!-- Progress bar -->
         <div class="progress-bar">
@@ -1148,7 +1144,7 @@ $pageView = $pageView ?? 'home';
 
             <div class="same-as-customer-section">
                 <button type="button" class="btn btn-outline" id="sameAsCustomerBtn" onclick="useCustomerAsLocation()">
-                    📋 Použiť údaje spoločnosti ako prevádzku
+                    Použiť údaje spoločnosti ako prevádzku
                 </button>
                 <p class="help-text">Ak má zákazník len jednu prevádzku s rovnakou adresou ako sídlo firmy.</p>
             </div>
@@ -1267,7 +1263,7 @@ $pageView = $pageView ?? 'home';
             <form id="componentsForm">
                 <!-- Základné údaje servisu -->
                 <div class="section-header">
-                    <h3>📅 Základné údaje</h3>
+                    <h3>Základné údaje</h3>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1292,7 +1288,7 @@ $pageView = $pageView ?? 'home';
 
                 <!-- Stav komponentov - tabuľkový formát -->
                 <div class="section-header">
-                    <h3>🔧 Stav komponentov</h3>
+                    <h3>Stav komponentov</h3>
                     <p class="help-text">Pre každý komponent vyplňte popis/typ a zistený stav pre prívod a odvod.</p>
                 </div>
 
@@ -1392,7 +1388,7 @@ $pageView = $pageView ?? 'home';
 
                 <!-- Poznámky a odporúčania -->
                 <div class="section-header">
-                    <h3>📝 Poznámky a odporúčania</h3>
+                    <h3>Poznámky a odporúčania</h3>
                 </div>
                 <div class="form-group">
                     <label>Zhodnotenie stavu</label>
@@ -1409,24 +1405,22 @@ $pageView = $pageView ?? 'home';
 
                 <!-- Fotografie pred/po -->
                 <div class="section-header">
-                    <h3>📷 Fotografie</h3>
+                    <h3>Fotografie</h3>
                     <p class="help-text">Nahrajte fotografie zariadenia - pred servisom a po servise.</p>
                 </div>
                 
                 <div class="photos-grid-upload">
                     <!-- Fotografie PRED servisom -->
                     <div class="photo-upload-section">
-                        <h4>🔴 Fotografie PRED servisom</h4>
+                        <h4>Fotografie PRED servisom</h4>
                         <div class="photo-section" data-photo-type="before">
                             <div class="photo-buttons">
                                 <button type="button" class="btn btn-camera" onclick="openCameraForType('before')">
-                                    <span class="camera-icon">📸</span>
                                     Odfotiť
                                 </button>
                                 <input type="file" id="cameraInputBefore" accept="image/*" capture="environment" style="display: none;" data-photo-type="before">
                                 
                                 <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputBefore').click()">
-                                    <span class="gallery-icon">🖼️</span>
                                     Vybrať z galérie
                                 </button>
                                 <input type="file" id="galleryInputBefore" accept="image/*" multiple style="display: none;" data-photo-type="before">
@@ -1438,17 +1432,15 @@ $pageView = $pageView ?? 'home';
                     
                     <!-- Fotografie PO servise -->
                     <div class="photo-upload-section">
-                        <h4>🟢 Fotografie PO servise</h4>
+                        <h4>Fotografie PO servise</h4>
                         <div class="photo-section" data-photo-type="after">
                             <div class="photo-buttons">
                                 <button type="button" class="btn btn-camera" onclick="openCameraForType('after')">
-                                    <span class="camera-icon">📸</span>
                                     Odfotiť
                                 </button>
                                 <input type="file" id="cameraInputAfter" accept="image/*" capture="environment" style="display: none;" data-photo-type="after">
                                 
                                 <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputAfter').click()">
-                                    <span class="gallery-icon">🖼️</span>
                                     Vybrať z galérie
                                 </button>
                                 <input type="file" id="galleryInputAfter" accept="image/*" multiple style="display: none;" data-photo-type="after">
@@ -1487,7 +1479,7 @@ $pageView = $pageView ?? 'home';
                 
                 <!-- Technik -->
                 <div class="signature-section">
-                    <h3>✏️ Servisný technik</h3>
+                    <h3>Servisný technik</h3>
                     <div class="signature-container">
                         <canvas id="signatureTechnik" width="400" height="200"></canvas>
                         <div class="signature-controls">
@@ -1500,7 +1492,7 @@ $pageView = $pageView ?? 'home';
 
                 <!-- Zákazník -->
                 <div class="signature-section">
-                    <h3>✏️ Skontroloval a prevzal (zákazník)</h3>
+                    <h3>Skontroloval a prevzal (zákazník)</h3>
                     <div class="form-group">
                         <label>Meno a priezvisko zákazníka</label>
                         <input type="text" name="skontroloval_prevzal" placeholder="Meno osoby, ktorá prevzala prácu">
@@ -1703,7 +1695,7 @@ $pageView = $pageView ?? 'home';
                         data.locations.forEach(loc => {
                             locHtml += `
                                 <div class="location-card">
-                                    <h4>🏢 ${escapeHtml(loc.nazov)}</h4>
+                                    <h4>${escapeHtml(loc.nazov)}</h4>
                                     <p>${loc.adresa || ''} ${loc.mesto || ''}</p>
                                     ${loc.poznamka ? '<p class="note">' + escapeHtml(loc.poznamka) + '</p>' : ''}
                                     <div class="devices-list">
@@ -1714,7 +1706,7 @@ $pageView = $pageView ?? 'home';
                             } else {
                                 locHtml += '<ul>';
                                 loc.devices.forEach(d => {
-                                    locHtml += `<li>⚙️ ${escapeHtml(d.nazov)} ${d.typ ? '(' + escapeHtml(d.typ) + ')' : ''}</li>`;
+                                    locHtml += `<li>${escapeHtml(d.nazov)} ${d.typ ? '(' + escapeHtml(d.typ) + ')' : ''}</li>`;
                                 });
                                 locHtml += '</ul>';
                             }

@@ -583,7 +583,7 @@ function updatePhotoPreviewForType(photoType) {
     
     if (countEl) {
         if (photos.length > 0) {
-            countEl.textContent = `📷 ${photos.length} ${photos.length === 1 ? 'fotografia' : (photos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.textContent = `${photos.length} ${photos.length === 1 ? 'fotografia' : (photos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
             countEl.style.display = 'block';
         } else {
             countEl.style.display = 'none';
@@ -613,7 +613,7 @@ function updatePhotoPreview() {
     const countEl = document.getElementById('photoCount');
     if (countEl) {
         if (uploadedPhotos.length > 0) {
-            countEl.textContent = `📷 ${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'fotografia' : (uploadedPhotos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.textContent = `${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'fotografia' : (uploadedPhotos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
             countEl.style.display = 'block';
         } else {
             countEl.style.display = 'none';
