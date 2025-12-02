@@ -42,109 +42,155 @@ if (!isset($photosGeneral)) {
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 9pt;
-            line-height: 1.3;
-            color: #000;
-            padding: 15px;
+            line-height: 1.4;
+            color: #333;
+            padding: 20px;
+            background: #fff;
         }
         
         /* Hlavička protokolu */
         .protocol-header {
             text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
         }
         .protocol-header h1 {
-            font-size: 16pt;
+            font-size: 18pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #2c3e50;
         }
         .protocol-number {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        /* Moderná sekcia s oblými tvarmi */
+        .info-section {
+            margin-bottom: 15px;
+        }
+        .info-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .info-card {
+            display: table-cell;
+            background: #f8f9fa;
+            padding: 12px 15px;
+            vertical-align: top;
+        }
+        .info-card-left {
+            width: 48%;
+            background: #e8f4fc;
+        }
+        .info-card-right {
+            width: 48%;
+            background: #f0f7eb;
+        }
+        .info-card-separator {
+            display: table-cell;
+            width: 4%;
+        }
+        .info-card-full {
+            width: 100%;
+            background: #f8f9fa;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 8pt;
+            margin-bottom: 3px;
+        }
+        .info-value {
+            font-size: 9pt;
+            color: #222;
+        }
+        .info-item {
+            margin-bottom: 8px;
+        }
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Sekcia nadpis - moderný štýl */
+        .section-title {
             font-size: 11pt;
             font-weight: bold;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+            padding: 8px 12px;
+            margin: 15px 0 10px 0;
         }
         
-        /* Hlavná informačná tabuľka */
-        .info-header-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        .info-header-table td {
-            border: 1px solid #000;
-            padding: 4px 6px;
-            vertical-align: top;
-            font-size: 8pt;
-        }
-        .info-header-table .label {
-            font-weight: bold;
-            width: 25%;
-            background-color: #f0f0f0;
-        }
-        .info-header-table .value {
-            width: 25%;
-        }
-        
-        /* Sekcia nadpis */
-        .section-title {
-            font-size: 10pt;
-            font-weight: bold;
-            background: #e0e0e0;
-            padding: 5px 8px;
-            margin: 10px 0 5px 0;
-            border: 1px solid #000;
-        }
-        
-        /* Hlavná tabuľka komponentov */
+        /* Hlavná tabuľka komponentov - moderný štýl */
         .components-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-bottom: 15px;
             font-size: 8pt;
         }
-        .components-table th,
-        .components-table td {
-            border: 1px solid #000;
-            padding: 4px 6px;
-            text-align: left;
-            vertical-align: top;
-        }
         .components-table th {
-            background: #e0e0e0;
+            background: #34495e;
+            color: #fff;
             font-weight: bold;
             text-align: center;
+            padding: 8px 6px;
+        }
+        .components-table th:first-child {
+        }
+        .components-table th:last-child {
+        }
+        .components-table td {
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid #e0e0e0;
         }
         .components-table .col-component {
             width: 18%;
             font-weight: bold;
+            color: #2c3e50;
+            background: #f4f6f7;
         }
         .components-table .col-type {
             width: 22%;
+            background: #fafbfc;
         }
         .components-table .col-state {
             width: 30%;
         }
-        .components-table tr:nth-child(even) {
-            background-color: #fafafa;
+        .components-table tr:nth-child(even) td {
+            background-color: #f9fafb;
+        }
+        .components-table tr:nth-child(even) td.col-component {
+            background: #ecf0f1;
+        }
+        .components-table tr:hover td {
+            background-color: #eef5fb;
         }
         
-        /* Poznámky */
+        /* Poznámky - moderný štýl */
         .notes-section {
             margin-bottom: 15px;
         }
         .notes-box {
-            border: 1px solid #000;
-            padding: 8px;
+            background: #fafbfc;
+            padding: 10px 12px;
             min-height: 40px;
-            background: #fff;
+            border-left: 3px solid #3498db;
         }
         .notes-label {
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
+            color: #2c3e50;
         }
         
-        /* Fotografie */
+        /* Fotografie - moderný štýl */
         .photos-section {
             margin-bottom: 15px;
             page-break-inside: avoid;
@@ -158,10 +204,10 @@ if (!isset($photosGeneral)) {
         .photos-row-title {
             font-weight: bold;
             font-size: 9pt;
-            margin-bottom: 5px;
-            padding: 3px 5px;
-            background: #f0f0f0;
-            border: 1px solid #000;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: #ecf0f1;
+            color: #2c3e50;
         }
         .photo-item {
             display: inline-block;
@@ -173,42 +219,47 @@ if (!isset($photosGeneral)) {
         .photo-item img {
             max-width: 100%;
             max-height: 100px;
-            border: 1px solid #000;
+            border: 2px solid #e0e0e0;
         }
         .photo-caption {
             font-size: 7pt;
-            color: #333;
-            margin-top: 2px;
+            color: #666;
+            margin-top: 3px;
             word-break: break-all;
         }
         
-        /* Podpisy */
+        /* Podpisy - moderný štýl */
         .signatures-section {
             margin-top: 20px;
             page-break-inside: avoid;
         }
-        .signatures-table {
+        .signatures-row {
+            display: table;
             width: 100%;
-            border-collapse: collapse;
         }
-        .signatures-table td {
-            border: 1px solid #000;
-            padding: 8px;
-            width: 50%;
+        .signature-card {
+            display: table-cell;
+            width: 48%;
+            background: #f8f9fa;
+            padding: 12px;
             vertical-align: top;
+        }
+        .signature-separator {
+            display: table-cell;
+            width: 4%;
         }
         .signature-label {
             font-weight: bold;
             margin-bottom: 5px;
             font-size: 9pt;
+            color: #2c3e50;
         }
         .signature-box {
             min-height: 60px;
-            border: 1px dashed #999;
-            margin: 5px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 2px dashed #bdc3c7;
+            margin: 8px 0;
+            text-align: center;
+            padding: 5px;
             background: #fff;
         }
         .signature-box img {
@@ -216,18 +267,19 @@ if (!isset($photosGeneral)) {
             max-height: 55px;
         }
         .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 5px;
-            padding-top: 3px;
+            border-top: 1px solid #bdc3c7;
+            margin-top: 8px;
+            padding-top: 5px;
             font-size: 8pt;
             text-align: center;
+            color: #7f8c8d;
         }
         
         /* Dolná sekcia - dátum a miesto */
         .footer-info {
             margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #000;
+            padding: 10px 12px;
+            background: #f4f6f7;
         }
         .footer-info-table {
             width: 100%;
@@ -240,15 +292,16 @@ if (!isset($photosGeneral)) {
         .footer-info-table .label {
             font-weight: bold;
             width: 20%;
+            color: #555;
         }
         
         /* Footer */
         .footer {
             margin-top: 20px;
             padding-top: 10px;
-            border-top: 1px solid #ccc;
+            border-top: 1px solid #e0e0e0;
             font-size: 7pt;
-            color: #666;
+            color: #999;
             text-align: center;
         }
         
@@ -266,64 +319,95 @@ if (!isset($photosGeneral)) {
     </div>
 
     <!-- Sekcia 1: Prevádzka a Interné označenie zariadenia -->
-    <table class="info-header-table">
-        <tr>
-            <td class="label">Prevádzka:</td>
-            <td class="value"><?= htmlspecialchars($report['location_nazov'] ?? '-') ?><?= !empty($report['location_adresa']) ? ', ' . htmlspecialchars($report['location_adresa']) : '' ?><?= !empty($report['location_mesto']) ? ', ' . htmlspecialchars($report['location_mesto']) : '' ?></td>
-            <td class="label">Interné označenie:</td>
-            <td class="value"><?= htmlspecialchars($report['interne_oznacenie'] ?? '-') ?></td>
-        </tr>
-    </table>
+    <div class="info-section">
+        <div class="info-row">
+            <div class="info-card info-card-left">
+                <div class="info-item">
+                    <div class="info-label">Prevádzka:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['location_nazov'] ?? '-') ?><?= !empty($report['location_adresa']) ? ', ' . htmlspecialchars($report['location_adresa']) : '' ?><?= !empty($report['location_mesto']) ? ', ' . htmlspecialchars($report['location_mesto']) : '' ?></div>
+                </div>
+            </div>
+            <div class="info-card-separator"></div>
+            <div class="info-card info-card-right">
+                <div class="info-item">
+                    <div class="info-label">Interné označenie zariadenia:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['interne_oznacenie'] ?? '-') ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Sekcia 2: Informácie o zákazníkovi (vľavo) a zariadení (vpravo) -->
-    <table class="info-header-table">
-        <tr>
-            <td class="label">Prevádzkovateľ:</td>
-            <td class="value"><?= htmlspecialchars($report['nazov_firmy'] ?? '-') ?><?= !empty($report['sidlo']) ? ', ' . htmlspecialchars($report['sidlo']) : '' ?></td>
-            <td class="label">Výrobné číslo:</td>
-            <td class="value"><?= htmlspecialchars($report['device_vyrobne_cislo'] ?? '-') ?></td>
-        </tr>
-        <tr>
-            <td class="label">Objednávateľ:</td>
-            <td class="value"><?= htmlspecialchars($report['objednavatel'] ?? $report['kontakt_osoba'] ?? '-') ?></td>
-            <td class="label">Rok výroby:</td>
-            <td class="value"><?= htmlspecialchars($report['device_rok_vyroby'] ?? '-') ?></td>
-        </tr>
-        <tr>
-            <td class="label">Kontakt:</td>
-            <td class="value"><?= htmlspecialchars($report['telefon'] ?? '-') ?><?= !empty($report['email']) ? ' / ' . htmlspecialchars($report['email']) : '' ?></td>
-            <td class="label">Typ / Model:</td>
-            <td class="value"><?= htmlspecialchars($report['device_typ'] ?? '-') ?></td>
-        </tr>
-        <tr>
-            <td class="label"></td>
-            <td class="value"></td>
-            <td class="label">Prevedenie:</td>
-            <td class="value"><?= htmlspecialchars($report['device_prevedenie'] ?? '-') ?></td>
-        </tr>
-        <tr>
-            <td class="label"></td>
-            <td class="value"></td>
-            <td class="label">Výrobca:</td>
-            <td class="value"><?= htmlspecialchars($report['device_vyrobca'] ?? '-') ?></td>
-        </tr>
-    </table>
+    <div class="info-section">
+        <div class="info-row">
+            <div class="info-card info-card-left">
+                <div class="info-item">
+                    <div class="info-label">Prevádzkovateľ:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['nazov_firmy'] ?? '-') ?><?= !empty($report['sidlo']) ? ', ' . htmlspecialchars($report['sidlo']) : '' ?></div>
+                </div>
+                <?php if (!empty($report['objednavatel']) || !empty($report['kontakt_osoba'])): ?>
+                <div class="info-item">
+                    <div class="info-label">Objednávateľ:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['objednavatel'] ?? $report['kontakt_osoba'] ?? '-') ?></div>
+                </div>
+                <?php endif; ?>
+                <div class="info-item">
+                    <div class="info-label">Kontakt:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['telefon'] ?? '-') ?><?= !empty($report['email']) ? ' / ' . htmlspecialchars($report['email']) : '' ?></div>
+                </div>
+            </div>
+            <div class="info-card-separator"></div>
+            <div class="info-card info-card-right">
+                <div class="info-item">
+                    <div class="info-label">Výrobné číslo:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_vyrobne_cislo'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Rok výroby:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_rok_vyroby'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Typ / Model:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_typ'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Prevedenie:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_prevedenie'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Výrobca:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_vyrobca'] ?? '-') ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Sekcia 3: Servisné stredisko -->
-    <table class="info-header-table">
-        <tr>
-            <td class="label">Servisné stredisko:</td>
-            <td class="value"><?= htmlspecialchars($report['device_servisne_stredisko'] ?? '-') ?></td>
-            <td class="label">Kontakt:</td>
-            <td class="value"><?= htmlspecialchars($report['device_servisne_stredisko_tel'] ?? '-') ?></td>
-        </tr>
-        <tr>
-            <td class="label">Distribúcia pre SR:</td>
-            <td class="value"><?= htmlspecialchars($report['device_distribucia'] ?? '-') ?></td>
-            <td class="label">Dátum servisu:</td>
-            <td class="value"><?= htmlspecialchars($report['datum'] ?? date('d.m.Y')) ?></td>
-        </tr>
-    </table>
+    <div class="info-section">
+        <div class="info-row">
+            <div class="info-card info-card-left">
+                <div class="info-item">
+                    <div class="info-label">Servisné stredisko:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_servisne_stredisko'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Distribúcia pre SR:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_distribucia'] ?? '-') ?></div>
+                </div>
+            </div>
+            <div class="info-card-separator"></div>
+            <div class="info-card info-card-right">
+                <div class="info-item">
+                    <div class="info-label">Kontakt:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_servisne_stredisko_tel'] ?? '-') ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Dátum servisu:</div>
+                    <div class="info-value"><?= htmlspecialchars($report['datum'] ?? date('d.m.Y')) ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Tabuľka stavu komponentov -->
     <div class="section-title">Zistený stav komponentov</div>
@@ -463,40 +547,39 @@ if (!isset($photosGeneral)) {
     <!-- Podpisy -->
     <div class="signatures-section">
         <div class="section-title">Podpisy</div>
-        <table class="signatures-table">
-            <tr>
-                <td>
-                    <div class="signature-label">Servis vykonal:</div>
-                    <div style="font-size: 9pt; margin-bottom: 5px;"><?= htmlspecialchars($report['servis_vykonal'] ?? '-') ?></div>
-                    <div class="signature-box">
-                        <?php 
-                        $technikPath = SIGNATURES_PATH . '/' . ($report['podpis_technik'] ?? '');
-                        $technikDataUri = !empty($report['podpis_technik']) ? getImageDataUri($technikPath) : null;
-                        if ($technikDataUri): ?>
-                        <img src="<?= $technikDataUri ?>" alt="Podpis technika">
-                        <?php else: ?>
-                        <span style="color: #999; font-size: 8pt;">Bez podpisu</span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="signature-line">podpis technika</div>
-                </td>
-                <td>
-                    <div class="signature-label">Skontroloval a prevzal:</div>
-                    <div style="font-size: 9pt; margin-bottom: 5px;"><?= htmlspecialchars($report['skontroloval_prevzal'] ?? $report['kontakt_osoba'] ?? '-') ?></div>
-                    <div class="signature-box">
-                        <?php 
-                        $zakaznikPath = SIGNATURES_PATH . '/' . ($report['podpis_zakaznik'] ?? '');
-                        $zakaznikDataUri = !empty($report['podpis_zakaznik']) ? getImageDataUri($zakaznikPath) : null;
-                        if ($zakaznikDataUri): ?>
-                        <img src="<?= $zakaznikDataUri ?>" alt="Podpis zákazníka">
-                        <?php else: ?>
-                        <span style="color: #999; font-size: 8pt;">Bez podpisu</span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="signature-line">podpis zákazníka</div>
-                </td>
-            </tr>
-        </table>
+        <div class="signatures-row">
+            <div class="signature-card">
+                <div class="signature-label">Servis vykonal:</div>
+                <div style="font-size: 9pt; margin-bottom: 5px; color: #333;"><?= htmlspecialchars($report['servis_vykonal'] ?? '-') ?></div>
+                <div class="signature-box">
+                    <?php 
+                    $technikPath = SIGNATURES_PATH . '/' . ($report['podpis_technik'] ?? '');
+                    $technikDataUri = !empty($report['podpis_technik']) ? getImageDataUri($technikPath) : null;
+                    if ($technikDataUri): ?>
+                    <img src="<?= $technikDataUri ?>" alt="Podpis technika">
+                    <?php else: ?>
+                    <span style="color: #bdc3c7; font-size: 8pt;">Bez podpisu</span>
+                    <?php endif; ?>
+                </div>
+                <div class="signature-line">podpis technika</div>
+            </div>
+            <div class="signature-separator"></div>
+            <div class="signature-card">
+                <div class="signature-label">Skontroloval a prevzal:</div>
+                <div style="font-size: 9pt; margin-bottom: 5px; color: #333;"><?= htmlspecialchars($report['skontroloval_prevzal'] ?? $report['kontakt_osoba'] ?? '-') ?></div>
+                <div class="signature-box">
+                    <?php 
+                    $zakaznikPath = SIGNATURES_PATH . '/' . ($report['podpis_zakaznik'] ?? '');
+                    $zakaznikDataUri = !empty($report['podpis_zakaznik']) ? getImageDataUri($zakaznikPath) : null;
+                    if ($zakaznikDataUri): ?>
+                    <img src="<?= $zakaznikDataUri ?>" alt="Podpis zákazníka">
+                    <?php else: ?>
+                    <span style="color: #bdc3c7; font-size: 8pt;">Bez podpisu</span>
+                    <?php endif; ?>
+                </div>
+                <div class="signature-line">podpis zákazníka</div>
+            </div>
+        </div>
     </div>
 
     <!-- Miesto a dátum -->
