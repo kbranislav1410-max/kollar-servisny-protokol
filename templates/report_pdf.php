@@ -265,55 +265,63 @@ if (!isset($photosGeneral)) {
         <div class="protocol-number">č. <?= htmlspecialchars($report['cislo_protokolu'] ?? 'N/A') ?></div>
     </div>
 
-    <!-- Základné informácie - horná tabuľka -->
+    <!-- Sekcia 1: Prevádzka a Interné označenie zariadenia -->
     <table class="info-header-table">
         <tr>
             <td class="label">Prevádzka:</td>
-            <td class="value"><?= htmlspecialchars($report['location_nazov'] ?? '-') ?></td>
+            <td class="value"><?= htmlspecialchars($report['location_nazov'] ?? '-') ?><?= !empty($report['location_adresa']) ? ', ' . htmlspecialchars($report['location_adresa']) : '' ?><?= !empty($report['location_mesto']) ? ', ' . htmlspecialchars($report['location_mesto']) : '' ?></td>
+            <td class="label">Interné označenie:</td>
+            <td class="value"><?= htmlspecialchars($report['interne_oznacenie'] ?? '-') ?></td>
+        </tr>
+    </table>
+
+    <!-- Sekcia 2: Informácie o zákazníkovi (vľavo) a zariadení (vpravo) -->
+    <table class="info-header-table">
+        <tr>
+            <td class="label">Prevádzkovateľ:</td>
+            <td class="value"><?= htmlspecialchars($report['nazov_firmy'] ?? '-') ?><?= !empty($report['sidlo']) ? ', ' . htmlspecialchars($report['sidlo']) : '' ?></td>
             <td class="label">Výrobné číslo:</td>
             <td class="value"><?= htmlspecialchars($report['device_vyrobne_cislo'] ?? '-') ?></td>
         </tr>
         <tr>
-            <td class="label">Interné označenie:</td>
-            <td class="value"><?= htmlspecialchars($report['interne_oznacenie'] ?? '-') ?></td>
+            <td class="label">Objednávateľ:</td>
+            <td class="value"><?= htmlspecialchars($report['objednavatel'] ?? $report['kontakt_osoba'] ?? '-') ?></td>
             <td class="label">Rok výroby:</td>
             <td class="value"><?= htmlspecialchars($report['device_rok_vyroby'] ?? '-') ?></td>
         </tr>
         <tr>
-            <td class="label">Výrobca:</td>
-            <td class="value"><?= htmlspecialchars($report['device_vyrobca'] ?? '-') ?></td>
+            <td class="label">Kontakt:</td>
+            <td class="value"><?= htmlspecialchars($report['telefon'] ?? '-') ?><?= !empty($report['email']) ? ' / ' . htmlspecialchars($report['email']) : '' ?></td>
             <td class="label">Typ / Model:</td>
             <td class="value"><?= htmlspecialchars($report['device_typ'] ?? '-') ?></td>
         </tr>
         <tr>
-            <td class="label">Distribúcia pre SR:</td>
-            <td class="value"><?= htmlspecialchars($report['device_distribucia'] ?? '-') ?></td>
+            <td class="label"></td>
+            <td class="value"></td>
             <td class="label">Prevedenie:</td>
             <td class="value"><?= htmlspecialchars($report['device_prevedenie'] ?? '-') ?></td>
         </tr>
         <tr>
-            <td class="label">Servisné stredisko:</td>
-            <td class="value"><?= htmlspecialchars($report['device_servisne_stredisko'] ?? '-') ?> <?= !empty($report['device_servisne_stredisko_tel']) ? '(tel: ' . htmlspecialchars($report['device_servisne_stredisko_tel']) . ')' : '' ?></td>
-            <td class="label">Dátum servisu:</td>
-            <td class="value"><?= htmlspecialchars($report['datum'] ?? date('d.m.Y')) ?></td>
+            <td class="label"></td>
+            <td class="value"></td>
+            <td class="label">Výrobca:</td>
+            <td class="value"><?= htmlspecialchars($report['device_vyrobca'] ?? '-') ?></td>
         </tr>
     </table>
 
-    <!-- Informácie o zákazníkovi a prevádzke -->
+    <!-- Sekcia 3: Servisné stredisko -->
     <table class="info-header-table">
         <tr>
-            <td class="label">Prevádzkovateľ:</td>
-            <td class="value" colspan="3"><?= htmlspecialchars($report['nazov_firmy'] ?? '-') ?><?= !empty($report['sidlo']) ? ', ' . htmlspecialchars($report['sidlo']) : '' ?></td>
-        </tr>
-        <tr>
-            <td class="label">Zariadenie (adresa):</td>
-            <td class="value" colspan="3"><?= htmlspecialchars($report['location_adresa'] ?? '-') ?><?= !empty($report['location_mesto']) ? ', ' . htmlspecialchars($report['location_mesto']) : '' ?></td>
-        </tr>
-        <tr>
-            <td class="label">Objednávateľ:</td>
-            <td class="value"><?= htmlspecialchars($report['objednavatel'] ?? $report['kontakt_osoba'] ?? '-') ?></td>
+            <td class="label">Servisné stredisko:</td>
+            <td class="value"><?= htmlspecialchars($report['device_servisne_stredisko'] ?? '-') ?></td>
             <td class="label">Kontakt:</td>
-            <td class="value"><?= htmlspecialchars($report['telefon'] ?? '-') ?><?= !empty($report['email']) ? ' / ' . htmlspecialchars($report['email']) : '' ?></td>
+            <td class="value"><?= htmlspecialchars($report['device_servisne_stredisko_tel'] ?? '-') ?></td>
+        </tr>
+        <tr>
+            <td class="label">Distribúcia pre SR:</td>
+            <td class="value"><?= htmlspecialchars($report['device_distribucia'] ?? '-') ?></td>
+            <td class="label">Dátum servisu:</td>
+            <td class="value"><?= htmlspecialchars($report['datum'] ?? date('d.m.Y')) ?></td>
         </tr>
     </table>
 
