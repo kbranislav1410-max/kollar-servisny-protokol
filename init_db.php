@@ -101,6 +101,7 @@ try {
             distribucia TEXT,
             servisne_stredisko TEXT,
             servisne_stredisko_tel TEXT,
+            interne_oznacenie TEXT,
             poznamka TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL
@@ -200,6 +201,7 @@ try {
         "ALTER TABLE devices ADD COLUMN distribucia TEXT",
         "ALTER TABLE devices ADD COLUMN servisne_stredisko TEXT",
         "ALTER TABLE devices ADD COLUMN servisne_stredisko_tel TEXT",
+        "ALTER TABLE devices ADD COLUMN interne_oznacenie TEXT",
         "ALTER TABLE reports ADD COLUMN interne_oznacenie TEXT",
         "ALTER TABLE reports ADD COLUMN objednavatel TEXT",
         "ALTER TABLE reports ADD COLUMN miesto_datum TEXT",

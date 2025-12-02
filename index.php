@@ -162,8 +162,8 @@ function addDevice(): void
     $pdo = getDbConnection();
     
     $stmt = $pdo->prepare("
-        INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, rok_vyroby, prevedenie, vyrobca, distribucia, servisne_stredisko, servisne_stredisko_tel, poznamka)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, rok_vyroby, prevedenie, vyrobca, distribucia, servisne_stredisko, servisne_stredisko_tel, interne_oznacenie, poznamka)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $stmt->execute([
@@ -177,6 +177,7 @@ function addDevice(): void
         post('distribucia', ''),
         post('servisne_stredisko', ''),
         post('servisne_stredisko_tel', ''),
+        post('interne_oznacenie', ''),
         post('poznamka', ''),
     ]);
     
@@ -342,6 +343,15 @@ function finalizeReport(): void
     // Zariadenie - použijeme existujúce ID z výberu
     $deviceId = !empty($report['device_id']) ? (int)$report['device_id'] : null;
     
+    // Získať interné označenie zo zariadenia
+    $interneOznacenie = '';
+    if ($deviceId) {
+        $stmt = $pdo->prepare("SELECT interne_oznacenie FROM devices WHERE id = ?");
+        $stmt->execute([$deviceId]);
+        $device = $stmt->fetch();
+        $interneOznacenie = $device['interne_oznacenie'] ?? '';
+    }
+    
     // Pripraviť sekcie JSON pre uloženie všetkých komponentov
     $sekcieData = [
         'klapky' => [
@@ -432,7 +442,7 @@ function finalizeReport(): void
         $report['location_id'] ?? null,
         $deviceId,
         $report['datum'] ?? date('Y-m-d'),
-        $report['interne_oznacenie'] ?? '',
+        $interneOznacenie,
         $report['objednavatel'] ?? '',
         $report['servis_vykonal'] ?? '',
         $report['skontroloval_prevzal'] ?? '',
@@ -510,7 +520,8 @@ function generatePdf(int $reportId, string $cisloProtokolu): ?string
                d.nazov as device_nazov, d.typ as device_typ, d.vyrobne_cislo as device_vyrobne_cislo,
                d.rok_vyroby as device_rok_vyroby, d.prevedenie as device_prevedenie,
                d.vyrobca as device_vyrobca, d.distribucia as device_distribucia,
-               d.servisne_stredisko as device_servisne_stredisko, d.servisne_stredisko_tel as device_servisne_stredisko_tel
+               d.servisne_stredisko as device_servisne_stredisko, d.servisne_stredisko_tel as device_servisne_stredisko_tel,
+               d.interne_oznacenie as device_interne_oznacenie
         FROM reports r
         LEFT JOIN customers c ON r.customer_id = c.id
         LEFT JOIN locations l ON r.location_id = l.id
@@ -1377,9 +1388,15 @@ $pageView = $pageView ?? 'home';
                 </button>
                 <div class="collapsible-content">
                     <form id="newDeviceForm">
-                        <div class="form-group">
-                            <label>Názov zariadenia *</label>
-                            <input type="text" name="nazov" placeholder="Napr. Vzduchotechnická jednotka" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Názov zariadenia *</label>
+                                <input type="text" name="nazov" placeholder="Napr. Vzduchotechnická jednotka" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Interné označenie *</label>
+                                <input type="text" name="interne_oznacenie" placeholder="Napr. VZT-01, KLIMA-1" required>
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -1453,19 +1470,13 @@ $pageView = $pageView ?? 'home';
                         <input type="date" name="datum" value="<?= date('Y-m-d') ?>">
                     </div>
                     <div class="form-group">
-                        <label>Interné označenie zariadenia</label>
-                        <input type="text" name="interne_oznacenie" placeholder="Napr. VZT-01">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
                         <label>Servis vykonal (meno technika)</label>
                         <input type="text" name="servis_vykonal" placeholder="Meno a priezvisko technika">
                     </div>
-                    <div class="form-group">
-                        <label>Objednávateľ</label>
-                        <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
-                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Objednávateľ</label>
+                    <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
                 </div>
 
                 <!-- Stav komponentov - tabuľkový formát -->

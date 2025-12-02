@@ -108,7 +108,15 @@ function loadDevices(locationId) {
             devices.forEach(d => {
                 const option = document.createElement('option');
                 option.value = d.id;
-                option.textContent = `${d.nazov}${d.typ ? ' (' + d.typ + ')' : ''}`;
+                // Zobrazíme interné označenie ak existuje, inak typ
+                let label = d.nazov;
+                if (d.interne_oznacenie) {
+                    label += ` [${d.interne_oznacenie}]`;
+                }
+                if (d.typ) {
+                    label += ` (${d.typ})`;
+                }
+                option.textContent = label;
                 select.appendChild(option);
             });
             
@@ -840,6 +848,16 @@ function updateSummary() {
     const data = window.reportData || {};
     const totalPhotos = uploadedPhotos.length + uploadedPhotosBefore.length + uploadedPhotosAfter.length;
     
+    // Získať názov vybraného zariadenia z dropdownu
+    let deviceDisplay = 'Nevybrané';
+    const deviceSelect = document.getElementById('device_select');
+    if (deviceSelect && deviceSelect.value) {
+        const selectedOption = deviceSelect.options[deviceSelect.selectedIndex];
+        if (selectedOption) {
+            deviceDisplay = selectedOption.textContent;
+        }
+    }
+    
     let html = `
         <div class="summary-section">
             <h4>Zákazník a prevádzka</h4>
@@ -856,12 +874,8 @@ function updateSummary() {
         <div class="summary-section">
             <h4>Zariadenie</h4>
             <div class="summary-row">
-                <span class="summary-label">Zariadenie ID:</span>
-                <span class="summary-value">${data.device_id || 'Nevybrané'}</span>
-            </div>
-            <div class="summary-row">
-                <span class="summary-label">Interné označenie:</span>
-                <span class="summary-value">${data.interne_oznacenie || '-'}</span>
+                <span class="summary-label">Zariadenie:</span>
+                <span class="summary-value">${deviceDisplay}</span>
             </div>
         </div>
         

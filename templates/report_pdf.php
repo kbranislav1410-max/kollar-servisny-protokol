@@ -331,7 +331,7 @@ if (!isset($photosGeneral)) {
             <div class="info-card info-card-right">
                 <div class="info-item">
                     <div class="info-label">Interné označenie zariadenia:</div>
-                    <div class="info-value"><?= htmlspecialchars($report['interne_oznacenie'] ?? '-') ?></div>
+                    <div class="info-value"><?= htmlspecialchars($report['device_interne_oznacenie'] ?? $report['interne_oznacenie'] ?? '-') ?></div>
                 </div>
             </div>
         </div>
