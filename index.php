@@ -1169,7 +1169,10 @@ $pageView = $pageView ?? 'home';
         <div class="customer-detail-page">
             <div class="page-header">
                 <a href="index.php?action=customers" class="back-link">← Späť na zoznam</a>
-                <h1 id="customerName">Načítavam...</h1>
+                <div class="page-title-section">
+                    <span class="page-type-label">Detail zákazníka</span>
+                    <h1 id="customerName">Načítavam...</h1>
+                </div>
             </div>
             
             <div class="customer-info" id="customerInfo">
@@ -1202,7 +1205,10 @@ $pageView = $pageView ?? 'home';
         <div class="location-detail-page">
             <div class="page-header">
                 <a href="#" id="backToCustomerLink" class="back-link">← Späť na zákazníka</a>
-                <h1 id="locationName">Načítavam...</h1>
+                <div class="page-title-section">
+                    <span class="page-type-label">Detail prevádzky</span>
+                    <h1 id="locationName">Načítavam...</h1>
+                </div>
             </div>
             
             <div class="location-info" id="locationInfo">
@@ -1235,7 +1241,10 @@ $pageView = $pageView ?? 'home';
         <div class="device-detail-page">
             <div class="page-header">
                 <a href="#" id="backToLocationLink" class="back-link">← Späť na prevádzku</a>
-                <h1 id="deviceName">Načítavam...</h1>
+                <div class="page-title-section">
+                    <span class="page-type-label">Detail zariadenia</span>
+                    <h1 id="deviceName">Načítavam...</h1>
+                </div>
             </div>
             
             <div class="device-info" id="deviceInfo">
@@ -1259,8 +1268,9 @@ $pageView = $pageView ?? 'home';
                 $steps = ['Zákazník', 'Prevádzka', 'Zariadenie', 'Komponenty', 'Podpisy', 'Súhrn'];
                 foreach ($steps as $i => $stepName):
                     $class = $i < $currentStep ? 'completed' : ($i === $currentStep ? 'active' : '');
+                    $clickable = $i < $currentStep ? 'clickable' : '';
                 ?>
-                <div class="progress-step <?= $class ?>">
+                <div class="progress-step <?= $class ?> <?= $clickable ?>" data-step="<?= $i ?>" onclick="goToStep(<?= $i ?>)">
                     <span class="step-number"><?= $i + 1 ?></span>
                     <span class="step-name"><?= $stepName ?></span>
                 </div>

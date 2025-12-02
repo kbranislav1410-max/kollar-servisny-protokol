@@ -759,6 +759,25 @@ function prevStep(currentStepIndex) {
 }
 
 /**
+ * Prechod na konkrétny krok (kliknutím na číslo v progress bare)
+ */
+function goToStep(targetStep) {
+    // Môžeme ísť len na dokončené kroky alebo aktuálny
+    if (targetStep > window.currentStep) {
+        return; // Nemôžeme preskakovať dopredu
+    }
+    
+    if (targetStep === window.currentStep) {
+        return; // Už sme na tomto kroku
+    }
+    
+    // Prechod na požadovaný krok
+    window.currentStep = targetStep;
+    showStep(targetStep);
+    updateProgressBar(targetStep);
+}
+
+/**
  * Zobrazenie konkrétneho kroku
  */
 function showStep(stepIndex) {
@@ -775,9 +794,9 @@ function showStep(stepIndex) {
  */
 function updateProgressBar(currentStep) {
     document.querySelectorAll('.progress-step').forEach((step, i) => {
-        step.classList.remove('active', 'completed');
+        step.classList.remove('active', 'completed', 'clickable');
         if (i < currentStep) {
-            step.classList.add('completed');
+            step.classList.add('completed', 'clickable');
         } else if (i === currentStep) {
             step.classList.add('active');
         }
