@@ -87,7 +87,7 @@ try {
     ");
     echo "✓ Tabuľka 'locations' vytvorená/existuje\n";
     
-    // Tabuľka devices (zariadenia)
+    // Tabuľka devices (zariadenia) - rozšírená o nové polia
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS devices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,6 +95,12 @@ try {
             nazov TEXT NOT NULL,
             typ TEXT,
             vyrobne_cislo TEXT,
+            rok_vyroby TEXT,
+            prevedenie TEXT,
+            vyrobca TEXT,
+            distribucia TEXT,
+            servisne_stredisko TEXT,
+            servisne_stredisko_tel TEXT,
             poznamka TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL
@@ -102,7 +108,7 @@ try {
     ");
     echo "✓ Tabuľka 'devices' vytvorená/existuje\n";
     
-    // Tabuľka reports (servisné protokoly)
+    // Tabuľka reports (servisné protokoly) - rozšírená o nové polia
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,6 +117,18 @@ try {
             location_id INTEGER,
             device_id INTEGER,
             datum DATE,
+            
+            -- Hlavička info
+            interne_oznacenie TEXT,
+            objednavatel TEXT,
+            miesto_datum TEXT,
+            servis_vykonal TEXT,
+            skontroloval_prevzal TEXT,
+            
+            -- Sekcie komponentov (JSON formát pre flexibilitu)
+            sekcie_json TEXT,
+            
+            -- Legacy polia pre spätnú kompatibilitu
             klapky_pr TEXT,
             klapky_od TEXT,
             filtracia_pr TEXT,
@@ -121,7 +139,11 @@ try {
             plynovy_horak TEXT,
             chladic TEXT,
             zvukovy_tlmic TEXT,
+            
             poznamka TEXT,
+            odporucania TEXT,
+            zhodnotenie TEXT,
+            
             podpis_technik TEXT,
             podpis_zakaznik TEXT,
             pdf_path TEXT,
@@ -136,11 +158,30 @@ try {
     ");
     echo "✓ Tabuľka 'reports' vytvorená/existuje\n";
     
-    // Tabuľka attachments (prílohy - fotky)
+    // Tabuľka report_sections (sekcie protokolu pre detailné údaje)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS report_sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_id INTEGER NOT NULL,
+            section_key TEXT NOT NULL,
+            section_name TEXT NOT NULL,
+            popis_typ TEXT,
+            stav_privod TEXT,
+            stav_odvod TEXT,
+            sort_order INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE
+        )
+    ");
+    echo "✓ Tabuľka 'report_sections' vytvorená/existuje\n";
+    
+    // Tabuľka attachments (prílohy - fotky) - rozšírená o sekciu a typ
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS attachments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             report_id INTEGER NOT NULL,
+            section_key TEXT,
+            photo_type TEXT DEFAULT 'general',
             file_path TEXT NOT NULL,
             file_name TEXT NOT NULL,
             file_type TEXT,
@@ -150,6 +191,38 @@ try {
         )
     ");
     echo "✓ Tabuľka 'attachments' vytvorená/existuje\n";
+    
+    // Migrácia existujúcich tabuliek - pridanie nových stĺpcov ak neexistujú
+    $migrations = [
+        "ALTER TABLE devices ADD COLUMN rok_vyroby TEXT",
+        "ALTER TABLE devices ADD COLUMN prevedenie TEXT",
+        "ALTER TABLE devices ADD COLUMN vyrobca TEXT",
+        "ALTER TABLE devices ADD COLUMN distribucia TEXT",
+        "ALTER TABLE devices ADD COLUMN servisne_stredisko TEXT",
+        "ALTER TABLE devices ADD COLUMN servisne_stredisko_tel TEXT",
+        "ALTER TABLE reports ADD COLUMN interne_oznacenie TEXT",
+        "ALTER TABLE reports ADD COLUMN objednavatel TEXT",
+        "ALTER TABLE reports ADD COLUMN miesto_datum TEXT",
+        "ALTER TABLE reports ADD COLUMN servis_vykonal TEXT",
+        "ALTER TABLE reports ADD COLUMN skontroloval_prevzal TEXT",
+        "ALTER TABLE reports ADD COLUMN sekcie_json TEXT",
+        "ALTER TABLE reports ADD COLUMN odporucania TEXT",
+        "ALTER TABLE reports ADD COLUMN zhodnotenie TEXT",
+        "ALTER TABLE attachments ADD COLUMN section_key TEXT",
+        "ALTER TABLE attachments ADD COLUMN photo_type TEXT DEFAULT 'general'",
+    ];
+    
+    foreach ($migrations as $sql) {
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // Ignorujeme chyby "duplicate column" - stĺpec už existuje
+            if (strpos($e->getMessage(), 'duplicate column') === false) {
+                // Log other errors but don't fail
+            }
+        }
+    }
+    echo "✓ Migrácie aplikované\n";
     
     echo "\n=== Inicializácia dokončená úspešne! ===\n";
     echo "\nMôžete spustiť aplikáciu pomocou:\n";

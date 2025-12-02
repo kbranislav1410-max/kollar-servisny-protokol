@@ -6,6 +6,8 @@
 let signaturePadTechnik = null;
 let signaturePadZakaznik = null;
 let uploadedPhotos = [];
+let uploadedPhotosBefore = [];
+let uploadedPhotosAfter = [];
 
 /**
  * Prepnutie collapsible sekcie
@@ -388,27 +390,75 @@ function setupFormHandlers() {
  * Nastavenie nahrávania fotiek
  */
 function setupPhotoUpload() {
-    // Camera input - opens device camera directly
+    // Camera input - opens device camera directly (legacy)
     const cameraInput = document.getElementById('cameraInput');
     if (cameraInput) {
         cameraInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
         });
     }
     
-    // Gallery input - for selecting existing photos
+    // Gallery input - for selecting existing photos (legacy)
     const galleryInput = document.getElementById('galleryInput');
     if (galleryInput) {
         galleryInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
+        });
+    }
+    
+    // Before photos - camera
+    const cameraInputBefore = document.getElementById('cameraInputBefore');
+    if (cameraInputBefore) {
+        cameraInputBefore.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'before');
+            }
+            this.value = '';
+        });
+    }
+    
+    // Before photos - gallery
+    const galleryInputBefore = document.getElementById('galleryInputBefore');
+    if (galleryInputBefore) {
+        galleryInputBefore.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'before');
+            }
+            this.value = '';
+        });
+    }
+    
+    // After photos - camera
+    const cameraInputAfter = document.getElementById('cameraInputAfter');
+    if (cameraInputAfter) {
+        cameraInputAfter.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'after');
+            }
+            this.value = '';
+        });
+    }
+    
+    // After photos - gallery
+    const galleryInputAfter = document.getElementById('galleryInputAfter');
+    if (galleryInputAfter) {
+        galleryInputAfter.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'after');
+            }
+            this.value = '';
         });
     }
     
@@ -418,7 +468,7 @@ function setupPhotoUpload() {
         photoInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
         });
@@ -426,7 +476,7 @@ function setupPhotoUpload() {
 }
 
 /**
- * Otvorenie fotoaparátu
+ * Otvorenie fotoaparátu (legacy)
  */
 function openCamera() {
     const cameraInput = document.getElementById('cameraInput');
@@ -436,9 +486,26 @@ function openCamera() {
 }
 
 /**
- * Nahratie jednej fotky
+ * Otvorenie fotoaparátu pre konkrétny typ
  */
-function uploadPhoto(file) {
+function openCameraForType(photoType) {
+    let inputId = 'cameraInput';
+    if (photoType === 'before') {
+        inputId = 'cameraInputBefore';
+    } else if (photoType === 'after') {
+        inputId = 'cameraInputAfter';
+    }
+    
+    const cameraInput = document.getElementById(inputId);
+    if (cameraInput) {
+        cameraInput.click();
+    }
+}
+
+/**
+ * Nahratie jednej fotky s typom
+ */
+function uploadPhoto(file, photoType = 'general') {
     if (file.size > 5 * 1024 * 1024) {
         alert('Súbor ' + file.name + ' je príliš veľký (max 5MB)');
         return;
@@ -447,6 +514,7 @@ function uploadPhoto(file) {
     const formData = new FormData();
     formData.append('action', 'upload_photo');
     formData.append('photo', file);
+    formData.append('photo_type', photoType);
     
     fetch('index.php', {
         method: 'POST',
@@ -455,11 +523,23 @@ function uploadPhoto(file) {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            uploadedPhotos.push({
+            const photoData = {
                 filename: result.filename,
-                name: file.name
-            });
-            updatePhotoPreview();
+                name: file.name,
+                photo_type: photoType
+            };
+            
+            // Uloženie do správneho zoznamu
+            if (photoType === 'before') {
+                uploadedPhotosBefore.push(photoData);
+                updatePhotoPreviewForType('before');
+            } else if (photoType === 'after') {
+                uploadedPhotosAfter.push(photoData);
+                updatePhotoPreviewForType('after');
+            } else {
+                uploadedPhotos.push(photoData);
+                updatePhotoPreview();
+            }
         } else {
             alert('Chyba: ' + (result.error || 'Nepodarilo sa nahrať súbor'));
         }
@@ -471,7 +551,48 @@ function uploadPhoto(file) {
 }
 
 /**
- * Aktualizácia náhľadu fotiek
+ * Aktualizácia náhľadu fotiek pre konkrétny typ
+ */
+function updatePhotoPreviewForType(photoType) {
+    let preview, countEl, photos;
+    
+    if (photoType === 'before') {
+        preview = document.getElementById('photoPreviewBefore');
+        countEl = document.getElementById('photoCountBefore');
+        photos = uploadedPhotosBefore;
+    } else if (photoType === 'after') {
+        preview = document.getElementById('photoPreviewAfter');
+        countEl = document.getElementById('photoCountAfter');
+        photos = uploadedPhotosAfter;
+    } else {
+        return updatePhotoPreview();
+    }
+    
+    if (!preview) return;
+    
+    preview.innerHTML = '';
+    photos.forEach((photo, index) => {
+        const div = document.createElement('div');
+        div.className = 'photo-item';
+        div.innerHTML = `
+            <img src="uploads/photos/${escapeHtml(photo.filename)}" alt="${escapeHtml(photo.name)}">
+            <button type="button" class="remove-photo" onclick="removePhotoByType('${photoType}', ${index})">×</button>
+        `;
+        preview.appendChild(div);
+    });
+    
+    if (countEl) {
+        if (photos.length > 0) {
+            countEl.textContent = `📷 ${photos.length} ${photos.length === 1 ? 'fotografia' : (photos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.style.display = 'block';
+        } else {
+            countEl.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Aktualizácia náhľadu fotiek (legacy)
  */
 function updatePhotoPreview() {
     const preview = document.getElementById('photoPreview');
@@ -482,8 +603,8 @@ function updatePhotoPreview() {
         const div = document.createElement('div');
         div.className = 'photo-item';
         div.innerHTML = `
-            <img src="uploads/photos/${photo.filename}" alt="${photo.name}">
-            <button class="remove-photo" onclick="removePhoto(${index})">×</button>
+            <img src="uploads/photos/${escapeHtml(photo.filename)}" alt="${escapeHtml(photo.name)}">
+            <button type="button" class="remove-photo" onclick="removePhoto(${index})">×</button>
         `;
         preview.appendChild(div);
     });
@@ -501,11 +622,36 @@ function updatePhotoPreview() {
 }
 
 /**
- * Odstránenie fotky
+ * Odstránenie fotky (legacy)
  */
 function removePhoto(index) {
     uploadedPhotos.splice(index, 1);
     updatePhotoPreview();
+}
+
+/**
+ * Odstránenie fotky podľa typu
+ */
+function removePhotoByType(photoType, index) {
+    if (photoType === 'before') {
+        uploadedPhotosBefore.splice(index, 1);
+        updatePhotoPreviewForType('before');
+    } else if (photoType === 'after') {
+        uploadedPhotosAfter.splice(index, 1);
+        updatePhotoPreviewForType('after');
+    } else {
+        removePhoto(index);
+    }
+}
+
+/**
+ * Helper function to escape HTML
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 /**
@@ -640,6 +786,7 @@ function updateSummary() {
     if (!summaryEl) return;
     
     const data = window.reportData || {};
+    const totalPhotos = uploadedPhotos.length + uploadedPhotosBefore.length + uploadedPhotosAfter.length;
     
     let html = `
         <div class="summary-section">
@@ -660,6 +807,22 @@ function updateSummary() {
                 <span class="summary-label">Zariadenie ID:</span>
                 <span class="summary-value">${data.device_id || 'Nevybrané (voliteľné)'}</span>
             </div>
+            <div class="summary-row">
+                <span class="summary-label">Interné označenie:</span>
+                <span class="summary-value">${data.interne_oznacenie || '-'}</span>
+            </div>
+        </div>
+        
+        <div class="summary-section">
+            <h4>Servisné údaje</h4>
+            <div class="summary-row">
+                <span class="summary-label">Dátum servisu:</span>
+                <span class="summary-value">${data.datum || '-'}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Servis vykonal:</span>
+                <span class="summary-value">${data.servis_vykonal || '-'}</span>
+            </div>
         </div>
         
         <div class="summary-section">
@@ -674,11 +837,11 @@ function updateSummary() {
             </div>
             <div class="summary-row">
                 <span class="summary-label">Rekuperácia:</span>
-                <span class="summary-value">${data.rekuperacia || '-'}</span>
+                <span class="summary-value">${data.rekuperacia_pr || '-'} / ${data.rekuperacia_od || '-'}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">Ventilátor:</span>
-                <span class="summary-value">${data.ventilator || '-'}</span>
+                <span class="summary-value">${data.ventilator_pr || '-'} / ${data.ventilator_od || '-'}</span>
             </div>
         </div>
         
@@ -697,8 +860,16 @@ function updateSummary() {
         <div class="summary-section">
             <h4>Fotografie</h4>
             <div class="summary-row">
-                <span class="summary-label">Počet:</span>
-                <span class="summary-value">${uploadedPhotos.length} súborov</span>
+                <span class="summary-label">Pred servisom:</span>
+                <span class="summary-value">${uploadedPhotosBefore.length} súborov</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Po servise:</span>
+                <span class="summary-value">${uploadedPhotosAfter.length} súborov</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Celkom:</span>
+                <span class="summary-value">${totalPhotos} súborov</span>
             </div>
         </div>
     `;

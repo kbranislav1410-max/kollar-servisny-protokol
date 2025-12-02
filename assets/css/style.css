@@ -1205,3 +1205,178 @@ select {
         justify-content: center;
     }
 }
+
+/* ===== COMPONENTS INPUT TABLE ===== */
+.section-header {
+    margin: 25px 0 15px 0;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #3498db;
+}
+
+.section-header h3 {
+    font-size: 18px;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.section-header .help-text {
+    margin-top: 5px;
+}
+
+.components-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.components-input-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.components-input-table th,
+.components-input-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.components-input-table thead th {
+    background: #34495e;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.components-input-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.components-input-table tbody tr:hover {
+    background: #ecf0f1;
+}
+
+.components-input-table .col-component {
+    width: 15%;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.components-input-table .col-type {
+    width: 25%;
+}
+
+.components-input-table .col-state {
+    width: 30%;
+}
+
+.components-input-table input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+}
+
+.components-input-table input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Photos grid upload */
+.photos-grid-upload {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.photo-upload-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.photo-upload-section h4 {
+    font-size: 14px;
+    color: #2c3e50;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.photo-upload-section .photo-section {
+    background: transparent;
+    padding: 0;
+}
+
+/* Responsive adjustments for components table */
+@media (max-width: 900px) {
+    .components-input-table {
+        font-size: 12px;
+    }
+    
+    .components-input-table th,
+    .components-input-table td {
+        padding: 6px 8px;
+    }
+    
+    .components-input-table input[type="text"] {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .photos-grid-upload {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .components-input-table .col-component {
+        width: auto;
+    }
+    
+    .components-input-table td,
+    .components-input-table th {
+        display: block;
+        width: 100%;
+    }
+    
+    .components-input-table thead {
+        display: none;
+    }
+    
+    .components-input-table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .components-input-table tbody td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 40%;
+    }
+    
+    .components-input-table tbody td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 600;
+        color: #7f8c8d;
+        font-size: 11px;
+    }
+}

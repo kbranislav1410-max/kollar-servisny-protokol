@@ -162,8 +162,8 @@ function addDevice(): void
     $pdo = getDbConnection();
     
     $stmt = $pdo->prepare("
-        INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, poznamka)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO devices (location_id, nazov, typ, vyrobne_cislo, rok_vyroby, prevedenie, vyrobca, distribucia, servisne_stredisko, servisne_stredisko_tel, poznamka)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $stmt->execute([
@@ -171,6 +171,12 @@ function addDevice(): void
         post('nazov'),
         post('typ'),
         post('vyrobne_cislo'),
+        post('rok_vyroby', ''),
+        post('prevedenie', ''),
+        post('vyrobca', ''),
+        post('distribucia', ''),
+        post('servisne_stredisko', ''),
+        post('servisne_stredisko_tel', ''),
         post('poznamka', ''),
     ]);
     
@@ -233,6 +239,14 @@ function uploadPhoto(): void
     }
     
     $file = $_FILES['photo'];
+    $photoType = post('photo_type', 'general'); // 'before', 'after', or 'general'
+    $sectionKey = post('section_key', '');
+    
+    // Validácia photo_type
+    $allowedTypes = ['before', 'after', 'general'];
+    if (!in_array($photoType, $allowedTypes)) {
+        $photoType = 'general';
+    }
     
     // Kontrola veľkosti - použitie skutočnej veľkosti súboru
     $actualFileSize = filesize($file['tmp_name']);
@@ -253,8 +267,12 @@ function uploadPhoto(): void
     }
     
     // Generovanie názvu súboru
-    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = 'photo_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    // Sanitizácia prípony
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+        $ext = 'jpg';
+    }
+    $filename = 'photo_' . $photoType . '_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
     $filepath = PHOTOS_PATH . '/' . $filename;
     
     if (!is_dir(PHOTOS_PATH)) {
@@ -271,12 +289,19 @@ function uploadPhoto(): void
         $_SESSION['report']['photos'][] = [
             'filename' => $filename,
             'original_name' => $file['name'],
-            'size' => $file['size'],
+            'size' => $actualFileSize,
             'type' => $mimeType,
+            'photo_type' => $photoType,
+            'section_key' => $sectionKey,
         ];
         
         header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'filename' => $filename]);
+        echo json_encode([
+            'success' => true, 
+            'filename' => $filename,
+            'photo_type' => $photoType,
+            'section_key' => $sectionKey
+        ]);
     } else {
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Nepodarilo sa uložiť súbor']);
@@ -317,14 +342,88 @@ function finalizeReport(): void
     // Zariadenie - použijeme existujúce ID z výberu
     $deviceId = !empty($report['device_id']) ? (int)$report['device_id'] : null;
     
-    // Uloženie reportu
+    // Pripraviť sekcie JSON pre uloženie všetkých komponentov
+    $sekcieData = [
+        'klapky' => [
+            'typ' => $report['klapky_typ'] ?? '',
+            'privod' => $report['klapky_pr'] ?? '',
+            'odvod' => $report['klapky_od'] ?? ''
+        ],
+        'filtracia' => [
+            'typ' => $report['filtracia_typ'] ?? '',
+            'privod' => $report['filtracia_pr'] ?? '',
+            'odvod' => $report['filtracia_od'] ?? ''
+        ],
+        'recirkulacia' => [
+            'typ' => $report['recirkulacia_typ'] ?? '',
+            'privod' => $report['recirkulacia_pr'] ?? '',
+            'odvod' => $report['recirkulacia_od'] ?? ''
+        ],
+        'rekuperacia' => [
+            'typ' => $report['rekuperacia_typ'] ?? '',
+            'privod' => $report['rekuperacia_pr'] ?? '',
+            'odvod' => $report['rekuperacia_od'] ?? ''
+        ],
+        'ventilator' => [
+            'typ' => $report['ventilator_typ'] ?? '',
+            'privod' => $report['ventilator_pr'] ?? '',
+            'odvod' => $report['ventilator_od'] ?? ''
+        ],
+        'el_motor' => [
+            'typ' => $report['el_motor_typ'] ?? '',
+            'privod' => $report['el_motor_pr'] ?? '',
+            'odvod' => $report['el_motor_od'] ?? ''
+        ],
+        'remene' => [
+            'typ' => $report['remene_typ'] ?? '',
+            'privod' => $report['remene_pr'] ?? '',
+            'odvod' => $report['remene_od'] ?? ''
+        ],
+        'chladic' => [
+            'typ' => $report['chladic_typ'] ?? '',
+            'privod' => $report['chladic_pr'] ?? '',
+            'odvod' => $report['chladic_od'] ?? ''
+        ],
+        'ohrievac' => [
+            'typ' => $report['ohrievac_typ'] ?? '',
+            'privod' => $report['ohrievac_pr'] ?? '',
+            'odvod' => $report['ohrievac_od'] ?? ''
+        ],
+        'bypass_klapka' => [
+            'typ' => $report['bypass_klapka_typ'] ?? '',
+            'stav' => $report['bypass_klapka_stav'] ?? ''
+        ],
+        'bypass_servo' => [
+            'typ' => $report['bypass_servo_typ'] ?? '',
+            'stav' => $report['bypass_servo_stav'] ?? ''
+        ],
+        'termostat' => [
+            'typ' => $report['termostat_typ'] ?? '',
+            'stav' => $report['termostat_stav'] ?? ''
+        ],
+        'plynovy_horak' => [
+            'typ' => $report['plynovy_horak_typ'] ?? '',
+            'stav' => $report['plynovy_horak_stav'] ?? ''
+        ],
+        'mar' => [
+            'typ' => $report['mar_typ'] ?? '',
+            'stav' => $report['mar_stav'] ?? ''
+        ]
+    ];
+    
+    $sekcieJson = json_encode($sekcieData, JSON_UNESCAPED_UNICODE);
+    
+    // Uloženie reportu s rozšírenými poliami
     $stmt = $pdo->prepare("
         INSERT INTO reports (
             cislo_protokolu, customer_id, location_id, device_id, datum,
+            interne_oznacenie, objednavatel, servis_vykonal, skontroloval_prevzal,
+            sekcie_json,
             klapky_pr, klapky_od, filtracia_pr, filtracia_od, rekuperacia,
             ventilator, ohrievac, plynovy_horak, chladic, zvukovy_tlmic,
-            poznamka, podpis_technik, podpis_zakaznik, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
+            poznamka, odporucania, zhodnotenie,
+            podpis_technik, podpis_zakaznik, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
     ");
     
     $stmt->execute([
@@ -333,32 +432,41 @@ function finalizeReport(): void
         $report['location_id'] ?? null,
         $deviceId,
         $report['datum'] ?? date('Y-m-d'),
+        $report['interne_oznacenie'] ?? '',
+        $report['objednavatel'] ?? '',
+        $report['servis_vykonal'] ?? '',
+        $report['skontroloval_prevzal'] ?? '',
+        $sekcieJson,
         $report['klapky_pr'] ?? '',
         $report['klapky_od'] ?? '',
         $report['filtracia_pr'] ?? '',
         $report['filtracia_od'] ?? '',
-        $report['rekuperacia'] ?? '',
-        $report['ventilator'] ?? '',
-        $report['ohrievac'] ?? '',
-        $report['plynovy_horak'] ?? '',
-        $report['chladic'] ?? '',
-        $report['zvukovy_tlmic'] ?? '',
+        $report['rekuperacia_pr'] ?? '',
+        $report['ventilator_pr'] ?? '',
+        $report['ohrievac_pr'] ?? '',
+        $report['plynovy_horak_stav'] ?? '',
+        $report['chladic_pr'] ?? '',
+        '', // zvukovy_tlmic - legacy, not used in new form
         $report['poznamka'] ?? '',
+        $report['odporucania'] ?? '',
+        $report['zhodnotenie'] ?? '',
         $report['podpis_technik'] ?? '',
         $report['podpis_zakaznik'] ?? '',
     ]);
     
     $reportId = $pdo->lastInsertId();
     
-    // Uloženie príloh
+    // Uloženie príloh s photo_type a section_key
     if (!empty($report['photos'])) {
         $stmt = $pdo->prepare("
-            INSERT INTO attachments (report_id, file_path, file_name, file_type, file_size)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO attachments (report_id, section_key, photo_type, file_path, file_name, file_type, file_size)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         foreach ($report['photos'] as $photo) {
             $stmt->execute([
                 $reportId,
+                $photo['section_key'] ?? '',
+                $photo['photo_type'] ?? 'general',
                 'uploads/photos/' . $photo['filename'],
                 $photo['original_name'],
                 $photo['type'],
@@ -394,12 +502,15 @@ function generatePdf(int $reportId, string $cisloProtokolu): ?string
 {
     $pdo = getDbConnection();
     
-    // Načítanie dát reportu
+    // Načítanie dát reportu s rozšírenými device poliami
     $stmt = $pdo->prepare("
         SELECT r.*, 
                c.nazov_firmy, c.ico, c.dic, c.ic_dph, c.sidlo, c.kontakt_osoba, c.telefon, c.email,
                l.nazov as location_nazov, l.adresa as location_adresa, l.mesto as location_mesto,
-               d.nazov as device_nazov, d.typ as device_typ, d.vyrobne_cislo as device_vyrobne_cislo
+               d.nazov as device_nazov, d.typ as device_typ, d.vyrobne_cislo as device_vyrobne_cislo,
+               d.rok_vyroby as device_rok_vyroby, d.prevedenie as device_prevedenie,
+               d.vyrobca as device_vyrobca, d.distribucia as device_distribucia,
+               d.servisne_stredisko as device_servisne_stredisko, d.servisne_stredisko_tel as device_servisne_stredisko_tel
         FROM reports r
         LEFT JOIN customers c ON r.customer_id = c.id
         LEFT JOIN locations l ON r.location_id = l.id
@@ -413,10 +524,31 @@ function generatePdf(int $reportId, string $cisloProtokolu): ?string
         return null;
     }
     
-    // Načítanie príloh
-    $stmt = $pdo->prepare("SELECT * FROM attachments WHERE report_id = ?");
+    // Dekódovanie sekcie JSON
+    $sekcieData = [];
+    if (!empty($report['sekcie_json'])) {
+        $sekcieData = json_decode($report['sekcie_json'], true) ?: [];
+    }
+    
+    // Načítanie príloh - rozdelených podľa photo_type
+    $stmt = $pdo->prepare("SELECT * FROM attachments WHERE report_id = ? ORDER BY photo_type, created_at");
     $stmt->execute([$reportId]);
     $attachments = $stmt->fetchAll();
+    
+    // Rozdelenie príloh podľa typu
+    $photosBefore = [];
+    $photosAfter = [];
+    $photosGeneral = [];
+    foreach ($attachments as $att) {
+        $photoType = $att['photo_type'] ?? 'general';
+        if ($photoType === 'before') {
+            $photosBefore[] = $att;
+        } elseif ($photoType === 'after') {
+            $photosAfter[] = $att;
+        } else {
+            $photosGeneral[] = $att;
+        }
+    }
     
     // Generovanie HTML
     ob_start();
@@ -1068,16 +1200,52 @@ $pageView = $pageView ?? 'home';
                 <div class="collapsible-content">
                     <form id="newDeviceForm">
                         <div class="form-group">
-                            <input type="text" name="nazov" placeholder="Názov zariadenia *" required>
+                            <label>Názov zariadenia *</label>
+                            <input type="text" name="nazov" placeholder="Napr. Vzduchotechnická jednotka" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ / Model</label>
+                                <input type="text" name="typ" placeholder="Model zariadenia">
+                            </div>
+                            <div class="form-group">
+                                <label>Prevedenie</label>
+                                <input type="text" name="prevedenie" placeholder="Napr. Vnútorné/Vonkajšie">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Výrobné číslo</label>
+                                <input type="text" name="vyrobne_cislo" placeholder="S/N">
+                            </div>
+                            <div class="form-group">
+                                <label>Rok výroby</label>
+                                <input type="text" name="rok_vyroby" placeholder="Napr. 2020">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Výrobca</label>
+                                <input type="text" name="vyrobca" placeholder="Výrobca zariadenia">
+                            </div>
+                            <div class="form-group">
+                                <label>Distribúcia a techn. podpora pre SR</label>
+                                <input type="text" name="distribucia" placeholder="Distribútor v SR">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Servisné stredisko</label>
+                                <input type="text" name="servisne_stredisko" placeholder="Názov strediska">
+                            </div>
+                            <div class="form-group">
+                                <label>Tel. servisného strediska</label>
+                                <input type="tel" name="servisne_stredisko_tel" placeholder="+421...">
+                            </div>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="typ" placeholder="Typ zariadenia">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="vyrobne_cislo" placeholder="Výrobné číslo">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="poznamka" placeholder="Poznámka k zariadeniu"></textarea>
+                            <label>Poznámka k zariadeniu</label>
+                            <textarea name="poznamka" placeholder="Ďalšie poznámky"></textarea>
                         </div>
                         <button type="submit" class="btn btn-secondary">Pridať zariadenie</button>
                     </form>
@@ -1092,80 +1260,210 @@ $pageView = $pageView ?? 'home';
             </div>
         </div>
 
-        <!-- Step 3: Komponenty -->
+        <!-- Step 3: Komponenty a detaily -->
         <div class="step <?= $currentStep === 3 ? 'active' : '' ?>" id="step-3">
-            <h2>Krok 4: Stav komponentov</h2>
+            <h2>Krok 4: Servisné údaje a stav komponentov</h2>
             
             <form id="componentsForm">
-                <div class="form-group">
-                    <input type="date" name="datum" value="<?= date('Y-m-d') ?>">
-                    <label>Dátum servisu</label>
+                <!-- Základné údaje servisu -->
+                <div class="section-header">
+                    <h3>📅 Základné údaje</h3>
                 </div>
-
-                <h3>Klapky</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <input type="text" name="klapky_pr" placeholder="Stav - prívod">
+                        <label>Dátum servisu</label>
+                        <input type="date" name="datum" value="<?= date('Y-m-d') ?>">
                     </div>
                     <div class="form-group">
-                        <input type="text" name="klapky_od" placeholder="Stav - odvod">
+                        <label>Interné označenie zariadenia</label>
+                        <input type="text" name="interne_oznacenie" placeholder="Napr. VZT-01">
                     </div>
                 </div>
-
-                <h3>Filtrácia</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <input type="text" name="filtracia_pr" placeholder="Stav - prívod">
+                        <label>Servis vykonal (meno technika)</label>
+                        <input type="text" name="servis_vykonal" placeholder="Meno a priezvisko technika">
                     </div>
                     <div class="form-group">
-                        <input type="text" name="filtracia_od" placeholder="Stav - odvod">
+                        <label>Objednávateľ</label>
+                        <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
                     </div>
                 </div>
 
-                <h3>Ostatné komponenty</h3>
-                <div class="form-group">
-                    <input type="text" name="rekuperacia" placeholder="Stav rekuperácie">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="ventilator" placeholder="Stav ventilátora">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="ohrievac" placeholder="Stav ohrievača">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="plynovy_horak" placeholder="Stav plynového horáka">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="chladic" placeholder="Stav chladiča">
-                </div>
-                <div class="form-group">
-                    <input type="text" name="zvukovy_tlmic" placeholder="Stav zvukového tlmiča">
+                <!-- Stav komponentov - tabuľkový formát -->
+                <div class="section-header">
+                    <h3>🔧 Stav komponentov</h3>
+                    <p class="help-text">Pre každý komponent vyplňte popis/typ a zistený stav pre prívod a odvod.</p>
                 </div>
 
-                <h3>Poznámka</h3>
-                <div class="form-group">
-                    <textarea name="poznamka" placeholder="Poznámka k servisu"></textarea>
+                <div class="components-table-wrapper">
+                    <table class="components-input-table">
+                        <thead>
+                            <tr>
+                                <th class="col-component">Komponent</th>
+                                <th class="col-type">Popis / Typ</th>
+                                <th class="col-state">Stav prívod</th>
+                                <th class="col-state">Stav odvod</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Klapky</strong></td>
+                                <td><input type="text" name="klapky_typ" placeholder="Typ klapiek"></td>
+                                <td><input type="text" name="klapky_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="klapky_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Filtrácia</strong></td>
+                                <td><input type="text" name="filtracia_typ" placeholder="Trieda filtra"></td>
+                                <td><input type="text" name="filtracia_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="filtracia_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Recirkulácia</strong></td>
+                                <td><input type="text" name="recirkulacia_typ" placeholder="Typ"></td>
+                                <td><input type="text" name="recirkulacia_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="recirkulacia_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rekuperácia</strong></td>
+                                <td><input type="text" name="rekuperacia_typ" placeholder="Typ výmenníka"></td>
+                                <td><input type="text" name="rekuperacia_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="rekuperacia_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ventilátor</strong></td>
+                                <td><input type="text" name="ventilator_typ" placeholder="Typ"></td>
+                                <td><input type="text" name="ventilator_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="ventilator_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>El. motor</strong></td>
+                                <td><input type="text" name="el_motor_typ" placeholder="Výkon/Typ"></td>
+                                <td><input type="text" name="el_motor_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="el_motor_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Klinové remeňe</strong></td>
+                                <td><input type="text" name="remene_typ" placeholder="Typ/Počet"></td>
+                                <td><input type="text" name="remene_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="remene_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Chladič</strong></td>
+                                <td><input type="text" name="chladic_typ" placeholder="Typ chladiča"></td>
+                                <td><input type="text" name="chladic_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="chladic_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ohrievač</strong></td>
+                                <td><input type="text" name="ohrievac_typ" placeholder="Typ ohrievača"></td>
+                                <td><input type="text" name="ohrievac_pr" placeholder="Zistený stav"></td>
+                                <td><input type="text" name="ohrievac_od" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Klapka bypassu</strong></td>
+                                <td><input type="text" name="bypass_klapka_typ" placeholder="Typ"></td>
+                                <td colspan="2"><input type="text" name="bypass_klapka_stav" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Servopohon bypassu</strong></td>
+                                <td><input type="text" name="bypass_servo_typ" placeholder="Typ"></td>
+                                <td colspan="2"><input type="text" name="bypass_servo_stav" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Termostat</strong></td>
+                                <td><input type="text" name="termostat_typ" placeholder="Typ"></td>
+                                <td colspan="2"><input type="text" name="termostat_stav" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Plynový horák</strong></td>
+                                <td><input type="text" name="plynovy_horak_typ" placeholder="Typ"></td>
+                                <td colspan="2"><input type="text" name="plynovy_horak_stav" placeholder="Zistený stav"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>MaR systém</strong></td>
+                                <td><input type="text" name="mar_typ" placeholder="Typ/Výrobca"></td>
+                                <td colspan="2"><input type="text" name="mar_stav" placeholder="Zistený stav"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <h3>📷 Fotografie</h3>
-                <div class="photo-section">
-                    <div class="photo-buttons">
-                        <button type="button" class="btn btn-camera" onclick="openCamera()">
-                            <span class="camera-icon">📸</span>
-                            Odfotiť zariadenie
-                        </button>
-                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
-                        
-                        <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInput').click()">
-                            <span class="gallery-icon">🖼️</span>
-                            Vybrať z galérie
-                        </button>
-                        <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                <!-- Poznámky a odporúčania -->
+                <div class="section-header">
+                    <h3>📝 Poznámky a odporúčania</h3>
+                </div>
+                <div class="form-group">
+                    <label>Zhodnotenie stavu</label>
+                    <textarea name="zhodnotenie" placeholder="Celkové zhodnotenie stavu zariadenia..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Odporúčania</label>
+                    <textarea name="odporucania" placeholder="Odporúčania pre zákazníka, plán údržby..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Poznámka</label>
+                    <textarea name="poznamka" placeholder="Ďalšie poznámky k servisu..." rows="3"></textarea>
+                </div>
+
+                <!-- Fotografie pred/po -->
+                <div class="section-header">
+                    <h3>📷 Fotografie</h3>
+                    <p class="help-text">Nahrajte fotografie zariadenia - pred servisom a po servise.</p>
+                </div>
+                
+                <div class="photos-grid-upload">
+                    <!-- Fotografie PRED servisom -->
+                    <div class="photo-upload-section">
+                        <h4>🔴 Fotografie PRED servisom</h4>
+                        <div class="photo-section" data-photo-type="before">
+                            <div class="photo-buttons">
+                                <button type="button" class="btn btn-camera" onclick="openCameraForType('before')">
+                                    <span class="camera-icon">📸</span>
+                                    Odfotiť
+                                </button>
+                                <input type="file" id="cameraInputBefore" accept="image/*" capture="environment" style="display: none;" data-photo-type="before">
+                                
+                                <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputBefore').click()">
+                                    <span class="gallery-icon">🖼️</span>
+                                    Vybrať z galérie
+                                </button>
+                                <input type="file" id="galleryInputBefore" accept="image/*" multiple style="display: none;" data-photo-type="before">
+                            </div>
+                            <div id="photoPreviewBefore" class="photo-preview"></div>
+                            <div id="photoCountBefore" class="photo-count"></div>
+                        </div>
                     </div>
-                    <p class="help-text">Kliknite na "Odfotiť zariadenie" pre spustenie fotoaparátu alebo "Vybrať z galérie" pre nahratie existujúcich fotiek.</p>
-                    <div id="photoPreview" class="photo-preview"></div>
-                    <div id="photoCount" class="photo-count"></div>
+                    
+                    <!-- Fotografie PO servise -->
+                    <div class="photo-upload-section">
+                        <h4>🟢 Fotografie PO servise</h4>
+                        <div class="photo-section" data-photo-type="after">
+                            <div class="photo-buttons">
+                                <button type="button" class="btn btn-camera" onclick="openCameraForType('after')">
+                                    <span class="camera-icon">📸</span>
+                                    Odfotiť
+                                </button>
+                                <input type="file" id="cameraInputAfter" accept="image/*" capture="environment" style="display: none;" data-photo-type="after">
+                                
+                                <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputAfter').click()">
+                                    <span class="gallery-icon">🖼️</span>
+                                    Vybrať z galérie
+                                </button>
+                                <input type="file" id="galleryInputAfter" accept="image/*" multiple style="display: none;" data-photo-type="after">
+                            </div>
+                            <div id="photoPreviewAfter" class="photo-preview"></div>
+                            <div id="photoCountAfter" class="photo-count"></div>
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- Legacy photo inputs for backward compatibility -->
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                <div id="photoPreview" class="photo-preview" style="display: none;"></div>
+                <div id="photoCount" class="photo-count" style="display: none;"></div>
             </form>
 
             <div class="navigation">
