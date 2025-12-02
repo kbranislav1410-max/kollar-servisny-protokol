@@ -750,6 +750,15 @@ switch ($action) {
     case 'api_customer_reports':
         getCustomerReports();
         break;
+    case 'api_location_detail':
+        getLocationDetail();
+        break;
+    case 'api_device_detail':
+        getDeviceDetail();
+        break;
+    case 'api_device_reports':
+        getDeviceReports();
+        break;
     case 'api_stats':
         getStats();
         break;
@@ -770,6 +779,12 @@ switch ($action) {
         break;
     case 'customer_detail':
         $pageView = 'customer_detail';
+        break;
+    case 'location_detail':
+        $pageView = 'location_detail';
+        break;
+    case 'device_detail':
+        $pageView = 'device_detail';
         break;
     case 'home':
     default:
@@ -876,6 +891,121 @@ function getStats(): void
     exit;
 }
 
+function getLocationDetail(): void
+{
+    $locationId = (int)get('location_id', 0);
+    
+    $pdo = getDbConnection();
+    
+    // Prevádzka
+    $stmt = $pdo->prepare("
+        SELECT l.*, c.nazov_firmy as customer_name, c.id as customer_id
+        FROM locations l
+        LEFT JOIN customers c ON l.customer_id = c.id
+        WHERE l.id = ?
+    ");
+    $stmt->execute([$locationId]);
+    $location = $stmt->fetch();
+    
+    if (!$location) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Location not found']);
+        exit;
+    }
+    
+    // Zariadenia
+    $stmt = $pdo->prepare("SELECT * FROM devices WHERE location_id = ? ORDER BY nazov ASC");
+    $stmt->execute([$locationId]);
+    $devices = $stmt->fetchAll();
+    
+    // Počet protokolov pre každé zariadenie
+    foreach ($devices as &$device) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM reports WHERE device_id = ?");
+        $stmt->execute([$device['id']]);
+        $device['reports_count'] = $stmt->fetch()['count'];
+    }
+    
+    // Protokoly pre túto prevádzku
+    $stmt = $pdo->prepare("
+        SELECT r.*, d.nazov as device_name
+        FROM reports r
+        LEFT JOIN devices d ON r.device_id = d.id
+        WHERE r.location_id = ?
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->execute([$locationId]);
+    $reports = $stmt->fetchAll();
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'location' => $location,
+        'devices' => $devices,
+        'reports' => $reports
+    ]);
+    exit;
+}
+
+function getDeviceDetail(): void
+{
+    $deviceId = (int)get('device_id', 0);
+    
+    $pdo = getDbConnection();
+    
+    // Zariadenie
+    $stmt = $pdo->prepare("
+        SELECT d.*, l.nazov as location_name, l.adresa as location_adresa, l.mesto as location_mesto,
+               c.nazov_firmy as customer_name, c.id as customer_id
+        FROM devices d
+        LEFT JOIN locations l ON d.location_id = l.id
+        LEFT JOIN customers c ON l.customer_id = c.id
+        WHERE d.id = ?
+    ");
+    $stmt->execute([$deviceId]);
+    $device = $stmt->fetch();
+    
+    if (!$device) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Device not found']);
+        exit;
+    }
+    
+    // Protokoly pre toto zariadenie
+    $stmt = $pdo->prepare("
+        SELECT r.*
+        FROM reports r
+        WHERE r.device_id = ?
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->execute([$deviceId]);
+    $reports = $stmt->fetchAll();
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'device' => $device,
+        'reports' => $reports
+    ]);
+    exit;
+}
+
+function getDeviceReports(): void
+{
+    $deviceId = (int)get('device_id', 0);
+    
+    $pdo = getDbConnection();
+    $stmt = $pdo->prepare("
+        SELECT r.*, l.nazov as location_name
+        FROM reports r
+        LEFT JOIN locations l ON r.location_id = l.id
+        WHERE r.device_id = ?
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->execute([$deviceId]);
+    
+    header('Content-Type: application/json');
+    echo json_encode($stmt->fetchAll());
+    exit;
+}
+
 // Získanie aktuálnych dát pre zobrazenie
 $currentStep = $_SESSION['current_step'] ?? 0;
 $reportData = $_SESSION['report'] ?? [];
@@ -896,7 +1026,7 @@ $pageView = $pageView ?? 'home';
         <ul>
             <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
             <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
-            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' ? 'active' : '' ?>">Zákazníci</a></li>
+            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' ? 'active' : '' ?>">Zákazníci</a></li>
         </ul>
     </nav>
 
@@ -1036,12 +1166,13 @@ $pageView = $pageView ?? 'home';
             </div>
             
             <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('locations')">Prevádzky</button>
-                <button class="tab-btn" onclick="showTab('reports')">Protokoly</button>
+                <button class="tab-btn active" onclick="showTab('locations')">Prevádzky a zariadenia</button>
+                <button class="tab-btn" onclick="showTab('reports')">Všetky protokoly</button>
             </div>
             
             <div class="tab-content active" id="tab-locations">
                 <h3>Prevádzky a zariadenia</h3>
+                <p class="help-text">Kliknite na prevádzku alebo zariadenie pre zobrazenie detailov a protokolov.</p>
                 <div id="locationsContent">
                     <p class="loading">Načítavam...</p>
                 </div>
@@ -1052,6 +1183,57 @@ $pageView = $pageView ?? 'home';
                 <div id="reportsContent">
                     <p class="loading">Načítavam...</p>
                 </div>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'location_detail'): ?>
+        <!-- LOCATION DETAIL -->
+        <div class="location-detail-page">
+            <div class="page-header">
+                <a href="#" id="backToCustomerLink" class="back-link">← Späť na zákazníka</a>
+                <h1 id="locationName">Načítavam...</h1>
+            </div>
+            
+            <div class="location-info" id="locationInfo">
+                <p class="loading">Načítavam údaje prevádzky...</p>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showLocationTab('devices')">Zariadenia</button>
+                <button class="tab-btn" onclick="showLocationTab('reports')">Protokoly prevádzky</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-devices">
+                <h3>Zariadenia na prevádzke</h3>
+                <p class="help-text">Kliknite na zariadenie pre zobrazenie protokolov.</p>
+                <div id="devicesContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tab-reports">
+                <h3>Protokoly pre túto prevádzku</h3>
+                <div id="locationReportsContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'device_detail'): ?>
+        <!-- DEVICE DETAIL -->
+        <div class="device-detail-page">
+            <div class="page-header">
+                <a href="#" id="backToLocationLink" class="back-link">← Späť na prevádzku</a>
+                <h1 id="deviceName">Načítavam...</h1>
+            </div>
+            
+            <div class="device-info" id="deviceInfo">
+                <p class="loading">Načítavam údaje zariadenia...</p>
+            </div>
+            
+            <h3>Protokoly pre toto zariadenie</h3>
+            <div id="deviceReportsContent">
+                <p class="loading">Načítavam...</p>
             </div>
         </div>
         
@@ -1183,9 +1365,9 @@ $pageView = $pageView ?? 'home';
             <h2>Krok 3: Výber/pridanie zariadenia</h2>
             
             <div class="form-group">
-                <label for="device_select">Existujúce zariadenie na prevádzke:</label>
-                <select id="device_select" name="device_id">
-                    <option value="">-- Vyberte zariadenie (voliteľné) --</option>
+                <label for="device_select">Existujúce zariadenie na prevádzke: *</label>
+                <select id="device_select" name="device_id" required>
+                    <option value="">-- Vyberte zariadenie --</option>
                 </select>
             </div>
 
@@ -1248,7 +1430,7 @@ $pageView = $pageView ?? 'home';
                 </div>
             </div>
 
-            <p class="help-text">Zariadenie je voliteľné. Ak nechcete vybrať ani pridať zariadenie, pokračujte ďalej.</p>
+            <p class="help-text required-note">Zariadenie je povinné. Vyberte existujúce zariadenie alebo pridajte nové.</p>
 
             <div class="navigation">
                 <button type="button" class="btn btn-outline" onclick="prevStep(2)">Späť</button>
@@ -1574,6 +1756,18 @@ $pageView = $pageView ?? 'home';
                 if (customerId) {
                     loadCustomerDetail(customerId);
                 }
+            } else if (window.pageView === 'location_detail') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const locationId = urlParams.get('location_id');
+                if (locationId) {
+                    loadLocationDetail(locationId);
+                }
+            } else if (window.pageView === 'device_detail') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const deviceId = urlParams.get('device_id');
+                if (deviceId) {
+                    loadDeviceDetail(deviceId);
+                }
             }
         });
         
@@ -1687,32 +1881,47 @@ $pageView = $pageView ?? 'home';
                     infoHtml += '</div>';
                     document.getElementById('customerInfo').innerHTML = infoHtml;
                     
-                    // Prevádzky a zariadenia
+                    // Prevádzky a zariadenia - s klikateľnými kartami
                     let locHtml = '';
                     if (data.locations.length === 0) {
                         locHtml = '<p class="no-data">Žiadne prevádzky</p>';
                     } else {
+                        locHtml = '<div class="expandable-list">';
                         data.locations.forEach(loc => {
                             locHtml += `
-                                <div class="location-card">
-                                    <h4>${escapeHtml(loc.nazov)}</h4>
-                                    <p>${loc.adresa || ''} ${loc.mesto || ''}</p>
-                                    ${loc.poznamka ? '<p class="note">' + escapeHtml(loc.poznamka) + '</p>' : ''}
-                                    <div class="devices-list">
-                                        <h5>Zariadenia:</h5>`;
+                                <div class="expandable-card location-expandable">
+                                    <div class="card-header clickable" onclick="window.location.href='index.php?action=location_detail&location_id=${loc.id}'">
+                                        <div class="card-title">
+                                            <h4>${escapeHtml(loc.nazov)}</h4>
+                                            <span class="card-subtitle">${loc.adresa || ''} ${loc.mesto || ''}</span>
+                                        </div>
+                                        <div class="card-meta">
+                                            <span class="badge">${loc.devices.length} zariadení</span>
+                                            <span class="arrow">→</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-devices">`;
                             
                             if (loc.devices.length === 0) {
-                                locHtml += '<p class="no-data small">Žiadne zariadenia</p>';
+                                locHtml += '<p class="no-data small">Žiadne zariadenia na tejto prevádzke</p>';
                             } else {
-                                locHtml += '<ul>';
+                                locHtml += '<div class="devices-grid">';
                                 loc.devices.forEach(d => {
-                                    locHtml += `<li>${escapeHtml(d.nazov)} ${d.typ ? '(' + escapeHtml(d.typ) + ')' : ''}</li>`;
+                                    locHtml += `
+                                        <div class="device-mini-card clickable" onclick="event.stopPropagation(); window.location.href='index.php?action=device_detail&device_id=${d.id}'">
+                                            <div class="device-info">
+                                                <strong>${escapeHtml(d.nazov)}</strong>
+                                                ${d.typ ? '<span class="device-type">' + escapeHtml(d.typ) + '</span>' : ''}
+                                            </div>
+                                            <span class="arrow">→</span>
+                                        </div>`;
                                 });
-                                locHtml += '</ul>';
+                                locHtml += '</div>';
                             }
                             
                             locHtml += '</div></div>';
                         });
+                        locHtml += '</div>';
                     }
                     document.getElementById('locationsContent').innerHTML = locHtml;
                 })
@@ -1735,12 +1944,141 @@ $pageView = $pageView ?? 'home';
                                 <td>${r.datum}</td>
                                 <td>${r.location_name || '-'}</td>
                                 <td>${r.device_name || '-'}</td>
-                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">📄 PDF</a></td>
+                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
                             </tr>`;
                         });
                         html += '</tbody></table></div>';
                     }
                     document.getElementById('reportsContent').innerHTML = html;
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        // Location detail funkcie
+        function loadLocationDetail(locationId) {
+            fetch('index.php?action=api_location_detail&location_id=' + locationId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Prevádzka nebola nájdená');
+                        return;
+                    }
+                    
+                    const loc = data.location;
+                    document.getElementById('locationName').textContent = loc.nazov;
+                    document.getElementById('backToCustomerLink').href = 'index.php?action=customer_detail&customer_id=' + loc.customer_id;
+                    
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += `<div class="info-item"><strong>Zákazník:</strong> ${loc.customer_name || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Adresa:</strong> ${loc.adresa || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Mesto:</strong> ${loc.mesto || '-'}</div>`;
+                    if (loc.poznamka) {
+                        infoHtml += `<div class="info-item full-width"><strong>Poznámka:</strong> ${loc.poznamka}</div>`;
+                    }
+                    infoHtml += '</div>';
+                    document.getElementById('locationInfo').innerHTML = infoHtml;
+                    
+                    // Zariadenia
+                    let devHtml = '';
+                    if (data.devices.length === 0) {
+                        devHtml = '<p class="no-data">Žiadne zariadenia na tejto prevádzke</p>';
+                    } else {
+                        devHtml = '<div class="devices-list-cards">';
+                        data.devices.forEach(d => {
+                            devHtml += `
+                                <div class="device-card clickable" onclick="window.location.href='index.php?action=device_detail&device_id=${d.id}'">
+                                    <div class="device-card-content">
+                                        <h4>${escapeHtml(d.nazov)}</h4>
+                                        <p>${d.typ || ''} ${d.vyrobne_cislo ? '| S/N: ' + escapeHtml(d.vyrobne_cislo) : ''}</p>
+                                        ${d.vyrobca ? '<p class="small">Výrobca: ' + escapeHtml(d.vyrobca) + '</p>' : ''}
+                                    </div>
+                                    <div class="device-card-meta">
+                                        <span class="badge">${d.reports_count || 0} protokolov</span>
+                                        <span class="arrow">→</span>
+                                    </div>
+                                </div>`;
+                        });
+                        devHtml += '</div>';
+                    }
+                    document.getElementById('devicesContent').innerHTML = devHtml;
+                    
+                    // Protokoly prevádzky
+                    let repHtml = '';
+                    if (data.reports.length === 0) {
+                        repHtml = '<p class="no-data">Žiadne protokoly pre túto prevádzku</p>';
+                    } else {
+                        repHtml = '<div class="reports-table"><table>';
+                        repHtml += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Zariadenie</th><th>Akcia</th></tr></thead>';
+                        repHtml += '<tbody>';
+                        data.reports.forEach(r => {
+                            repHtml += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.device_name || '-'}</td>
+                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
+                            </tr>`;
+                        });
+                        repHtml += '</tbody></table></div>';
+                    }
+                    document.getElementById('locationReportsContent').innerHTML = repHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function showLocationTab(tabName) {
+            document.querySelectorAll('.location-detail-page .tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.location-detail-page .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Device detail funkcie
+        function loadDeviceDetail(deviceId) {
+            fetch('index.php?action=api_device_detail&device_id=' + deviceId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Zariadenie nebolo nájdené');
+                        return;
+                    }
+                    
+                    const d = data.device;
+                    document.getElementById('deviceName').textContent = d.nazov;
+                    document.getElementById('backToLocationLink').href = 'index.php?action=location_detail&location_id=' + d.location_id;
+                    
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += `<div class="info-item"><strong>Zákazník:</strong> ${d.customer_name || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Prevádzka:</strong> ${d.location_name || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Typ/Model:</strong> ${d.typ || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Výrobné číslo:</strong> ${d.vyrobne_cislo || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Rok výroby:</strong> ${d.rok_vyroby || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Prevedenie:</strong> ${d.prevedenie || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Výrobca:</strong> ${d.vyrobca || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Distribúcia SR:</strong> ${d.distribucia || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Servisné stredisko:</strong> ${d.servisne_stredisko || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Tel. servisu:</strong> ${d.servisne_stredisko_tel || '-'}</div>`;
+                    infoHtml += '</div>';
+                    document.getElementById('deviceInfo').innerHTML = infoHtml;
+                    
+                    // Protokoly zariadenia
+                    let repHtml = '';
+                    if (data.reports.length === 0) {
+                        repHtml = '<p class="no-data">Žiadne protokoly pre toto zariadenie</p>';
+                    } else {
+                        repHtml = '<div class="reports-table"><table>';
+                        repHtml += '<thead><tr><th>Číslo protokolu</th><th>Dátum</th><th>Servis vykonal</th><th>Akcia</th></tr></thead>';
+                        repHtml += '<tbody>';
+                        data.reports.forEach(r => {
+                            repHtml += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.servis_vykonal || '-'}</td>
+                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
+                            </tr>`;
+                        });
+                        repHtml += '</tbody></table></div>';
+                    }
+                    document.getElementById('deviceReportsContent').innerHTML = repHtml;
                 })
                 .catch(err => console.error('Chyba:', err));
         }

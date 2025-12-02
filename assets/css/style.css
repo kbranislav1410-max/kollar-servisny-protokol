@@ -1380,3 +1380,224 @@ select {
         font-size: 11px;
     }
 }
+
+/* Expandable cards for locations and devices */
+.expandable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.expandable-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.expandable-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.expandable-card .card-header.clickable {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.expandable-card .card-header.clickable:hover {
+    background: #e9ecef;
+}
+
+.expandable-card .card-title h4 {
+    font-size: 16px;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.expandable-card .card-subtitle {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.expandable-card .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.expandable-card .badge {
+    background: #3498db;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.expandable-card .arrow {
+    color: #3498db;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.expandable-card .card-devices {
+    padding: 15px 20px;
+}
+
+/* Devices grid inside location card */
+.devices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.device-mini-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.device-mini-card.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-mini-card.clickable:hover {
+    background: #e9ecef;
+    border-color: #3498db;
+}
+
+.device-mini-card .device-info strong {
+    display: block;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.device-mini-card .device-type {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.device-mini-card .arrow {
+    color: #3498db;
+    font-size: 14px;
+}
+
+/* Device cards list on location detail page */
+.devices-list-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.device-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+}
+
+.device-card.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-card.clickable:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.device-card-content h4 {
+    font-size: 16px;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.device-card-content p {
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-bottom: 2px;
+}
+
+.device-card-content p.small {
+    font-size: 12px;
+}
+
+.device-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.device-card-meta .badge {
+    background: #27ae60;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+/* Location detail page */
+.location-detail-page,
+.device-detail-page {
+    max-width: 900px;
+}
+
+.location-detail-page .info-grid,
+.device-detail-page .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.location-detail-page .info-item,
+.device-detail-page .info-item {
+    font-size: 14px;
+}
+
+.location-detail-page .info-item.full-width,
+.device-detail-page .info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Required note styling */
+.required-note {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+/* Clickable general styling */
+.clickable {
+    cursor: pointer;
+}
+
+/* Badge variations */
+.badge.badge-success {
+    background: #27ae60;
+}
+
+.badge.badge-info {
+    background: #3498db;
+}
+
+.badge.badge-warning {
+    background: #f39c12;
+}

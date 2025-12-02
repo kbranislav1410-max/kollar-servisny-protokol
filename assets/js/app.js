@@ -104,7 +104,7 @@ function loadDevices(locationId) {
             const select = document.getElementById('device_select');
             if (!select) return;
             
-            select.innerHTML = '<option value="">-- Vyberte zariadenie (voliteľné) --</option>';
+            select.innerHTML = '<option value="">-- Vyberte zariadenie --</option>';
             devices.forEach(d => {
                 const option = document.createElement('option');
                 option.value = d.id;
@@ -665,7 +665,12 @@ function escapeHtml(text) {
  * Prechod na ďalší krok
  */
 function nextStep(currentStepIndex) {
-    // Validácia a uloženie dát aktuálneho kroku
+    // Validácia dát aktuálneho kroku
+    if (!validateStep(currentStepIndex)) {
+        return;
+    }
+    
+    // Zbieranie dát aktuálneho kroku
     const stepData = collectStepData(currentStepIndex);
     
     // Uloženie do session na serveri
@@ -699,6 +704,38 @@ function nextStep(currentStepIndex) {
         }
     })
     .catch(err => console.error('Chyba:', err));
+}
+
+/**
+ * Validácia dát aktuálneho kroku
+ */
+function validateStep(stepIndex) {
+    switch (stepIndex) {
+        case 0: // Zákazník
+            const customerSelect = document.getElementById('customer_select');
+            if (!customerSelect || !customerSelect.value) {
+                alert('Prosím vyberte zákazníka');
+                return false;
+            }
+            break;
+            
+        case 1: // Prevádzka
+            const locationSelect = document.getElementById('location_select');
+            if (!locationSelect || !locationSelect.value) {
+                alert('Prosím vyberte prevádzku');
+                return false;
+            }
+            break;
+            
+        case 2: // Zariadenie - POVINNÉ
+            const deviceSelect = document.getElementById('device_select');
+            if (!deviceSelect || !deviceSelect.value) {
+                alert('Prosím vyberte zariadenie. Zariadenie je povinné pre vytvorenie protokolu.');
+                return false;
+            }
+            break;
+    }
+    return true;
 }
 
 /**
@@ -820,7 +857,7 @@ function updateSummary() {
             <h4>Zariadenie</h4>
             <div class="summary-row">
                 <span class="summary-label">Zariadenie ID:</span>
-                <span class="summary-value">${data.device_id || 'Nevybrané (voliteľné)'}</span>
+                <span class="summary-value">${data.device_id || 'Nevybrané'}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">Interné označenie:</span>
