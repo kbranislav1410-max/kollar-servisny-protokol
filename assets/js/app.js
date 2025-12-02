@@ -770,8 +770,16 @@ function collectStepData(stepIndex) {
             }
             break;
             
-        case 4: // Podpisy
+        case 4: // Podpisy a odovzdanie
             // Podpisy sa ukladajú priamo pri kliknutí na "Uložiť podpis"
+            // Ale nové textové polia treba uložiť
+            const signaturesForm = document.getElementById('signaturesForm');
+            if (signaturesForm) {
+                const formData = new FormData(signaturesForm);
+                for (const [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+            }
             break;
     }
     

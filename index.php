@@ -1474,31 +1474,47 @@ $pageView = $pageView ?? 'home';
 
         <!-- Step 4: Podpisy -->
         <div class="step <?= $currentStep === 4 ? 'active' : '' ?>" id="step-4">
-            <h2>Krok 5: Podpisy</h2>
+            <h2>Krok 5: Podpisy a odovzdanie</h2>
             
-            <div class="signature-section">
-                <h3>Podpis technika</h3>
-                <div class="signature-container">
-                    <canvas id="signatureTechnik" width="400" height="200"></canvas>
-                    <div class="signature-controls">
-                        <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('Technik')">Vymazať</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="saveSignature('technik')">Uložiť podpis</button>
+            <form id="signaturesForm">
+                <!-- Miesto a dátum -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Miesto a dátum odovzdania</label>
+                        <input type="text" name="miesto_datum" placeholder="Napr. Bratislava, <?= date('d.m.Y') ?>">
                     </div>
-                    <span id="signatureTechnikStatus" class="status-text"></span>
                 </div>
-            </div>
+                
+                <!-- Technik -->
+                <div class="signature-section">
+                    <h3>✏️ Servisný technik</h3>
+                    <div class="signature-container">
+                        <canvas id="signatureTechnik" width="400" height="200"></canvas>
+                        <div class="signature-controls">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('Technik')">Vymazať</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="saveSignature('technik')">Uložiť podpis</button>
+                        </div>
+                        <span id="signatureTechnikStatus" class="status-text"></span>
+                    </div>
+                </div>
 
-            <div class="signature-section">
-                <h3>Podpis zákazníka</h3>
-                <div class="signature-container">
-                    <canvas id="signatureZakaznik" width="400" height="200"></canvas>
-                    <div class="signature-controls">
-                        <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('Zakaznik')">Vymazať</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="saveSignature('zakaznik')">Uložiť podpis</button>
+                <!-- Zákazník -->
+                <div class="signature-section">
+                    <h3>✏️ Skontroloval a prevzal (zákazník)</h3>
+                    <div class="form-group">
+                        <label>Meno a priezvisko zákazníka</label>
+                        <input type="text" name="skontroloval_prevzal" placeholder="Meno osoby, ktorá prevzala prácu">
                     </div>
-                    <span id="signatureZakaznikStatus" class="status-text"></span>
+                    <div class="signature-container">
+                        <canvas id="signatureZakaznik" width="400" height="200"></canvas>
+                        <div class="signature-controls">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('Zakaznik')">Vymazať</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="saveSignature('zakaznik')">Uložiť podpis</button>
+                        </div>
+                        <span id="signatureZakaznikStatus" class="status-text"></span>
+                    </div>
                 </div>
-            </div>
+            </form>
 
             <div class="navigation">
                 <button type="button" class="btn btn-outline" onclick="prevStep(4)">Späť</button>
