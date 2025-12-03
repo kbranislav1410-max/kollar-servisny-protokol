@@ -2324,7 +2324,7 @@ $pageView = $pageView ?? 'home';
             </form>
 
             <div class="navigation">
-                <button type="button" class="btn btn-outline" onclick="prevStep(4)">Späť</button>
+                <button type="button" class="btn btn-outline" onclick="prevStep(6)">Späť</button>
                 <button type="button" class="btn btn-primary" onclick="nextStep(6)">Ďalej</button>
             </div>
         </div>
