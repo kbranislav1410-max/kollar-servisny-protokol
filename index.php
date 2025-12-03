@@ -1415,7 +1415,11 @@ $pageView = $pageView ?? 'home';
                             </div>
                             <div class="form-group">
                                 <label>Prevedenie</label>
-                                <input type="text" name="prevedenie" placeholder="Napr. Vnútorné/Vonkajšie">
+                                <select name="prevedenie">
+                                    <option value="">-- Vyberte prevedenie --</option>
+                                    <option value="interierove">Interiérové</option>
+                                    <option value="exterierove">Exteriérové</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-row">
@@ -1489,104 +1493,562 @@ $pageView = $pageView ?? 'home';
                     <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
                 </div>
 
-                <!-- Stav komponentov - tabuľkový formát -->
+                <!-- Komponenty s prívodom aj odvodom -->
                 <div class="section-header">
-                    <h3>Stav komponentov</h3>
-                    <p class="help-text">Pre každý komponent vyplňte popis/typ a zistený stav pre prívod a odvod.</p>
+                    <h3>Komponenty - PRÍVOD aj ODVOD</h3>
+                    <p class="help-text">Pre každý komponent vyplňte konfiguráciu a stav pre prívod aj odvod.</p>
                 </div>
 
-                <div class="components-table-wrapper">
-                    <table class="components-input-table">
-                        <thead>
-                            <tr>
-                                <th class="col-component">Komponent</th>
-                                <th class="col-type">Popis / Typ</th>
-                                <th class="col-state">Stav prívod</th>
-                                <th class="col-state">Stav odvod</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Klapky</strong></td>
-                                <td><input type="text" name="klapky_typ" placeholder="Typ klapiek"></td>
-                                <td><input type="text" name="klapky_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="klapky_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Filtrácia</strong></td>
-                                <td><input type="text" name="filtracia_typ" placeholder="Trieda filtra"></td>
-                                <td><input type="text" name="filtracia_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="filtracia_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Recirkulácia</strong></td>
-                                <td><input type="text" name="recirkulacia_typ" placeholder="Typ"></td>
-                                <td><input type="text" name="recirkulacia_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="recirkulacia_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Rekuperácia</strong></td>
-                                <td><input type="text" name="rekuperacia_typ" placeholder="Typ výmenníka"></td>
-                                <td><input type="text" name="rekuperacia_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="rekuperacia_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Ventilátor</strong></td>
-                                <td><input type="text" name="ventilator_typ" placeholder="Typ"></td>
-                                <td><input type="text" name="ventilator_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="ventilator_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>El. motor</strong></td>
-                                <td><input type="text" name="el_motor_typ" placeholder="Výkon/Typ"></td>
-                                <td><input type="text" name="el_motor_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="el_motor_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Klinové remeňe</strong></td>
-                                <td><input type="text" name="remene_typ" placeholder="Typ/Počet"></td>
-                                <td><input type="text" name="remene_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="remene_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Chladič</strong></td>
-                                <td><input type="text" name="chladic_typ" placeholder="Typ chladiča"></td>
-                                <td><input type="text" name="chladic_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="chladic_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Ohrievač</strong></td>
-                                <td><input type="text" name="ohrievac_typ" placeholder="Typ ohrievača"></td>
-                                <td><input type="text" name="ohrievac_pr" placeholder="Zistený stav"></td>
-                                <td><input type="text" name="ohrievac_od" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Klapka bypassu</strong></td>
-                                <td><input type="text" name="bypass_klapka_typ" placeholder="Typ"></td>
-                                <td colspan="2"><input type="text" name="bypass_klapka_stav" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Servopohon bypassu</strong></td>
-                                <td><input type="text" name="bypass_servo_typ" placeholder="Typ"></td>
-                                <td colspan="2"><input type="text" name="bypass_servo_stav" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Termostat</strong></td>
-                                <td><input type="text" name="termostat_typ" placeholder="Typ"></td>
-                                <td colspan="2"><input type="text" name="termostat_stav" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Plynový horák</strong></td>
-                                <td><input type="text" name="plynovy_horak_typ" placeholder="Typ"></td>
-                                <td colspan="2"><input type="text" name="plynovy_horak_stav" placeholder="Zistený stav"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>MaR systém</strong></td>
-                                <td><input type="text" name="mar_typ" placeholder="Typ/Výrobca"></td>
-                                <td colspan="2"><input type="text" name="mar_stav" placeholder="Zistený stav"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- KLAPKY -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Klapky</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ klapiek</label>
+                                <select name="klapky_typ" onchange="toggleKlapkyServo(this)">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="bez_servopohonu">Bez servopohonu</option>
+                                    <option value="so_servopohonom">So servopohonom</option>
+                                </select>
+                            </div>
+                            <div class="form-group conditional-field" id="klapky_servo_fields" style="display:none;">
+                                <label>Typ servopohonu</label>
+                                <input type="text" name="klapky_servo_typ" placeholder="Typ servopohonu">
+                            </div>
+                            <div class="form-group conditional-field" id="klapky_moment_field" style="display:none;">
+                                <label>Moment (Nm)</label>
+                                <input type="text" name="klapky_moment" placeholder="Napr. 10 Nm">
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="klapky_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="klapky_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="klapky_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="klapky_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTER -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Filter</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ filtra</label>
+                                <select name="filter_typ">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="bez_filtra">Bez filtra</option>
+                                    <option value="kapsovy">Kapsový</option>
+                                    <option value="kazetovy">Kazetový</option>
+                                    <option value="firon">Fíron</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Rozmer filtra</label>
+                                <input type="text" name="filter_rozmer" placeholder="Napr. 592x592x300">
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="filter_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="filter_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="filter_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="filter_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REKUPERÁTOR -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Rekuperátor</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ rekuperátora</label>
+                                <select name="rekuperator_typ">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="doskovy">Doskový</option>
+                                    <option value="rotacny">Rotačný</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="rekuperator_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="rekuperator_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="rekuperator_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="rekuperator_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECIRKULÁCIA -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Recirkulácia</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Recirkulácia</label>
+                                <select name="recirkulacia_typ">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="s_recirkulaciou">S recirkuláciou</option>
+                                    <option value="bez_recirkulacie">Bez recirkulácie</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="recirkulacia_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="recirkulacia_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="recirkulacia_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="recirkulacia_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VENTILÁTOR -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Ventilátor</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ ventilátora</label>
+                                <input type="text" name="ventilator_typ" placeholder="Typ ventilátora">
+                            </div>
+                            <div class="form-group">
+                                <label>Vzduchový výkon</label>
+                                <select name="ventilator_pohon" onchange="toggleVentilatorRemenica(this)">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="napriamo">Napriamo</option>
+                                    <option value="sprevodovany">Sprevodovaný</option>
+                                </select>
+                            </div>
+                            <div class="form-group conditional-field" id="ventilator_remenica_field" style="display:none;">
+                                <label>Remenica - typ</label>
+                                <input type="text" name="ventilator_remenica_typ" placeholder="Typ remenice">
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="ventilator_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="ventilator_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="ventilator_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="ventilator_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ELEKTRO MOTOR -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Elektro motor</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Výkon / Príkon</label>
+                                <input type="text" name="motor_vykon" placeholder="Napr. 2.2 kW">
+                            </div>
+                            <div class="form-group">
+                                <label>Pohon</label>
+                                <select name="motor_pohon" onchange="toggleMotorRemenica(this)">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="napriamo">Napriamo</option>
+                                    <option value="sprevodovany">Sprevodovaný</option>
+                                </select>
+                            </div>
+                            <div class="form-group conditional-field" id="motor_remenica_field" style="display:none;">
+                                <label>Remenica</label>
+                                <input type="text" name="motor_remenica" placeholder="Typ remenice">
+                            </div>
+                        </div>
+                        <div class="priv-odv-section">
+                            <div class="priv-section">
+                                <h5>PRÍVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="motor_pr_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="motor_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="odv-section">
+                                <h5>ODVOD</h5>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Stav</label>
+                                        <select name="motor_od_stav">
+                                            <option value="">-- Vyberte stav --</option>
+                                            <option value="cisty">Čistý</option>
+                                            <option value="mierne_znecisteny">Mierne znečistený</option>
+                                            <option value="znecisteny">Znečistený</option>
+                                            <option value="silno_znecisteny">Silno znečistený</option>
+                                            <option value="poskodeny">Poškodený</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Poznámka</label>
+                                        <input type="text" name="motor_od_poznamka" placeholder="Poznámka k odvodu">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Komponenty len na PRÍVOD -->
+                <div class="section-header">
+                    <h3>Komponenty - LEN PRÍVOD</h3>
+                    <p class="help-text">Tieto komponenty sa nachádzajú len na prívodnej časti jednotky.</p>
+                </div>
+
+                <!-- CHLADIČ -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Chladič</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ chladiča</label>
+                                <select name="chladic_typ">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="vodny">Vodný</option>
+                                    <option value="priamy">Priamy (DX)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Bližšia špecifikácia</label>
+                                <input type="text" name="chladic_spec" placeholder="Typ / Model">
+                            </div>
+                            <div class="form-group">
+                                <label>Výkon</label>
+                                <input type="text" name="chladic_vykon" placeholder="Napr. 15 kW">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Stav</label>
+                                <select name="chladic_stav">
+                                    <option value="">-- Vyberte stav --</option>
+                                    <option value="cisty">Čistý</option>
+                                    <option value="mierne_znecisteny">Mierne znečistený</option>
+                                    <option value="znecisteny">Znečistený</option>
+                                    <option value="silno_znecisteny">Silno znečistený</option>
+                                    <option value="poskodeny">Poškodený</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="chladic_poznamka" placeholder="Poznámka k chladiču">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OHRIEVAČ -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Ohrievač</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ ohrievača</label>
+                                <select name="ohrievac_typ" onchange="toggleOhrievacFields(this)">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="vodny">Vodný</option>
+                                    <option value="elektricky">Elektrický</option>
+                                    <option value="plynovy">Plynový</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Výkon</label>
+                                <input type="text" name="ohrievac_vykon" placeholder="Napr. 20 kW">
+                            </div>
+                        </div>
+                        
+                        <!-- Plynový ohrievač - dodatočné polia -->
+                        <div class="conditional-section" id="ohrievac_plynovy_fields" style="display:none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Typ plynového horáka</label>
+                                    <input type="text" name="ohrievac_plyn_typ" placeholder="Typ horáka">
+                                </div>
+                                <div class="form-group">
+                                    <label>Bypass</label>
+                                    <select name="ohrievac_bypass" onchange="toggleOhrievacBypass(this)">
+                                        <option value="">-- Vyberte --</option>
+                                        <option value="bez_bypasu">Bez bypasu</option>
+                                        <option value="s_bypasom">S bypasom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="conditional-section" id="ohrievac_bypass_servo_field" style="display:none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Servopohon bypasu</label>
+                                        <select name="ohrievac_bypass_servo">
+                                            <option value="">-- Vyberte --</option>
+                                            <option value="bez_servopohonu">Bez servopohonu</option>
+                                            <option value="so_servopohonom">So servopohonom</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Stav</label>
+                                <select name="ohrievac_stav">
+                                    <option value="">-- Vyberte stav --</option>
+                                    <option value="cisty">Čistý</option>
+                                    <option value="mierne_znecisteny">Mierne znečistený</option>
+                                    <option value="znecisteny">Znečistený</option>
+                                    <option value="silno_znecisteny">Silno znečistený</option>
+                                    <option value="poskodeny">Poškodený</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="ohrievac_poznamka" placeholder="Poznámka k ohrievaču">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOMÍNOVÝ TERMOSTAT -->
+                <div class="component-card">
+                    <div class="component-header">
+                        <h4>Komínový termostat</h4>
+                    </div>
+                    <div class="component-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Komínový termostat</label>
+                                <select name="kominovy_termostat">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="ma">Má</option>
+                                    <option value="nema">Nemá</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Stav</label>
+                                <select name="kominovy_termostat_stav">
+                                    <option value="">-- Vyberte stav --</option>
+                                    <option value="cisty">Čistý</option>
+                                    <option value="mierne_znecisteny">Mierne znečistený</option>
+                                    <option value="znecisteny">Znečistený</option>
+                                    <option value="silno_znecisteny">Silno znečistený</option>
+                                    <option value="poskodeny">Poškodený</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="kominovy_termostat_poznamka" placeholder="Poznámka">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Poznámky a odporúčania -->

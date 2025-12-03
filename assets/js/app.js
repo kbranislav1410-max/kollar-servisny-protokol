@@ -1066,3 +1066,65 @@ function sendEmail() {
         console.error(err);
     });
 }
+
+/**
+ * Conditional field toggles for Step 4 components
+ */
+
+// Toggle Klapky servo fields
+function toggleKlapkyServo(selectEl) {
+    const servoFields = document.getElementById('klapky_servo_fields');
+    const momentField = document.getElementById('klapky_moment_field');
+    
+    if (selectEl.value === 'so_servopohonom') {
+        if (servoFields) servoFields.style.display = 'block';
+        if (momentField) momentField.style.display = 'block';
+    } else {
+        if (servoFields) servoFields.style.display = 'none';
+        if (momentField) momentField.style.display = 'none';
+    }
+}
+
+// Toggle Ventilátor remenica field
+function toggleVentilatorRemenica(selectEl) {
+    const remenicaField = document.getElementById('ventilator_remenica_field');
+    
+    if (selectEl.value === 'sprevodovany') {
+        if (remenicaField) remenicaField.style.display = 'block';
+    } else {
+        if (remenicaField) remenicaField.style.display = 'none';
+    }
+}
+
+// Toggle Motor remenica field
+function toggleMotorRemenica(selectEl) {
+    const remenicaField = document.getElementById('motor_remenica_field');
+    
+    if (selectEl.value === 'sprevodovany') {
+        if (remenicaField) remenicaField.style.display = 'block';
+    } else {
+        if (remenicaField) remenicaField.style.display = 'none';
+    }
+}
+
+// Toggle Ohrievač fields based on type
+function toggleOhrievacFields(selectEl) {
+    const plynovyFields = document.getElementById('ohrievac_plynovy_fields');
+    
+    if (selectEl.value === 'plynovy') {
+        if (plynovyFields) plynovyFields.style.display = 'block';
+    } else {
+        if (plynovyFields) plynovyFields.style.display = 'none';
+    }
+}
+
+// Toggle Ohrievač bypass servo field
+function toggleOhrievacBypass(selectEl) {
+    const bypassServoField = document.getElementById('ohrievac_bypass_servo_field');
+    
+    if (selectEl.value === 's_bypasom') {
+        if (bypassServoField) bypassServoField.style.display = 'block';
+    } else {
+        if (bypassServoField) bypassServoField.style.display = 'none';
+    }
+}
