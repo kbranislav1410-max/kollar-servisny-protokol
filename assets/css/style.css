@@ -1701,6 +1701,53 @@ select {
     color: #27ae60;
 }
 
+/* Component evaluation section */
+.component-evaluation {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px dashed #ecf0f1;
+    background: #fafbfc;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.component-evaluation .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.component-evaluation textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.component-evaluation .form-group label {
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+/* Full width photo upload */
+.photo-upload-section.full-width {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.photo-upload-section.full-width .photo-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.photo-upload-section.full-width .btn-lg {
+    padding: 20px 40px;
+    font-size: 18px;
+}
+
 /* Conditional fields */
 .conditional-field,
 .conditional-section {

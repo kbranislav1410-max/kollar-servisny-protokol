@@ -352,7 +352,7 @@ function finalizeReport(): void
         $interneOznacenie = $device['interne_oznacenie'] ?? '';
     }
     
-    // Pripraviť sekcie JSON pre uloženie všetkých komponentov s detailnými údajmi
+    // Pripraviť sekcie JSON pre uloženie všetkých komponentov s detailnými údajmi vrátane zhodnotenia a odporúčaní
     $sekcieData = [
         'klapky' => [
             'typ' => $report['klapky_typ'] ?? '',
@@ -361,7 +361,9 @@ function finalizeReport(): void
             'privod_stav' => $report['klapky_pr_stav'] ?? '',
             'privod_poznamka' => $report['klapky_pr_poznamka'] ?? '',
             'odvod_stav' => $report['klapky_od_stav'] ?? '',
-            'odvod_poznamka' => $report['klapky_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['klapky_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['klapky_zhodnotenie'] ?? '',
+            'odporucanie' => $report['klapky_odporucanie'] ?? ''
         ],
         'filter' => [
             'typ' => $report['filter_typ'] ?? '',
@@ -369,21 +371,27 @@ function finalizeReport(): void
             'privod_stav' => $report['filter_pr_stav'] ?? '',
             'privod_poznamka' => $report['filter_pr_poznamka'] ?? '',
             'odvod_stav' => $report['filter_od_stav'] ?? '',
-            'odvod_poznamka' => $report['filter_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['filter_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['filter_zhodnotenie'] ?? '',
+            'odporucanie' => $report['filter_odporucanie'] ?? ''
         ],
         'rekuperator' => [
             'typ' => $report['rekuperator_typ'] ?? '',
             'privod_stav' => $report['rekuperator_pr_stav'] ?? '',
             'privod_poznamka' => $report['rekuperator_pr_poznamka'] ?? '',
             'odvod_stav' => $report['rekuperator_od_stav'] ?? '',
-            'odvod_poznamka' => $report['rekuperator_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['rekuperator_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['rekuperator_zhodnotenie'] ?? '',
+            'odporucanie' => $report['rekuperator_odporucanie'] ?? ''
         ],
         'recirkulacia' => [
             'typ' => $report['recirkulacia_typ'] ?? '',
             'privod_stav' => $report['recirkulacia_pr_stav'] ?? '',
             'privod_poznamka' => $report['recirkulacia_pr_poznamka'] ?? '',
             'odvod_stav' => $report['recirkulacia_od_stav'] ?? '',
-            'odvod_poznamka' => $report['recirkulacia_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['recirkulacia_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['recirkulacia_zhodnotenie'] ?? '',
+            'odporucanie' => $report['recirkulacia_odporucanie'] ?? ''
         ],
         'ventilator' => [
             'typ' => $report['ventilator_typ'] ?? '',
@@ -392,7 +400,9 @@ function finalizeReport(): void
             'privod_stav' => $report['ventilator_pr_stav'] ?? '',
             'privod_poznamka' => $report['ventilator_pr_poznamka'] ?? '',
             'odvod_stav' => $report['ventilator_od_stav'] ?? '',
-            'odvod_poznamka' => $report['ventilator_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['ventilator_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['ventilator_zhodnotenie'] ?? '',
+            'odporucanie' => $report['ventilator_odporucanie'] ?? ''
         ],
         'el_motor' => [
             'vykon' => $report['motor_vykon'] ?? '',
@@ -401,14 +411,18 @@ function finalizeReport(): void
             'privod_stav' => $report['motor_pr_stav'] ?? '',
             'privod_poznamka' => $report['motor_pr_poznamka'] ?? '',
             'odvod_stav' => $report['motor_od_stav'] ?? '',
-            'odvod_poznamka' => $report['motor_od_poznamka'] ?? ''
+            'odvod_poznamka' => $report['motor_od_poznamka'] ?? '',
+            'zhodnotenie' => $report['motor_zhodnotenie'] ?? '',
+            'odporucanie' => $report['motor_odporucanie'] ?? ''
         ],
         'chladic' => [
             'typ' => $report['chladic_typ'] ?? '',
             'spec' => $report['chladic_spec'] ?? '',
             'vykon' => $report['chladic_vykon'] ?? '',
             'stav' => $report['chladic_stav'] ?? '',
-            'poznamka' => $report['chladic_poznamka'] ?? ''
+            'poznamka' => $report['chladic_poznamka'] ?? '',
+            'zhodnotenie' => $report['chladic_zhodnotenie'] ?? '',
+            'odporucanie' => $report['chladic_odporucanie'] ?? ''
         ],
         'ohrievac' => [
             'typ' => $report['ohrievac_typ'] ?? '',
@@ -417,12 +431,16 @@ function finalizeReport(): void
             'bypass' => $report['ohrievac_bypass'] ?? '',
             'bypass_servo' => $report['ohrievac_bypass_servo'] ?? '',
             'stav' => $report['ohrievac_stav'] ?? '',
-            'poznamka' => $report['ohrievac_poznamka'] ?? ''
+            'poznamka' => $report['ohrievac_poznamka'] ?? '',
+            'zhodnotenie' => $report['ohrievac_zhodnotenie'] ?? '',
+            'odporucanie' => $report['ohrievac_odporucanie'] ?? ''
         ],
         'kominovy_termostat' => [
             'typ' => $report['kominovy_termostat'] ?? '',
             'stav' => $report['kominovy_termostat_stav'] ?? '',
-            'poznamka' => $report['kominovy_termostat_poznamka'] ?? ''
+            'poznamka' => $report['kominovy_termostat_poznamka'] ?? '',
+            'zhodnotenie' => $report['termostat_zhodnotenie'] ?? '',
+            'odporucanie' => $report['termostat_odporucanie'] ?? ''
         ]
     ];
     
@@ -1270,7 +1288,7 @@ $pageView = $pageView ?? 'home';
         <div class="progress-bar">
             <div class="progress-steps">
                 <?php
-                $steps = ['Zákazník', 'Prevádzka', 'Zariadenie', 'Komponenty', 'Podpisy', 'Súhrn'];
+                $steps = ['Zákazník', 'Prevádzka', 'Zariadenie', 'Fotky pred', 'Komponenty', 'Fotky po', 'Podpisy', 'Súhrn'];
                 foreach ($steps as $i => $stepName):
                     $class = $i < $currentStep ? 'completed' : ($i === $currentStep ? 'active' : '');
                     $clickable = $i < $currentStep ? 'clickable' : '';
@@ -1474,9 +1492,42 @@ $pageView = $pageView ?? 'home';
             </div>
         </div>
 
-        <!-- Step 3: Komponenty a detaily -->
+        <!-- Step 3: Fotky pred servisom (NEW) -->
         <div class="step <?= $currentStep === 3 ? 'active' : '' ?>" id="step-3">
-            <h2>Krok 4: Servisné údaje a stav komponentov</h2>
+            <h2>Krok 4: Fotografie PRED servisom</h2>
+            
+            <div class="section-header">
+                <h3>Dokumentácia stavu pred servisom</h3>
+                <p class="help-text">Nafotografujte zariadenie a jeho komponenty pred začiatkom servisu. Tieto fotografie slúžia ako dôkaz pôvodného stavu.</p>
+            </div>
+            
+            <div class="photo-upload-section full-width">
+                <div class="photo-section" data-photo-type="before">
+                    <div class="photo-buttons">
+                        <button type="button" class="btn btn-camera btn-lg" onclick="openCameraForType('before')">
+                            Odfotiť
+                        </button>
+                        <input type="file" id="cameraInputBefore" accept="image/*" capture="environment" style="display: none;" data-photo-type="before">
+                        
+                        <button type="button" class="btn btn-outline btn-lg" onclick="document.getElementById('galleryInputBefore').click()">
+                            Vybrať z galérie
+                        </button>
+                        <input type="file" id="galleryInputBefore" accept="image/*" multiple style="display: none;" data-photo-type="before">
+                    </div>
+                    <div id="photoPreviewBefore" class="photo-preview"></div>
+                    <div id="photoCountBefore" class="photo-count"></div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="prevStep(3)">Späť</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Ďalej</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Komponenty a detaily -->
+        <div class="step <?= $currentStep === 4 ? 'active' : '' ?>" id="step-4">
+            <h2>Krok 5: Servisné údaje a stav komponentov</h2>
             
             <form id="componentsForm">
                 <!-- Základné údaje servisu -->
@@ -1501,7 +1552,7 @@ $pageView = $pageView ?? 'home';
                 <!-- Komponenty s prívodom aj odvodom -->
                 <div class="section-header">
                     <h3>Komponenty - PRÍVOD aj ODVOD</h3>
-                    <p class="help-text">Pre každý komponent vyplňte konfiguráciu a stav pre prívod aj odvod.</p>
+                    <p class="help-text">Pre každý komponent vyplňte konfiguráciu, stav a odporúčania.</p>
                 </div>
 
                 <!-- KLAPKY -->
@@ -1567,6 +1618,19 @@ $pageView = $pageView ?? 'home';
                                         <label>Poznámka</label>
                                         <input type="text" name="klapky_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="klapky_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="klapky_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1637,6 +1701,19 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="filter_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="filter_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1698,6 +1775,19 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="rekuperator_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="rekuperator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1756,6 +1846,19 @@ $pageView = $pageView ?? 'home';
                                         <label>Poznámka</label>
                                         <input type="text" name="recirkulacia_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="recirkulacia_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="recirkulacia_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1828,6 +1931,19 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="ventilator_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="ventilator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1897,6 +2013,19 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="motor_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="motor_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1945,6 +2074,19 @@ $pageView = $pageView ?? 'home';
                             <div class="form-group">
                                 <label>Poznámka</label>
                                 <input type="text" name="chladic_poznamka" placeholder="Poznámka k chladiču">
+                            </div>
+                        </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="chladic_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="chladic_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2019,6 +2161,19 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="ohrievac_poznamka" placeholder="Poznámka k ohrievaču">
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="ohrievac_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="ohrievac_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2053,74 +2208,31 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="kominovy_termostat_poznamka" placeholder="Poznámka">
                             </div>
                         </div>
+                        <!-- Zhodnotenie a odporúčanie pre komponent -->
+                        <div class="component-evaluation">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Zhodnotenie stavu</label>
+                                    <textarea name="termostat_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Odporúčanie</label>
+                                    <textarea name="termostat_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Poznámky a odporúčania -->
+                <!-- Všeobecná poznámka k servisu -->
                 <div class="section-header">
-                    <h3>Poznámky a odporúčania</h3>
+                    <h3>Všeobecná poznámka</h3>
                 </div>
                 <div class="form-group">
-                    <label>Zhodnotenie stavu</label>
-                    <textarea name="zhodnotenie" placeholder="Celkové zhodnotenie stavu zariadenia..." rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Odporúčania</label>
-                    <textarea name="odporucania" placeholder="Odporúčania pre zákazníka, plán údržby..." rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Poznámka</label>
+                    <label>Ďalšie poznámky k servisu</label>
                     <textarea name="poznamka" placeholder="Ďalšie poznámky k servisu..." rows="3"></textarea>
                 </div>
 
-                <!-- Fotografie pred/po -->
-                <div class="section-header">
-                    <h3>Fotografie</h3>
-                    <p class="help-text">Nahrajte fotografie zariadenia - pred servisom a po servise.</p>
-                </div>
-                
-                <div class="photos-grid-upload">
-                    <!-- Fotografie PRED servisom -->
-                    <div class="photo-upload-section">
-                        <h4>Fotografie PRED servisom</h4>
-                        <div class="photo-section" data-photo-type="before">
-                            <div class="photo-buttons">
-                                <button type="button" class="btn btn-camera" onclick="openCameraForType('before')">
-                                    Odfotiť
-                                </button>
-                                <input type="file" id="cameraInputBefore" accept="image/*" capture="environment" style="display: none;" data-photo-type="before">
-                                
-                                <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputBefore').click()">
-                                    Vybrať z galérie
-                                </button>
-                                <input type="file" id="galleryInputBefore" accept="image/*" multiple style="display: none;" data-photo-type="before">
-                            </div>
-                            <div id="photoPreviewBefore" class="photo-preview"></div>
-                            <div id="photoCountBefore" class="photo-count"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Fotografie PO servise -->
-                    <div class="photo-upload-section">
-                        <h4>Fotografie PO servise</h4>
-                        <div class="photo-section" data-photo-type="after">
-                            <div class="photo-buttons">
-                                <button type="button" class="btn btn-camera" onclick="openCameraForType('after')">
-                                    Odfotiť
-                                </button>
-                                <input type="file" id="cameraInputAfter" accept="image/*" capture="environment" style="display: none;" data-photo-type="after">
-                                
-                                <button type="button" class="btn btn-outline" onclick="document.getElementById('galleryInputAfter').click()">
-                                    Vybrať z galérie
-                                </button>
-                                <input type="file" id="galleryInputAfter" accept="image/*" multiple style="display: none;" data-photo-type="after">
-                            </div>
-                            <div id="photoPreviewAfter" class="photo-preview"></div>
-                            <div id="photoCountAfter" class="photo-count"></div>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Legacy photo inputs for backward compatibility -->
                 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
                 <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
@@ -2129,14 +2241,47 @@ $pageView = $pageView ?? 'home';
             </form>
 
             <div class="navigation">
-                <button type="button" class="btn btn-outline" onclick="prevStep(3)">Späť</button>
-                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Ďalej</button>
+                <button type="button" class="btn btn-outline" onclick="prevStep(4)">Späť</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Ďalej</button>
             </div>
         </div>
 
-        <!-- Step 4: Podpisy -->
-        <div class="step <?= $currentStep === 4 ? 'active' : '' ?>" id="step-4">
-            <h2>Krok 5: Podpisy a odovzdanie</h2>
+        <!-- Step 5: Fotky po servise (NEW) -->
+        <div class="step <?= $currentStep === 5 ? 'active' : '' ?>" id="step-5">
+            <h2>Krok 6: Fotografie PO servise</h2>
+            
+            <div class="section-header">
+                <h3>Dokumentácia stavu po servise</h3>
+                <p class="help-text">Nafotografujte zariadenie a jeho komponenty po dokončení servisu. Tieto fotografie dokumentujú výsledok vykonanej práce.</p>
+            </div>
+            
+            <div class="photo-upload-section full-width">
+                <div class="photo-section" data-photo-type="after">
+                    <div class="photo-buttons">
+                        <button type="button" class="btn btn-camera btn-lg" onclick="openCameraForType('after')">
+                            Odfotiť
+                        </button>
+                        <input type="file" id="cameraInputAfter" accept="image/*" capture="environment" style="display: none;" data-photo-type="after">
+                        
+                        <button type="button" class="btn btn-outline btn-lg" onclick="document.getElementById('galleryInputAfter').click()">
+                            Vybrať z galérie
+                        </button>
+                        <input type="file" id="galleryInputAfter" accept="image/*" multiple style="display: none;" data-photo-type="after">
+                    </div>
+                    <div id="photoPreviewAfter" class="photo-preview"></div>
+                    <div id="photoCountAfter" class="photo-count"></div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="prevStep(5)">Späť</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(5)">Ďalej</button>
+            </div>
+        </div>
+
+        <!-- Step 6: Podpisy -->
+        <div class="step <?= $currentStep === 6 ? 'active' : '' ?>" id="step-6">
+            <h2>Krok 7: Podpisy a odovzdanie</h2>
             
             <form id="signaturesForm">
                 <!-- Miesto a dátum -->
@@ -2180,20 +2325,20 @@ $pageView = $pageView ?? 'home';
 
             <div class="navigation">
                 <button type="button" class="btn btn-outline" onclick="prevStep(4)">Späť</button>
-                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Ďalej</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(6)">Ďalej</button>
             </div>
         </div>
 
-        <!-- Step 5: Súhrn a dokončenie -->
-        <div class="step <?= $currentStep === 5 ? 'active' : '' ?>" id="step-5">
-            <h2>Krok 6: Súhrn a dokončenie</h2>
+        <!-- Step 7: Súhrn a dokončenie -->
+        <div class="step <?= $currentStep === 7 ? 'active' : '' ?>" id="step-7">
+            <h2>Krok 8: Súhrn a dokončenie</h2>
             
             <div id="reportSummary" class="summary-box">
                 <!-- Vyplnené JavaScriptom -->
             </div>
 
             <div class="navigation">
-                <button type="button" class="btn btn-outline" onclick="prevStep(5)">Späť</button>
+                <button type="button" class="btn btn-outline" onclick="prevStep(7)">Späť</button>
                 <button type="button" class="btn btn-success" id="finalizeBtn" onclick="finalizeReport()">
                     Dokončiť a vygenerovať PDF
                 </button>

@@ -308,6 +308,33 @@ if (!isset($photosGeneral)) {
             text-align: right;
         }
         
+        /* Component evaluation section */
+        .component-evaluation {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #ddd;
+        }
+        .component-evaluation-row {
+            display: table;
+            width: 100%;
+        }
+        .component-eval-item {
+            display: table-cell;
+            width: 50%;
+            padding-right: 10px;
+            vertical-align: top;
+        }
+        .eval-label {
+            font-weight: bold;
+            font-size: 7pt;
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .eval-value {
+            font-size: 7pt;
+            color: #333;
+        }
+        
         /* Poznámky - moderný štýl */
         .notes-section {
             margin-bottom: 12px;
@@ -602,6 +629,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($klapky['zhodnotenie']) || !empty($klapky['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($klapky['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($klapky['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($klapky['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($klapky['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -656,6 +701,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($filter['zhodnotenie']) || !empty($filter['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($filter['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($filter['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($filter['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($filter['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -702,6 +765,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($rekuperator['zhodnotenie']) || !empty($rekuperator['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($rekuperator['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($rekuperator['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($rekuperator['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($rekuperator['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -748,6 +829,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($recirkulacia['zhodnotenie']) || !empty($recirkulacia['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($recirkulacia['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($recirkulacia['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($recirkulacia['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($recirkulacia['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -808,6 +907,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($ventilator['zhodnotenie']) || !empty($ventilator['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($ventilator['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($ventilator['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($ventilator['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($ventilator['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -868,6 +985,24 @@ if (!isset($photosGeneral)) {
                     </td>
                 </tr>
             </table>
+            <?php if (!empty($motor['zhodnotenie']) || !empty($motor['odporucanie'])): ?>
+            <div class="component-evaluation">
+                <div class="component-evaluation-row">
+                    <?php if (!empty($motor['zhodnotenie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Zhodnotenie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($motor['zhodnotenie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($motor['odporucanie'])): ?>
+                    <div class="component-eval-item">
+                        <div class="eval-label">Odporúčanie:</div>
+                        <div class="eval-value"><?= htmlspecialchars($motor['odporucanie']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -902,6 +1037,24 @@ if (!isset($photosGeneral)) {
         </div>
         <?php if (!empty($chladic['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($chladic['poznamka']) ?></div>
+        <?php endif; ?>
+        <?php if (!empty($chladic['zhodnotenie']) || !empty($chladic['odporucanie'])): ?>
+        <div class="component-evaluation">
+            <div class="component-evaluation-row">
+                <?php if (!empty($chladic['zhodnotenie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Zhodnotenie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($chladic['zhodnotenie']) ?></div>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($chladic['odporucanie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Odporúčanie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($chladic['odporucanie']) ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -942,6 +1095,24 @@ if (!isset($photosGeneral)) {
         <?php if (!empty($ohrievac['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($ohrievac['poznamka']) ?></div>
         <?php endif; ?>
+        <?php if (!empty($ohrievac['zhodnotenie']) || !empty($ohrievac['odporucanie'])): ?>
+        <div class="component-evaluation">
+            <div class="component-evaluation-row">
+                <?php if (!empty($ohrievac['zhodnotenie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Zhodnotenie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($ohrievac['zhodnotenie']) ?></div>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($ohrievac['odporucanie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Odporúčanie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($ohrievac['odporucanie']) ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -967,23 +1138,31 @@ if (!isset($photosGeneral)) {
         <?php if (!empty($termostat['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($termostat['poznamka']) ?></div>
         <?php endif; ?>
+        <?php if (!empty($termostat['zhodnotenie']) || !empty($termostat['odporucanie'])): ?>
+        <div class="component-evaluation">
+            <div class="component-evaluation-row">
+                <?php if (!empty($termostat['zhodnotenie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Zhodnotenie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($termostat['zhodnotenie']) ?></div>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($termostat['odporucanie'])): ?>
+                <div class="component-eval-item">
+                    <div class="eval-label">Odporúčanie:</div>
+                    <div class="eval-value"><?= htmlspecialchars($termostat['odporucanie']) ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
-    <!-- Poznámky, zhodnotenie, odporúčania -->
+    <!-- Všeobecná poznámka -->
     <div class="notes-section">
-        <?php if (!empty($report['zhodnotenie'])): ?>
-        <div class="notes-label">Zhodnotenie stavu:</div>
-        <div class="notes-box"><?= nl2br(htmlspecialchars($report['zhodnotenie'])) ?></div>
-        <?php endif; ?>
-        
-        <?php if (!empty($report['odporucania'])): ?>
-        <div class="notes-label" style="margin-top: 8px;">Odporúčania:</div>
-        <div class="notes-box"><?= nl2br(htmlspecialchars($report['odporucania'])) ?></div>
-        <?php endif; ?>
-        
         <?php if (!empty($report['poznamka'])): ?>
-        <div class="notes-label" style="margin-top: 8px;">Poznámka:</div>
+        <div class="notes-label">Všeobecná poznámka:</div>
         <div class="notes-box"><?= nl2br(htmlspecialchars($report['poznamka'])) ?></div>
         <?php endif; ?>
     </div>

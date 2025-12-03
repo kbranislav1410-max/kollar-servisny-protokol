@@ -706,7 +706,7 @@ function nextStep(currentStepIndex) {
             updateProgressBar(result.next_step);
             
             // Ak prechádzame na krok súhrnu, aktualizovať ho
-            if (result.next_step === 5) {
+            if (result.next_step === 7) {
                 updateSummary();
             }
         }
@@ -742,6 +742,7 @@ function validateStep(stepIndex) {
                 return false;
             }
             break;
+        // Steps 3, 4, 5 (Fotky pred, Komponenty, Fotky po) - no required validation
     }
     return true;
 }
@@ -831,7 +832,11 @@ function collectStepData(stepIndex) {
             }
             break;
             
-        case 3: // Komponenty
+        case 3: // Fotky pred servisom
+            // Fotky sa ukladajú priamo pri výbere/fotení
+            break;
+            
+        case 4: // Komponenty
             const componentsForm = document.getElementById('componentsForm');
             if (componentsForm) {
                 const formData = new FormData(componentsForm);
@@ -841,7 +846,11 @@ function collectStepData(stepIndex) {
             }
             break;
             
-        case 4: // Podpisy a odovzdanie
+        case 5: // Fotky po servise
+            // Fotky sa ukladajú priamo pri výbere/fotení
+            break;
+            
+        case 6: // Podpisy a odovzdanie
             // Podpisy sa ukladajú priamo pri kliknutí na "Uložiť podpis"
             // Ale nové textové polia treba uložiť
             const signaturesForm = document.getElementById('signaturesForm');
