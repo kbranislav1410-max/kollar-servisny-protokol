@@ -126,6 +126,10 @@ try {
             servis_vykonal TEXT,
             skontroloval_prevzal TEXT,
             
+            -- Typ servisu
+            typ_servisu TEXT DEFAULT 'pravidelny',
+            platnost_do DATE,
+            
             -- Sekcie komponentov (JSON formát pre flexibilitu)
             sekcie_json TEXT,
             
@@ -210,6 +214,8 @@ try {
         "ALTER TABLE reports ADD COLUMN sekcie_json TEXT",
         "ALTER TABLE reports ADD COLUMN odporucania TEXT",
         "ALTER TABLE reports ADD COLUMN zhodnotenie TEXT",
+        "ALTER TABLE reports ADD COLUMN typ_servisu TEXT DEFAULT 'pravidelny'",
+        "ALTER TABLE reports ADD COLUMN platnost_do DATE",
         "ALTER TABLE attachments ADD COLUMN section_key TEXT",
         "ALTER TABLE attachments ADD COLUMN photo_type TEXT DEFAULT 'general'",
     ];

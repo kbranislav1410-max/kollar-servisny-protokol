@@ -446,17 +446,27 @@ function finalizeReport(): void
     
     $sekcieJson = json_encode($sekcieData, JSON_UNESCAPED_UNICODE);
     
+    // Typ servisu a platnosť
+    $typServisu = $report['typ_servisu'] ?? 'pravidelny';
+    $datumServisu = $report['datum'] ?? date('Y-m-d');
+    
+    // Pre pravidelný servis nastaviť platnosť na 1 rok
+    $platnostDo = null;
+    if ($typServisu === 'pravidelny') {
+        $platnostDo = date('Y-m-d', strtotime($datumServisu . ' +1 year'));
+    }
+    
     // Uloženie reportu s rozšírenými poliami
     $stmt = $pdo->prepare("
         INSERT INTO reports (
             cislo_protokolu, customer_id, location_id, device_id, datum,
             interne_oznacenie, objednavatel, servis_vykonal, skontroloval_prevzal,
-            sekcie_json,
+            typ_servisu, platnost_do, sekcie_json,
             klapky_pr, klapky_od, filtracia_pr, filtracia_od, rekuperacia,
             ventilator, ohrievac, plynovy_horak, chladic, zvukovy_tlmic,
             poznamka, odporucania, zhodnotenie,
             podpis_technik, podpis_zakaznik, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
     ");
     
     $stmt->execute([
@@ -464,11 +474,13 @@ function finalizeReport(): void
         $report['customer_id'] ?? null,
         $report['location_id'] ?? null,
         $deviceId,
-        $report['datum'] ?? date('Y-m-d'),
+        $datumServisu,
         $interneOznacenie,
         $report['objednavatel'] ?? '',
         $report['servis_vykonal'] ?? '',
         $report['skontroloval_prevzal'] ?? '',
+        $typServisu,
+        $platnostDo,
         $sekcieJson,
         $report['klapky_pr'] ?? '',
         $report['klapky_od'] ?? '',
@@ -796,6 +808,12 @@ switch ($action) {
     case 'api_stats':
         getStats();
         break;
+    case 'api_detailed_stats':
+        getDetailedStats();
+        break;
+    case 'api_expiring_devices':
+        getExpiringDevices();
+        break;
     case 'download_pdf':
         downloadPdf();
         break;
@@ -819,6 +837,12 @@ switch ($action) {
         break;
     case 'device_detail':
         $pageView = 'device_detail';
+        break;
+    case 'statistics':
+        $pageView = 'statistics';
+        break;
+    case 'expiring_devices':
+        $pageView = 'expiring_devices';
         break;
     case 'home':
     default:
@@ -906,7 +930,7 @@ function getStats(): void
     
     // Posledné protokoly
     $stmt = $pdo->query("
-        SELECT r.id, r.cislo_protokolu, r.datum, r.created_at, c.nazov_firmy
+        SELECT r.id, r.cislo_protokolu, r.datum, r.created_at, r.typ_servisu, c.nazov_firmy
         FROM reports r
         LEFT JOIN customers c ON r.customer_id = c.id
         ORDER BY r.created_at DESC
@@ -914,13 +938,49 @@ function getStats(): void
     ");
     $recentReports = $stmt->fetchAll();
     
+    // Zariadenia s končiacou platnosťou v aktuálnom mesiaci
+    $currentMonth = date('Y-m');
+    $stmt = $pdo->prepare("
+        SELECT d.id, d.nazov, d.interne_oznacenie, d.typ, 
+               l.nazov as location_name, c.nazov_firmy,
+               r.platnost_do, r.datum as last_service_date
+        FROM devices d
+        LEFT JOIN locations l ON d.location_id = l.id
+        LEFT JOIN customers c ON l.customer_id = c.id
+        LEFT JOIN (
+            SELECT device_id, MAX(datum) as max_datum
+            FROM reports
+            WHERE typ_servisu = 'pravidelny' AND platnost_do IS NOT NULL
+            GROUP BY device_id
+        ) latest ON d.id = latest.device_id
+        LEFT JOIN reports r ON d.id = r.device_id AND r.datum = latest.max_datum AND r.typ_servisu = 'pravidelny'
+        WHERE r.platnost_do IS NOT NULL AND strftime('%Y-%m', r.platnost_do) = ?
+        ORDER BY r.platnost_do ASC
+    ");
+    $stmt->execute([$currentMonth]);
+    $expiringThisMonth = $stmt->fetchAll();
+    
+    // Počet protokolov podľa typu v aktuálnom mesiaci
+    $stmt = $pdo->prepare("
+        SELECT 
+            COUNT(CASE WHEN typ_servisu = 'pravidelny' THEN 1 END) as pravidelne,
+            COUNT(CASE WHEN typ_servisu = 'porucha' THEN 1 END) as poruchy
+        FROM reports 
+        WHERE strftime('%Y-%m', datum) = ?
+    ");
+    $stmt->execute([$currentMonth]);
+    $monthlyStats = $stmt->fetch();
+    
     header('Content-Type: application/json');
     echo json_encode([
         'customers' => $customersCount,
         'locations' => $locationsCount,
         'devices' => $devicesCount,
         'reports' => $reportsCount,
-        'recent_reports' => $recentReports
+        'recent_reports' => $recentReports,
+        'expiring_this_month' => $expiringThisMonth,
+        'expiring_count' => count($expiringThisMonth),
+        'monthly_stats' => $monthlyStats
     ]);
     exit;
 }
@@ -1005,7 +1065,7 @@ function getDeviceDetail(): void
     
     // Protokoly pre toto zariadenie
     $stmt = $pdo->prepare("
-        SELECT r.*
+        SELECT r.*, r.typ_servisu, r.platnost_do
         FROM reports r
         WHERE r.device_id = ?
         ORDER BY r.created_at DESC
@@ -1013,10 +1073,42 @@ function getDeviceDetail(): void
     $stmt->execute([$deviceId]);
     $reports = $stmt->fetchAll();
     
+    // Posledný pravidelný servis a jeho platnosť
+    $stmt = $pdo->prepare("
+        SELECT datum, platnost_do, typ_servisu
+        FROM reports 
+        WHERE device_id = ? AND typ_servisu = 'pravidelny' AND platnost_do IS NOT NULL
+        ORDER BY datum DESC 
+        LIMIT 1
+    ");
+    $stmt->execute([$deviceId]);
+    $lastRegularService = $stmt->fetch();
+    
+    // Vypočítať stav platnosti
+    $serviceStatus = null;
+    if ($lastRegularService) {
+        $today = date('Y-m-d');
+        $platnostDo = $lastRegularService['platnost_do'];
+        $daysRemaining = (strtotime($platnostDo) - strtotime($today)) / 86400;
+        
+        if ($daysRemaining < 0) {
+            $serviceStatus = ['status' => 'expired', 'text' => 'Prehliadka vypršala', 'days' => abs((int)$daysRemaining), 'color' => 'red'];
+        } elseif ($daysRemaining <= 30) {
+            $serviceStatus = ['status' => 'expiring_soon', 'text' => 'Končí platnosť', 'days' => (int)$daysRemaining, 'color' => 'orange'];
+        } elseif ($daysRemaining <= 90) {
+            $serviceStatus = ['status' => 'expiring', 'text' => 'Platná', 'days' => (int)$daysRemaining, 'color' => 'yellow'];
+        } else {
+            $serviceStatus = ['status' => 'valid', 'text' => 'Platná', 'days' => (int)$daysRemaining, 'color' => 'green'];
+        }
+        $serviceStatus['platnost_do'] = $platnostDo;
+        $serviceStatus['last_service'] = $lastRegularService['datum'];
+    }
+    
     header('Content-Type: application/json');
     echo json_encode([
         'device' => $device,
-        'reports' => $reports
+        'reports' => $reports,
+        'service_status' => $serviceStatus
     ]);
     exit;
 }
@@ -1037,6 +1129,167 @@ function getDeviceReports(): void
     
     header('Content-Type: application/json');
     echo json_encode($stmt->fetchAll());
+    exit;
+}
+
+function getDetailedStats(): void
+{
+    $pdo = getDbConnection();
+    
+    // Filter podľa obdobia
+    $period = get('period', 'month'); // month, year, custom
+    $startDate = get('start_date', date('Y-m-01'));
+    $endDate = get('end_date', date('Y-m-t'));
+    
+    if ($period === 'month') {
+        $startDate = date('Y-m-01');
+        $endDate = date('Y-m-t');
+    } elseif ($period === 'year') {
+        $startDate = date('Y-01-01');
+        $endDate = date('Y-12-31');
+    }
+    
+    // Základné počty
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM customers");
+    $customersCount = $stmt->fetch()['count'];
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM locations");
+    $locationsCount = $stmt->fetch()['count'];
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM devices");
+    $devicesCount = $stmt->fetch()['count'];
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM reports");
+    $totalReportsCount = $stmt->fetch()['count'];
+    
+    // Počty protokolov v období
+    $stmt = $pdo->prepare("
+        SELECT 
+            COUNT(*) as total,
+            COUNT(CASE WHEN typ_servisu = 'pravidelny' THEN 1 END) as pravidelne,
+            COUNT(CASE WHEN typ_servisu = 'porucha' THEN 1 END) as poruchy
+        FROM reports 
+        WHERE datum BETWEEN ? AND ?
+    ");
+    $stmt->execute([$startDate, $endDate]);
+    $periodStats = $stmt->fetch();
+    
+    // Protokoly po mesiacoch v aktuálnom roku
+    $stmt = $pdo->prepare("
+        SELECT 
+            strftime('%Y-%m', datum) as month,
+            COUNT(*) as total,
+            COUNT(CASE WHEN typ_servisu = 'pravidelny' THEN 1 END) as pravidelne,
+            COUNT(CASE WHEN typ_servisu = 'porucha' THEN 1 END) as poruchy
+        FROM reports 
+        WHERE strftime('%Y', datum) = ?
+        GROUP BY strftime('%Y-%m', datum)
+        ORDER BY month ASC
+    ");
+    $stmt->execute([date('Y')]);
+    $monthlyData = $stmt->fetchAll();
+    
+    // Top zákazníci podľa počtu protokolov
+    $stmt = $pdo->query("
+        SELECT c.nazov_firmy, COUNT(r.id) as protocols_count
+        FROM customers c
+        LEFT JOIN reports r ON c.id = r.customer_id
+        GROUP BY c.id
+        ORDER BY protocols_count DESC
+        LIMIT 5
+    ");
+    $topCustomers = $stmt->fetchAll();
+    
+    // Zariadenia s končiacou platnosťou
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count
+        FROM (
+            SELECT d.id, MAX(r.platnost_do) as latest_platnost
+            FROM devices d
+            LEFT JOIN reports r ON d.id = r.device_id AND r.typ_servisu = 'pravidelny' AND r.platnost_do IS NOT NULL
+            GROUP BY d.id
+            HAVING latest_platnost IS NOT NULL AND latest_platnost <= date('now', '+30 days')
+        )
+    ");
+    $stmt->execute();
+    $expiringCount = $stmt->fetch()['count'];
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'customers' => $customersCount,
+        'locations' => $locationsCount,
+        'devices' => $devicesCount,
+        'total_reports' => $totalReportsCount,
+        'period' => [
+            'start' => $startDate,
+            'end' => $endDate,
+            'total' => $periodStats['total'],
+            'pravidelne' => $periodStats['pravidelne'],
+            'poruchy' => $periodStats['poruchy']
+        ],
+        'monthly_data' => $monthlyData,
+        'top_customers' => $topCustomers,
+        'expiring_count' => $expiringCount
+    ]);
+    exit;
+}
+
+function getExpiringDevices(): void
+{
+    $pdo = getDbConnection();
+    
+    $days = (int)get('days', 30);
+    $futureDate = date('Y-m-d', strtotime("+$days days"));
+    
+    // Zariadenia s končiacou platnosťou
+    $stmt = $pdo->prepare("
+        SELECT d.id, d.nazov, d.interne_oznacenie, d.typ, d.vyrobne_cislo,
+               l.nazov as location_name, l.adresa as location_adresa,
+               c.nazov_firmy, c.id as customer_id, c.telefon as customer_phone,
+               latest.platnost_do, latest.datum as last_service
+        FROM devices d
+        LEFT JOIN locations l ON d.location_id = l.id
+        LEFT JOIN customers c ON l.customer_id = c.id
+        LEFT JOIN (
+            SELECT device_id, datum, platnost_do
+            FROM reports r1
+            WHERE typ_servisu = 'pravidelny' 
+            AND platnost_do IS NOT NULL
+            AND datum = (
+                SELECT MAX(r2.datum) 
+                FROM reports r2 
+                WHERE r2.device_id = r1.device_id 
+                AND r2.typ_servisu = 'pravidelny' 
+                AND r2.platnost_do IS NOT NULL
+            )
+        ) latest ON d.id = latest.device_id
+        WHERE latest.platnost_do IS NOT NULL AND latest.platnost_do <= ?
+        ORDER BY latest.platnost_do ASC
+    ");
+    $stmt->execute([$futureDate]);
+    $devices = $stmt->fetchAll();
+    
+    // Pridať status ku každému zariadeniu
+    $today = date('Y-m-d');
+    foreach ($devices as &$device) {
+        $daysRemaining = (strtotime($device['platnost_do']) - strtotime($today)) / 86400;
+        if ($daysRemaining < 0) {
+            $device['status'] = 'expired';
+            $device['status_text'] = 'Vypršala pred ' . abs((int)$daysRemaining) . ' dňami';
+            $device['status_color'] = 'red';
+        } else {
+            $device['status'] = 'expiring';
+            $device['status_text'] = 'Končí o ' . (int)$daysRemaining . ' dní';
+            $device['status_color'] = 'orange';
+        }
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'devices' => $devices,
+        'total' => count($devices),
+        'filter_days' => $days
+    ]);
     exit;
 }
 
@@ -1061,6 +1314,7 @@ $pageView = $pageView ?? 'home';
             <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
             <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
             <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' ? 'active' : '' ?>">Zákazníci</a></li>
+            <li><a href="index.php?action=statistics" class="<?= $pageView === 'statistics' ? 'active' : '' ?>">Štatistiky</a></li>
         </ul>
     </nav>
 
@@ -1114,20 +1368,120 @@ $pageView = $pageView ?? 'home';
                 </div>
                 
                 <div class="dashboard-card full-width">
-                    <h3>Nadchádzajúce úlohy</h3>
-                    <div class="upcoming-tasks">
-                        <p class="placeholder-text">Tu sa budú zobrazovať nadchádzajúce servisné úlohy a pripomienky.</p>
-                        <ul class="task-list placeholder">
-                            <li class="task-item">
-                                <span class="task-text">Pravidelná údržba - Firma ABC s.r.o.</span>
-                                <span class="task-date">Čoskoro</span>
-                            </li>
-                            <li class="task-item">
-                                <span class="task-text">Kontaktovať zákazníka - XYZ a.s.</span>
-                                <span class="task-date">Čoskoro</span>
-                            </li>
-                        </ul>
+                    <h3>Končiaca platnosť prehliadok</h3>
+                    <div class="expiring-devices-summary" id="expiringDevicesSummary">
+                        <p class="loading">Načítavam...</p>
                     </div>
+                </div>
+                
+                <div class="dashboard-card full-width">
+                    <h3>Štatistiky aktuálneho mesiaca</h3>
+                    <div class="monthly-stats" id="monthlyStatsPreview">
+                        <p class="loading">Načítavam...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'statistics'): ?>
+        <!-- STATISTICS PAGE -->
+        <h1>Štatistiky</h1>
+        
+        <div class="statistics-page">
+            <!-- Základné štatistiky -->
+            <div class="stats-grid" id="statsGridDetailed">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" id="detailStatCustomers">-</div>
+                    <div class="stat-label">Zákazníci</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-number" id="detailStatLocations">-</div>
+                    <div class="stat-label">Prevádzky</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚙️</div>
+                    <div class="stat-number" id="detailStatDevices">-</div>
+                    <div class="stat-label">Zariadenia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-number" id="detailStatReports">-</div>
+                    <div class="stat-label">Protokoly celkom</div>
+                </div>
+            </div>
+            
+            <!-- Filter obdobia -->
+            <div class="period-filter dashboard-card">
+                <h3>Obdobie</h3>
+                <div class="filter-row">
+                    <button class="btn btn-outline period-btn active" data-period="month" onclick="filterByPeriod('month', this)">Tento mesiac</button>
+                    <button class="btn btn-outline period-btn" data-period="year" onclick="filterByPeriod('year', this)">Tento rok</button>
+                    <button class="btn btn-outline period-btn" data-period="custom" onclick="showCustomPeriod()">Vlastné obdobie</button>
+                </div>
+                <div class="custom-period" id="customPeriodForm" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Od:</label>
+                            <input type="date" id="periodStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Do:</label>
+                            <input type="date" id="periodEndDate">
+                        </div>
+                        <button class="btn btn-primary" onclick="applyCustomPeriod()">Aplikovať</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Štatistiky za obdobie -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>Protokoly za obdobie</h3>
+                    <div class="period-stats" id="periodStats">
+                        <p class="loading">Načítavam...</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3>Rozdelenie podľa typu</h3>
+                    <div class="type-breakdown" id="typeBreakdown">
+                        <p class="loading">Načítavam...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mesačný prehľad -->
+            <div class="dashboard-card full-width">
+                <h3>Mesačný prehľad (<?= date('Y') ?>)</h3>
+                <div class="monthly-chart" id="monthlyChart">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+            
+            <!-- Top zákazníci -->
+            <div class="dashboard-card full-width">
+                <h3>Top zákazníci podľa počtu protokolov</h3>
+                <div class="top-customers" id="topCustomers">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+            
+            <!-- Zariadenia s končiacou platnosťou -->
+            <div class="dashboard-card full-width">
+                <h3>Zariadenia s končiacou platnosťou</h3>
+                <div class="expiring-filter">
+                    <label>Zobraziť zariadenia končiace do: </label>
+                    <select id="expiringDaysFilter" onchange="loadExpiringDevices()">
+                        <option value="30">30 dní</option>
+                        <option value="60">60 dní</option>
+                        <option value="90">90 dní</option>
+                        <option value="180">6 mesiacov</option>
+                    </select>
+                </div>
+                <div class="expiring-devices-list" id="expiringDevicesList">
+                    <p class="loading">Načítavam...</p>
                 </div>
             </div>
         </div>
@@ -1536,17 +1890,29 @@ $pageView = $pageView ?? 'home';
                 </div>
                 <div class="form-row">
                     <div class="form-group">
+                        <label>Typ servisu *</label>
+                        <select name="typ_servisu" id="typ_servisu_select" required>
+                            <option value="pravidelny">Pravidelný servis (ročná prehliadka)</option>
+                            <option value="porucha">Porucha / Oprava</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Dátum servisu</label>
                         <input type="date" name="datum" value="<?= date('Y-m-d') ?>">
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label>Servis vykonal (meno technika)</label>
                         <input type="text" name="servis_vykonal" placeholder="Meno a priezvisko technika">
                     </div>
+                    <div class="form-group">
+                        <label>Objednávateľ</label>
+                        <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Objednávateľ</label>
-                    <input type="text" name="objednavatel" placeholder="Meno objednávateľa">
+                <div class="service-type-info" id="serviceTypeInfo">
+                    <p class="info-box info-box-blue">Pri pravidelnom servise sa automaticky nastaví platnosť prehliadky na 1 rok od dátumu servisu.</p>
                 </div>
 
                 <!-- Komponenty s prívodom aj odvodom -->
@@ -2401,6 +2767,9 @@ $pageView = $pageView ?? 'home';
                 if (deviceId) {
                     loadDeviceDetail(deviceId);
                 }
+            } else if (window.pageView === 'statistics') {
+                loadDetailedStats('month');
+                loadExpiringDevices();
             }
         });
         
@@ -2421,17 +2790,236 @@ $pageView = $pageView ?? 'home';
                     } else {
                         let html = '<ul class="report-list">';
                         stats.recent_reports.forEach(r => {
+                            const typeLabel = r.typ_servisu === 'porucha' ? '<span class="badge-sm badge-red">Porucha</span>' : '<span class="badge-sm badge-green">Prehliadka</span>';
                             html += `<li class="report-item">
                                 <span class="report-number">${r.cislo_protokolu}</span>
                                 <span class="report-customer">${r.nazov_firmy || 'N/A'}</span>
+                                <span class="report-type">${typeLabel}</span>
                                 <span class="report-date">${r.datum}</span>
                             </li>`;
                         });
                         html += '</ul>';
                         recentEl.innerHTML = html;
                     }
+                    
+                    // Zariadenia s končiacou platnosťou
+                    const expiringEl = document.getElementById('expiringDevicesSummary');
+                    if (stats.expiring_count === 0) {
+                        expiringEl.innerHTML = '<p class="no-data success">Žiadne zariadenia s končiacou platnosťou tento mesiac</p>';
+                    } else {
+                        let html = `<div class="expiring-alert">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-content">
+                                <strong>${stats.expiring_count} zariadení</strong> má končiacu platnosť prehliadky tento mesiac
+                            </div>
+                            <a href="index.php?action=statistics" class="btn btn-outline btn-sm">Zobraziť zoznam</a>
+                        </div>`;
+                        if (stats.expiring_this_month.length > 0) {
+                            html += '<ul class="expiring-list-mini">';
+                            stats.expiring_this_month.slice(0, 3).forEach(d => {
+                                html += `<li onclick="window.location.href='index.php?action=device_detail&device_id=${d.id}'" class="clickable">
+                                    <strong>${escapeHtml(d.nazov)}</strong> - ${escapeHtml(d.nazov_firmy || '')}
+                                    <span class="expiring-date">do ${d.platnost_do}</span>
+                                </li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        expiringEl.innerHTML = html;
+                    }
+                    
+                    // Mesačné štatistiky preview
+                    const monthlyEl = document.getElementById('monthlyStatsPreview');
+                    if (stats.monthly_stats) {
+                        const total = (stats.monthly_stats.pravidelne || 0) + (stats.monthly_stats.poruchy || 0);
+                        monthlyEl.innerHTML = `
+                            <div class="monthly-stats-preview">
+                                <div class="stat-item">
+                                    <span class="stat-value">${total}</span>
+                                    <span class="stat-desc">protokolov celkom</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value green">${stats.monthly_stats.pravidelne || 0}</span>
+                                    <span class="stat-desc">pravidelné servisy</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value red">${stats.monthly_stats.poruchy || 0}</span>
+                                    <span class="stat-desc">poruchy / opravy</span>
+                                </div>
+                            </div>
+                            <a href="index.php?action=statistics" class="btn btn-outline btn-sm">Podrobné štatistiky</a>
+                        `;
+                    } else {
+                        monthlyEl.innerHTML = '<p class="no-data">Zatiaľ žiadne protokoly tento mesiac</p>';
+                    }
                 })
                 .catch(err => console.error('Chyba:', err));
+        }
+        
+        // Statistics page functions
+        function loadDetailedStats(period, startDate = null, endDate = null) {
+            let url = `index.php?action=api_detailed_stats&period=${period}`;
+            if (startDate && endDate) {
+                url += `&start_date=${startDate}&end_date=${endDate}`;
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(stats => {
+                    // Základné počty
+                    document.getElementById('detailStatCustomers').textContent = stats.customers;
+                    document.getElementById('detailStatLocations').textContent = stats.locations;
+                    document.getElementById('detailStatDevices').textContent = stats.devices;
+                    document.getElementById('detailStatReports').textContent = stats.total_reports;
+                    
+                    // Štatistiky za obdobie
+                    const periodEl = document.getElementById('periodStats');
+                    periodEl.innerHTML = `
+                        <div class="period-stats-grid">
+                            <div class="period-stat">
+                                <span class="value">${stats.period.total || 0}</span>
+                                <span class="label">Protokolov celkom</span>
+                            </div>
+                            <div class="period-stat">
+                                <span class="value green">${stats.period.pravidelne || 0}</span>
+                                <span class="label">Pravidelných servisov</span>
+                            </div>
+                            <div class="period-stat">
+                                <span class="value red">${stats.period.poruchy || 0}</span>
+                                <span class="label">Porúch / Opráv</span>
+                            </div>
+                        </div>
+                        <p class="period-range">Obdobie: ${stats.period.start} - ${stats.period.end}</p>
+                    `;
+                    
+                    // Rozdelenie podľa typu - pie chart style
+                    const typeEl = document.getElementById('typeBreakdown');
+                    const total = (stats.period.pravidelne || 0) + (stats.period.poruchy || 0);
+                    if (total > 0) {
+                        const pravidelnePercent = Math.round((stats.period.pravidelne / total) * 100);
+                        const poruchyPercent = 100 - pravidelnePercent;
+                        typeEl.innerHTML = `
+                            <div class="type-bars">
+                                <div class="type-bar">
+                                    <span class="type-label">Pravidelné servisy</span>
+                                    <div class="bar-container">
+                                        <div class="bar green" style="width: ${pravidelnePercent}%"></div>
+                                    </div>
+                                    <span class="type-percent">${pravidelnePercent}%</span>
+                                </div>
+                                <div class="type-bar">
+                                    <span class="type-label">Poruchy / Opravy</span>
+                                    <div class="bar-container">
+                                        <div class="bar red" style="width: ${poruchyPercent}%"></div>
+                                    </div>
+                                    <span class="type-percent">${poruchyPercent}%</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        typeEl.innerHTML = '<p class="no-data">Žiadne dáta za toto obdobie</p>';
+                    }
+                    
+                    // Mesačný prehľad
+                    const monthlyEl = document.getElementById('monthlyChart');
+                    if (stats.monthly_data && stats.monthly_data.length > 0) {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+                        const maxVal = Math.max(...stats.monthly_data.map(m => m.total)) || 1;
+                        
+                        let html = '<div class="chart-bars">';
+                        for (let i = 1; i <= 12; i++) {
+                            const monthKey = `${new Date().getFullYear()}-${String(i).padStart(2, '0')}`;
+                            const monthData = stats.monthly_data.find(m => m.month === monthKey);
+                            const total = monthData ? monthData.total : 0;
+                            const pravidelne = monthData ? monthData.pravidelne : 0;
+                            const poruchy = monthData ? monthData.poruchy : 0;
+                            const height = (total / maxVal) * 100;
+                            
+                            html += `<div class="chart-bar-group">
+                                <div class="chart-bar-stack" style="height: ${height}%" title="Celkom: ${total}, Pravidelné: ${pravidelne}, Poruchy: ${poruchy}">
+                                    <div class="bar-segment green" style="height: ${pravidelne > 0 ? (pravidelne/total)*100 : 0}%"></div>
+                                    <div class="bar-segment red" style="height: ${poruchy > 0 ? (poruchy/total)*100 : 0}%"></div>
+                                </div>
+                                <span class="chart-label">${months[i-1]}</span>
+                                <span class="chart-value">${total}</span>
+                            </div>`;
+                        }
+                        html += '</div>';
+                        html += '<div class="chart-legend"><span class="legend-item"><span class="dot green"></span> Pravidelné</span><span class="legend-item"><span class="dot red"></span> Poruchy</span></div>';
+                        monthlyEl.innerHTML = html;
+                    } else {
+                        monthlyEl.innerHTML = '<p class="no-data">Žiadne dáta za tento rok</p>';
+                    }
+                    
+                    // Top zákazníci
+                    const topEl = document.getElementById('topCustomers');
+                    if (stats.top_customers && stats.top_customers.length > 0) {
+                        let html = '<table class="simple-table"><thead><tr><th>#</th><th>Zákazník</th><th>Počet protokolov</th></tr></thead><tbody>';
+                        stats.top_customers.forEach((c, idx) => {
+                            html += `<tr>
+                                <td>${idx + 1}</td>
+                                <td>${escapeHtml(c.nazov_firmy)}</td>
+                                <td><strong>${c.protocols_count}</strong></td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table>';
+                        topEl.innerHTML = html;
+                    } else {
+                        topEl.innerHTML = '<p class="no-data">Žiadni zákazníci</p>';
+                    }
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function loadExpiringDevices() {
+            const daysFilter = document.getElementById('expiringDaysFilter');
+            const days = daysFilter ? daysFilter.value : 30;
+            
+            fetch(`index.php?action=api_expiring_devices&days=${days}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('expiringDevicesList');
+                    if (!data.devices || data.devices.length === 0) {
+                        container.innerHTML = '<p class="no-data success">Žiadne zariadenia s končiacou platnosťou v tomto období</p>';
+                        return;
+                    }
+                    
+                    let html = `<p class="summary-text">Celkom <strong>${data.total}</strong> zariadení s platnosťou končiacou do ${days} dní</p>`;
+                    html += '<table class="simple-table expiring-table"><thead><tr><th>Zariadenie</th><th>Zákazník</th><th>Prevádzka</th><th>Posledný servis</th><th>Platnosť do</th><th>Stav</th></tr></thead><tbody>';
+                    data.devices.forEach(d => {
+                        html += `<tr class="clickable" onclick="window.location.href='index.php?action=device_detail&device_id=${d.id}'">
+                            <td><strong>${escapeHtml(d.nazov)}</strong><br><small>${d.interne_oznacenie || ''}</small></td>
+                            <td>${escapeHtml(d.nazov_firmy || '-')}</td>
+                            <td>${escapeHtml(d.location_name || '-')}</td>
+                            <td>${d.last_service || '-'}</td>
+                            <td>${d.platnost_do}</td>
+                            <td><span class="status-badge status-${d.status_color}">${d.status_text}</span></td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function filterByPeriod(period, btn) {
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('customPeriodForm').style.display = 'none';
+            loadDetailedStats(period);
+        }
+        
+        function showCustomPeriod() {
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-period="custom"]').classList.add('active');
+            document.getElementById('customPeriodForm').style.display = 'flex';
+        }
+        
+        function applyCustomPeriod() {
+            const startDate = document.getElementById('periodStartDate').value;
+            const endDate = document.getElementById('periodEndDate').value;
+            if (startDate && endDate) {
+                loadDetailedStats('custom', startDate, endDate);
+            }
         }
         
         // Customers list funkcie
@@ -2691,6 +3279,34 @@ $pageView = $pageView ?? 'home';
                     infoHtml += `<div class="info-item"><strong>Servisné stredisko:</strong> ${d.servisne_stredisko || '-'}</div>`;
                     infoHtml += `<div class="info-item"><strong>Tel. servisu:</strong> ${d.servisne_stredisko_tel || '-'}</div>`;
                     infoHtml += '</div>';
+                    
+                    // Pridať informácie o platnosti prehliadky
+                    if (data.service_status) {
+                        const status = data.service_status;
+                        infoHtml += `<div class="service-status-box status-${status.color}">
+                            <h4>Stav pravidelnej prehliadky</h4>
+                            <div class="status-details">
+                                <div class="status-item">
+                                    <span class="label">Posledný servis:</span>
+                                    <span class="value">${status.last_service}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Platnosť do:</span>
+                                    <span class="value">${status.platnost_do}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Stav:</span>
+                                    <span class="value status-badge status-${status.color}">${status.text}${status.days > 0 ? ' (' + status.days + ' dní)' : ''}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    } else {
+                        infoHtml += `<div class="service-status-box status-gray">
+                            <h4>Stav pravidelnej prehliadky</h4>
+                            <p class="no-data">Žiadna pravidelná prehliadka zatiaľ nebola vykonaná</p>
+                        </div>`;
+                    }
+                    
                     document.getElementById('deviceInfo').innerHTML = infoHtml;
                     
                     // Protokoly zariadenia
@@ -2699,12 +3315,15 @@ $pageView = $pageView ?? 'home';
                         repHtml = '<p class="no-data">Žiadne protokoly pre toto zariadenie</p>';
                     } else {
                         repHtml = '<div class="reports-table"><table>';
-                        repHtml += '<thead><tr><th>Číslo protokolu</th><th>Dátum</th><th>Servis vykonal</th><th>Akcia</th></tr></thead>';
+                        repHtml += '<thead><tr><th>Číslo protokolu</th><th>Typ</th><th>Dátum</th><th>Platnosť do</th><th>Servis vykonal</th><th>Akcia</th></tr></thead>';
                         repHtml += '<tbody>';
                         data.reports.forEach(r => {
+                            const typeLabel = r.typ_servisu === 'porucha' ? '<span class="badge-sm badge-red">Porucha</span>' : '<span class="badge-sm badge-green">Prehliadka</span>';
                             repHtml += `<tr>
                                 <td>${r.cislo_protokolu}</td>
+                                <td>${typeLabel}</td>
                                 <td>${r.datum}</td>
+                                <td>${r.platnost_do || '-'}</td>
                                 <td>${r.servis_vykonal || '-'}</td>
                                 <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
                             </tr>`;

@@ -1815,3 +1815,504 @@ select {
         grid-template-columns: 1fr;
     }
 }
+
+/* Statistics and Dashboard Enhancements */
+.statistics-page {
+    max-width: 1200px;
+}
+
+.statistics-page .stats-grid {
+    margin-bottom: 30px;
+}
+
+/* Period filter */
+.period-filter {
+    margin-bottom: 30px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.period-btn {
+    padding: 10px 20px;
+}
+
+.period-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.custom-period {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.custom-period .form-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+/* Period stats grid */
+.period-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.period-stat {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.period-stat .value {
+    font-size: 32px;
+    font-weight: bold;
+    display: block;
+}
+
+.period-stat .value.green {
+    color: #27ae60;
+}
+
+.period-stat .value.red {
+    color: #e74c3c;
+}
+
+.period-stat .label {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.period-range {
+    color: #95a5a6;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Type breakdown bars */
+.type-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.type-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.type-bar .type-label {
+    width: 150px;
+    font-weight: 500;
+}
+
+.bar-container {
+    flex: 1;
+    height: 24px;
+    background: #ecf0f1;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-container .bar {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.5s ease;
+}
+
+.bar-container .bar.green {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.bar-container .bar.red {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+}
+
+.type-percent {
+    width: 50px;
+    text-align: right;
+    font-weight: bold;
+}
+
+/* Monthly chart */
+.chart-bars {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 200px;
+    padding-top: 20px;
+    gap: 8px;
+}
+
+.chart-bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.chart-bar-stack {
+    width: 100%;
+    max-width: 40px;
+    min-height: 5px;
+    background: #ecf0f1;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow: hidden;
+}
+
+.bar-segment {
+    width: 100%;
+    min-height: 2px;
+}
+
+.bar-segment.green {
+    background: #27ae60;
+}
+
+.bar-segment.red {
+    background: #e74c3c;
+}
+
+.chart-label {
+    font-size: 11px;
+    color: #7f8c8d;
+    margin-top: 8px;
+}
+
+.chart-value {
+    font-size: 12px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ecf0f1;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.legend-item .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-item .dot.green {
+    background: #27ae60;
+}
+
+.legend-item .dot.red {
+    background: #e74c3c;
+}
+
+/* Simple table */
+.simple-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.simple-table th,
+.simple-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.simple-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.simple-table tr:hover {
+    background: #f8f9fa;
+}
+
+.simple-table tr.clickable {
+    cursor: pointer;
+}
+
+.simple-table tr.clickable:hover {
+    background: #ebf5ff;
+}
+
+/* Expiring devices */
+.expiring-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.expiring-filter select {
+    padding: 8px 15px;
+    border: 2px solid #ecf0f1;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.expiring-table .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.status-green {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.status-yellow {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.status-orange {
+    background: #ffe5d0;
+    color: #c44d24;
+}
+
+.status-badge.status-red {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.summary-text {
+    margin-bottom: 15px;
+    color: #34495e;
+}
+
+/* Dashboard enhancements */
+.expiring-alert {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.alert-icon {
+    font-size: 24px;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.expiring-list-mini {
+    list-style: none;
+}
+
+.expiring-list-mini li {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expiring-list-mini li:hover {
+    background: #ebf5ff;
+}
+
+.expiring-date {
+    color: #e74c3c;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.monthly-stats-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.stat-item .stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-item .stat-value.green {
+    color: #27ae60;
+}
+
+.stat-item .stat-value.red {
+    color: #e74c3c;
+}
+
+.stat-item .stat-desc {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.no-data.success {
+    color: #27ae60;
+}
+
+/* Badge small variants */
+.badge-sm {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-sm.badge-green {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-sm.badge-red {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Service status box in device detail */
+.service-status-box {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    border-left: 4px solid #3498db;
+}
+
+.service-status-box.status-green {
+    border-left-color: #27ae60;
+    background: #f0fff4;
+}
+
+.service-status-box.status-yellow {
+    border-left-color: #f39c12;
+    background: #fffbeb;
+}
+
+.service-status-box.status-orange {
+    border-left-color: #e67e22;
+    background: #fff8f0;
+}
+
+.service-status-box.status-red {
+    border-left-color: #e74c3c;
+    background: #fff5f5;
+}
+
+.service-status-box.status-gray {
+    border-left-color: #95a5a6;
+    background: #f8f9fa;
+}
+
+.service-status-box h4 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.status-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.status-details .status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.status-details .label {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.status-details .value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Info box for service type */
+.info-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.info-box.info-box-blue {
+    background: #ebf5ff;
+    color: #1e3a5f;
+    border-left: 3px solid #3498db;
+}
+
+/* Report list with type badge */
+.report-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.report-item .report-type {
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .period-stats-grid,
+    .monthly-stats-preview {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-bars {
+        height: 150px;
+    }
+    
+    .chart-label {
+        font-size: 9px;
+    }
+    
+    .expiring-alert {
+        flex-direction: column;
+        text-align: center;
+    }
+}

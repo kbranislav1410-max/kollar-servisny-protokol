@@ -479,6 +479,19 @@ if (!isset($photosGeneral)) {
     <div class="protocol-header">
         <h1>Protokol k servisnému výkonu</h1>
         <div class="protocol-number">č. <?= htmlspecialchars($report['cislo_protokolu'] ?? 'N/A') ?></div>
+        <?php 
+        $typServisu = $report['typ_servisu'] ?? 'pravidelny';
+        $typLabel = ($typServisu === 'porucha') ? 'PORUCHA / OPRAVA' : 'PRAVIDELNÝ SERVIS';
+        $typColor = ($typServisu === 'porucha') ? '#e74c3c' : '#27ae60';
+        ?>
+        <div class="service-type" style="margin-top: 8px; padding: 4px 15px; background: <?= $typColor ?>; color: white; display: inline-block; border-radius: 15px; font-size: 9pt; font-weight: bold;">
+            <?= $typLabel ?>
+        </div>
+        <?php if (!empty($report['platnost_do']) && $typServisu === 'pravidelny'): ?>
+        <div class="validity-info" style="margin-top: 6px; font-size: 8pt; color: #666;">
+            Platnosť prehliadky do: <strong><?= htmlspecialchars($report['platnost_do']) ?></strong>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Sekcia 1: Prevádzka a Interné označenie zariadenia -->
