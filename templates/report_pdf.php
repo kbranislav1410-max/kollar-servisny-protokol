@@ -19,6 +19,83 @@ function getImageDataUri($path) {
     return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
 }
 
+/**
+ * Preklad stavu komponentu
+ */
+function getStavLabel($stav) {
+    $stavy = [
+        'cisty' => 'Čistý',
+        'mierne_znecisteny' => 'Mierne znečistený',
+        'znecisteny' => 'Znečistený',
+        'silno_znecisteny' => 'Silno znečistený',
+        'poskodeny' => 'Poškodený'
+    ];
+    return $stavy[$stav] ?? $stav;
+}
+
+/**
+ * Preklad typu komponentu
+ */
+function getTypLabel($key, $value) {
+    $typyKlapky = [
+        'bez_servopohonu' => 'Bez servopohonu',
+        'so_servopohonom' => 'So servopohonom'
+    ];
+    $typyFilter = [
+        'bez_filtra' => 'Bez filtra',
+        'kapsovy' => 'Kapsový',
+        'kazetovy' => 'Kazetový',
+        'firon' => 'Fíron'
+    ];
+    $typyRekuperator = [
+        'doskovy' => 'Doskový',
+        'rotacny' => 'Rotačný'
+    ];
+    $typyRecirkulacia = [
+        's_recirkulaciou' => 'S recirkuláciou',
+        'bez_recirkulacie' => 'Bez recirkulácie'
+    ];
+    $typyPohon = [
+        'napriamo' => 'Napriamo',
+        'sprevodovany' => 'Sprevodovaný'
+    ];
+    $typyChladic = [
+        'vodny' => 'Vodný',
+        'priamy' => 'Priamy'
+    ];
+    $typyOhrievac = [
+        'vodny' => 'Vodný',
+        'elektricky' => 'Elektrický',
+        'plynovy' => 'Plynový'
+    ];
+    $typyTermostat = [
+        'ma' => 'Má',
+        'nema' => 'Nemá'
+    ];
+    $typyBypass = [
+        's_bypasom' => 'S bypasom',
+        'bez_bypasu' => 'Bez bypasu'
+    ];
+    $typyServo = [
+        'so_servopohonom' => 'So servopohonom',
+        'bez_servopohonu' => 'Bez servopohonu'
+    ];
+    
+    // Match based on key
+    if (strpos($key, 'klapky') !== false) return $typyKlapky[$value] ?? $value;
+    if (strpos($key, 'filter') !== false) return $typyFilter[$value] ?? $value;
+    if (strpos($key, 'rekuperator') !== false) return $typyRekuperator[$value] ?? $value;
+    if (strpos($key, 'recirkulacia') !== false) return $typyRecirkulacia[$value] ?? $value;
+    if (strpos($key, 'pohon') !== false) return $typyPohon[$value] ?? $value;
+    if (strpos($key, 'chladic') !== false) return $typyChladic[$value] ?? $value;
+    if (strpos($key, 'ohrievac') !== false) return $typyOhrievac[$value] ?? $value;
+    if (strpos($key, 'termostat') !== false) return $typyTermostat[$value] ?? $value;
+    if (strpos($key, 'bypass') !== false && strpos($key, 'servo') === false) return $typyBypass[$value] ?? $value;
+    if (strpos($key, 'servo') !== false) return $typyServo[$value] ?? $value;
+    
+    return $value;
+}
+
 // Defensive initialization of variables that should be passed from including file
 if (!isset($sekcieData)) {
     $sekcieData = [];
@@ -44,43 +121,43 @@ if (!isset($photosGeneral)) {
             font-size: 9pt;
             line-height: 1.4;
             color: #333;
-            padding: 20px;
+            padding: 15px;
             background: #fff;
         }
         
         /* Hlavička protokolu */
         .protocol-header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #3498db;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #2c3e50;
         }
         .protocol-header h1 {
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #2c3e50;
         }
         .protocol-number {
-            font-size: 12pt;
+            font-size: 11pt;
             font-weight: bold;
-            color: #3498db;
+            color: #34495e;
         }
         
         /* Moderná sekcia s oblými tvarmi */
         .info-section {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .info-row {
             display: table;
             width: 100%;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .info-card {
             display: table-cell;
             background: #f8f9fa;
-            padding: 12px 15px;
+            padding: 10px 12px;
             vertical-align: top;
         }
         .info-card-left {
@@ -102,15 +179,15 @@ if (!isset($photosGeneral)) {
         .info-label {
             font-weight: bold;
             color: #555;
-            font-size: 8pt;
-            margin-bottom: 3px;
+            font-size: 7pt;
+            margin-bottom: 2px;
         }
         .info-value {
-            font-size: 9pt;
+            font-size: 8pt;
             color: #222;
         }
         .info-item {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .info-item:last-child {
             margin-bottom: 0;
@@ -118,94 +195,153 @@ if (!isset($photosGeneral)) {
         
         /* Sekcia nadpis - moderný štýl */
         .section-title {
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: bold;
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #2c3e50;
             color: #fff;
-            padding: 8px 12px;
-            margin: 15px 0 10px 0;
+            padding: 6px 10px;
+            margin: 12px 0 8px 0;
         }
         
-        /* Hlavná tabuľka komponentov - moderný štýl */
-        .components-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-bottom: 15px;
-            font-size: 8pt;
+        /* Komponent karta */
+        .component-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
         }
-        .components-table th {
+        .component-header {
             background: #34495e;
             color: #fff;
+            padding: 6px 10px;
             font-weight: bold;
-            text-align: center;
-            padding: 8px 6px;
+            font-size: 9pt;
         }
-        .components-table th:first-child {
+        .component-body {
+            padding: 8px 10px;
         }
-        .components-table th:last-child {
-        }
-        .components-table td {
+        .component-specs {
+            background: #f8f9fa;
             padding: 6px 8px;
-            text-align: left;
-            vertical-align: middle;
-            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 6px;
+            font-size: 8pt;
         }
-        .components-table .col-component {
-            width: 18%;
+        .component-specs-row {
+            display: table;
+            width: 100%;
+        }
+        .component-spec-item {
+            display: table-cell;
+            width: 33%;
+            padding-right: 10px;
+        }
+        .spec-label {
             font-weight: bold;
-            color: #2c3e50;
-            background: #f4f6f7;
+            color: #666;
+            font-size: 7pt;
         }
-        .components-table .col-type {
-            width: 22%;
-            background: #fafbfc;
+        .spec-value {
+            font-size: 8pt;
+            color: #222;
         }
-        .components-table .col-state {
-            width: 30%;
+        .priv-odv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
         }
-        .components-table tr:nth-child(even) td {
-            background-color: #f9fafb;
-        }
-        .components-table tr:nth-child(even) td.col-component {
+        .priv-odv-table th {
             background: #ecf0f1;
+            padding: 5px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            width: 50%;
         }
-        .components-table tr:hover td {
-            background-color: #eef5fb;
+        .priv-odv-table td {
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        .state-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 7pt;
+            font-weight: bold;
+        }
+        .state-cisty { background: #d4edda; color: #155724; }
+        .state-mierne_znecisteny { background: #fff3cd; color: #856404; }
+        .state-znecisteny { background: #ffe0b2; color: #e65100; }
+        .state-silno_znecisteny { background: #ffcdd2; color: #c62828; }
+        .state-poskodeny { background: #f8d7da; color: #721c24; }
+        .component-note {
+            font-size: 7pt;
+            color: #666;
+            font-style: italic;
+            margin-top: 3px;
+        }
+        
+        /* Komponenty len s jedným stavom */
+        .single-component {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 6px;
+            padding: 8px 10px;
+        }
+        .single-component-title {
+            font-weight: bold;
+            font-size: 9pt;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        .single-component-content {
+            display: table;
+            width: 100%;
+        }
+        .single-component-specs {
+            display: table-cell;
+            width: 60%;
+            font-size: 8pt;
+        }
+        .single-component-state {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
         }
         
         /* Poznámky - moderný štýl */
         .notes-section {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .notes-box {
             background: #fafbfc;
-            padding: 10px 12px;
-            min-height: 40px;
+            padding: 8px 10px;
+            min-height: 30px;
             border-left: 3px solid #3498db;
+            font-size: 8pt;
         }
         .notes-label {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: #2c3e50;
+            font-size: 8pt;
         }
         
         /* Fotografie - moderný štýl */
         .photos-section {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
         .photos-grid {
             display: block;
         }
         .photos-row {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .photos-row-title {
             font-weight: bold;
-            font-size: 9pt;
-            margin-bottom: 8px;
-            padding: 6px 10px;
+            font-size: 8pt;
+            margin-bottom: 6px;
+            padding: 4px 8px;
             background: #ecf0f1;
             color: #2c3e50;
         }
@@ -218,19 +354,19 @@ if (!isset($photosGeneral)) {
         }
         .photo-item img {
             max-width: 100%;
-            max-height: 100px;
-            border: 2px solid #e0e0e0;
+            max-height: 90px;
+            border: 1px solid #e0e0e0;
         }
         .photo-caption {
-            font-size: 7pt;
+            font-size: 6pt;
             color: #666;
-            margin-top: 3px;
+            margin-top: 2px;
             word-break: break-all;
         }
         
         /* Podpisy - moderný štýl */
         .signatures-section {
-            margin-top: 20px;
+            margin-top: 15px;
             page-break-inside: avoid;
         }
         .signatures-row {
@@ -241,7 +377,7 @@ if (!isset($photosGeneral)) {
             display: table-cell;
             width: 48%;
             background: #f8f9fa;
-            padding: 12px;
+            padding: 10px;
             vertical-align: top;
         }
         .signature-separator {
@@ -250,35 +386,35 @@ if (!isset($photosGeneral)) {
         }
         .signature-label {
             font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 9pt;
+            margin-bottom: 4px;
+            font-size: 8pt;
             color: #2c3e50;
         }
         .signature-box {
-            min-height: 60px;
-            border: 2px dashed #bdc3c7;
-            margin: 8px 0;
+            min-height: 50px;
+            border: 1px dashed #bdc3c7;
+            margin: 6px 0;
             text-align: center;
-            padding: 5px;
+            padding: 4px;
             background: #fff;
         }
         .signature-box img {
-            max-width: 150px;
-            max-height: 55px;
+            max-width: 120px;
+            max-height: 45px;
         }
         .signature-line {
             border-top: 1px solid #bdc3c7;
-            margin-top: 8px;
-            padding-top: 5px;
-            font-size: 8pt;
+            margin-top: 6px;
+            padding-top: 4px;
+            font-size: 7pt;
             text-align: center;
             color: #7f8c8d;
         }
         
         /* Dolná sekcia - dátum a miesto */
         .footer-info {
-            margin-top: 15px;
-            padding: 10px 12px;
+            margin-top: 12px;
+            padding: 8px 10px;
             background: #f4f6f7;
         }
         .footer-info-table {
@@ -286,8 +422,8 @@ if (!isset($photosGeneral)) {
             border-collapse: collapse;
         }
         .footer-info-table td {
-            padding: 3px 5px;
-            font-size: 8pt;
+            padding: 2px 4px;
+            font-size: 7pt;
         }
         .footer-info-table .label {
             font-weight: bold;
@@ -297,10 +433,10 @@ if (!isset($photosGeneral)) {
         
         /* Footer */
         .footer {
-            margin-top: 20px;
-            padding-top: 10px;
+            margin-top: 15px;
+            padding-top: 8px;
             border-top: 1px solid #e0e0e0;
-            font-size: 7pt;
+            font-size: 6pt;
             color: #999;
             text-align: center;
         }
@@ -409,53 +545,430 @@ if (!isset($photosGeneral)) {
         </div>
     </div>
 
-    <!-- Tabuľka stavu komponentov -->
+    <!-- Sekcia: Zistený stav komponentov - PRÍVOD a ODVOD -->
     <div class="section-title">Zistený stav komponentov</div>
-    <table class="components-table">
-        <thead>
-            <tr>
-                <th class="col-component">Komponent</th>
-                <th class="col-type">Popis / Typ</th>
-                <th class="col-state">Stav prívod - zistený stav</th>
-                <th class="col-state">Stav odvod - zistený stav</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Definícia komponentov
-            $komponenty = [
-                ['key' => 'klapky', 'name' => 'Klapky', 'dual' => true],
-                ['key' => 'filtracia', 'name' => 'Filtrácia', 'dual' => true],
-                ['key' => 'recirkulacia', 'name' => 'Recirkulácia', 'dual' => true],
-                ['key' => 'rekuperacia', 'name' => 'Rekuperácia', 'dual' => true],
-                ['key' => 'ventilator', 'name' => 'Ventilátor', 'dual' => true],
-                ['key' => 'el_motor', 'name' => 'El. motor', 'dual' => true],
-                ['key' => 'remene', 'name' => 'Klinové remeňe', 'dual' => true],
-                ['key' => 'chladic', 'name' => 'Chladič', 'dual' => true],
-                ['key' => 'ohrievac', 'name' => 'Ohrievač', 'dual' => true],
-                ['key' => 'bypass_klapka', 'name' => 'Klapka bypassu', 'dual' => false],
-                ['key' => 'bypass_servo', 'name' => 'Servopohon bypassu', 'dual' => false],
-                ['key' => 'termostat', 'name' => 'Termostat', 'dual' => false],
-                ['key' => 'plynovy_horak', 'name' => 'Plynový horák', 'dual' => false],
-                ['key' => 'mar', 'name' => 'MaR systém', 'dual' => false],
-            ];
-            
-            foreach ($komponenty as $komp):
-                $data = $sekcieData[$komp['key']] ?? [];
-            ?>
-            <tr>
-                <td class="col-component"><?= htmlspecialchars($komp['name']) ?></td>
-                <td><?= htmlspecialchars($data['typ'] ?? '-') ?></td>
-                <?php if ($komp['dual']): ?>
-                <td><?= htmlspecialchars($data['privod'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($data['odvod'] ?? '-') ?></td>
-                <?php else: ?>
-                <td colspan="2"><?= htmlspecialchars($data['stav'] ?? '-') ?></td>
+
+    <?php
+    // KLAPKY
+    $klapky = $sekcieData['klapky'] ?? [];
+    if (!empty($klapky['typ']) || !empty($klapky['privod_stav']) || !empty($klapky['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Klapky</div>
+        <div class="component-body">
+            <?php if (!empty($klapky['typ'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <div class="component-spec-item">
+                        <div class="spec-label">Typ:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('klapky', $klapky['typ'])) ?></div>
+                    </div>
+                    <?php if ($klapky['typ'] === 'so_servopohonom' && !empty($klapky['servo_typ'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Servopohon:</div>
+                        <div class="spec-value"><?= htmlspecialchars($klapky['servo_typ']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($klapky['moment'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Moment:</div>
+                        <div class="spec-value"><?= htmlspecialchars($klapky['moment']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($klapky['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $klapky['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($klapky['privod_stav'])) ?></span>
+                        <?php if (!empty($klapky['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($klapky['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($klapky['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $klapky['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($klapky['odvod_stav'])) ?></span>
+                        <?php if (!empty($klapky['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($klapky['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // FILTER
+    $filter = $sekcieData['filter'] ?? [];
+    if (!empty($filter['typ']) || !empty($filter['privod_stav']) || !empty($filter['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Filter</div>
+        <div class="component-body">
+            <?php if (!empty($filter['typ']) || !empty($filter['rozmer'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <?php if (!empty($filter['typ'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Typ:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('filter', $filter['typ'])) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($filter['rozmer'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Rozmer:</div>
+                        <div class="spec-value"><?= htmlspecialchars($filter['rozmer']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($filter['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $filter['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($filter['privod_stav'])) ?></span>
+                        <?php if (!empty($filter['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($filter['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($filter['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $filter['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($filter['odvod_stav'])) ?></span>
+                        <?php if (!empty($filter['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($filter['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // REKUPERÁTOR
+    $rekuperator = $sekcieData['rekuperator'] ?? [];
+    if (!empty($rekuperator['typ']) || !empty($rekuperator['privod_stav']) || !empty($rekuperator['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Rekuperátor</div>
+        <div class="component-body">
+            <?php if (!empty($rekuperator['typ'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <div class="component-spec-item">
+                        <div class="spec-label">Typ:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('rekuperator', $rekuperator['typ'])) ?></div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($rekuperator['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $rekuperator['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($rekuperator['privod_stav'])) ?></span>
+                        <?php if (!empty($rekuperator['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($rekuperator['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($rekuperator['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $rekuperator['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($rekuperator['odvod_stav'])) ?></span>
+                        <?php if (!empty($rekuperator['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($rekuperator['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // RECIRKULÁCIA
+    $recirkulacia = $sekcieData['recirkulacia'] ?? [];
+    if (!empty($recirkulacia['typ']) || !empty($recirkulacia['privod_stav']) || !empty($recirkulacia['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Recirkulácia</div>
+        <div class="component-body">
+            <?php if (!empty($recirkulacia['typ'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <div class="component-spec-item">
+                        <div class="spec-label">Typ:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('recirkulacia', $recirkulacia['typ'])) ?></div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($recirkulacia['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $recirkulacia['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($recirkulacia['privod_stav'])) ?></span>
+                        <?php if (!empty($recirkulacia['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($recirkulacia['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($recirkulacia['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $recirkulacia['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($recirkulacia['odvod_stav'])) ?></span>
+                        <?php if (!empty($recirkulacia['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($recirkulacia['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // VENTILÁTOR
+    $ventilator = $sekcieData['ventilator'] ?? [];
+    if (!empty($ventilator['typ']) || !empty($ventilator['privod_stav']) || !empty($ventilator['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Ventilátor</div>
+        <div class="component-body">
+            <?php if (!empty($ventilator['typ']) || !empty($ventilator['pohon'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <?php if (!empty($ventilator['typ'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Typ:</div>
+                        <div class="spec-value"><?= htmlspecialchars($ventilator['typ']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($ventilator['pohon'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Pohon:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('pohon', $ventilator['pohon'])) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($ventilator['remenica_typ'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Remenica:</div>
+                        <div class="spec-value"><?= htmlspecialchars($ventilator['remenica_typ']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($ventilator['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $ventilator['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($ventilator['privod_stav'])) ?></span>
+                        <?php if (!empty($ventilator['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($ventilator['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($ventilator['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $ventilator['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($ventilator['odvod_stav'])) ?></span>
+                        <?php if (!empty($ventilator['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($ventilator['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // ELEKTRO MOTOR
+    $motor = $sekcieData['el_motor'] ?? [];
+    if (!empty($motor['vykon']) || !empty($motor['privod_stav']) || !empty($motor['odvod_stav'])):
+    ?>
+    <div class="component-card">
+        <div class="component-header">Elektro motor</div>
+        <div class="component-body">
+            <?php if (!empty($motor['vykon']) || !empty($motor['pohon'])): ?>
+            <div class="component-specs">
+                <div class="component-specs-row">
+                    <?php if (!empty($motor['vykon'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Výkon/Príkon:</div>
+                        <div class="spec-value"><?= htmlspecialchars($motor['vykon']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($motor['pohon'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Pohon:</div>
+                        <div class="spec-value"><?= htmlspecialchars(getTypLabel('pohon', $motor['pohon'])) ?></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($motor['remenica_typ'])): ?>
+                    <div class="component-spec-item">
+                        <div class="spec-label">Remenica:</div>
+                        <div class="spec-value"><?= htmlspecialchars($motor['remenica_typ']) ?></div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            <table class="priv-odv-table">
+                <tr>
+                    <th>PRÍVOD</th>
+                    <th>ODVOD</th>
+                </tr>
+                <tr>
+                    <td>
+                        <?php if (!empty($motor['privod_stav'])): ?>
+                        <span class="state-badge state-<?= $motor['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($motor['privod_stav'])) ?></span>
+                        <?php if (!empty($motor['privod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($motor['privod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($motor['odvod_stav'])): ?>
+                        <span class="state-badge state-<?= $motor['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($motor['odvod_stav'])) ?></span>
+                        <?php if (!empty($motor['odvod_poznamka'])): ?>
+                        <div class="component-note"><?= htmlspecialchars($motor['odvod_poznamka']) ?></div>
+                        <?php endif; ?>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Sekcia: Komponenty len na PRÍVODE -->
+    <div class="section-title">Komponenty - len prívod</div>
+
+    <?php
+    // CHLADIČ
+    $chladic = $sekcieData['chladic'] ?? [];
+    if (!empty($chladic['typ']) || !empty($chladic['stav'])):
+    ?>
+    <div class="single-component">
+        <div class="single-component-title">Chladič</div>
+        <div class="single-component-content">
+            <div class="single-component-specs">
+                <?php if (!empty($chladic['typ'])): ?>
+                <strong>Typ:</strong> <?= htmlspecialchars(getTypLabel('chladic', $chladic['typ'])) ?>
                 <?php endif; ?>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+                <?php if (!empty($chladic['spec'])): ?>
+                | <strong>Model:</strong> <?= htmlspecialchars($chladic['spec']) ?>
+                <?php endif; ?>
+                <?php if (!empty($chladic['vykon'])): ?>
+                | <strong>Výkon:</strong> <?= htmlspecialchars($chladic['vykon']) ?>
+                <?php endif; ?>
+            </div>
+            <div class="single-component-state">
+                <?php if (!empty($chladic['stav'])): ?>
+                <span class="state-badge state-<?= $chladic['stav'] ?>"><?= htmlspecialchars(getStavLabel($chladic['stav'])) ?></span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php if (!empty($chladic['poznamka'])): ?>
+        <div class="component-note"><?= htmlspecialchars($chladic['poznamka']) ?></div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // OHRIEVAČ
+    $ohrievac = $sekcieData['ohrievac'] ?? [];
+    if (!empty($ohrievac['typ']) || !empty($ohrievac['stav'])):
+    ?>
+    <div class="single-component">
+        <div class="single-component-title">Ohrievač</div>
+        <div class="single-component-content">
+            <div class="single-component-specs">
+                <?php if (!empty($ohrievac['typ'])): ?>
+                <strong>Typ:</strong> <?= htmlspecialchars(getTypLabel('ohrievac', $ohrievac['typ'])) ?>
+                <?php endif; ?>
+                <?php if (!empty($ohrievac['vykon'])): ?>
+                | <strong>Výkon:</strong> <?= htmlspecialchars($ohrievac['vykon']) ?>
+                <?php endif; ?>
+                <?php if ($ohrievac['typ'] === 'plynovy'): ?>
+                    <?php if (!empty($ohrievac['plyn_typ'])): ?>
+                    | <strong>Typ horáka:</strong> <?= htmlspecialchars($ohrievac['plyn_typ']) ?>
+                    <?php endif; ?>
+                    <?php if (!empty($ohrievac['bypass'])): ?>
+                    | <strong>Bypass:</strong> <?= htmlspecialchars(getTypLabel('bypass', $ohrievac['bypass'])) ?>
+                    <?php endif; ?>
+                    <?php if ($ohrievac['bypass'] === 's_bypasom' && !empty($ohrievac['bypass_servo'])): ?>
+                    | <strong>Servopohon:</strong> <?= htmlspecialchars(getTypLabel('servo', $ohrievac['bypass_servo'])) ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            <div class="single-component-state">
+                <?php if (!empty($ohrievac['stav'])): ?>
+                <span class="state-badge state-<?= $ohrievac['stav'] ?>"><?= htmlspecialchars(getStavLabel($ohrievac['stav'])) ?></span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php if (!empty($ohrievac['poznamka'])): ?>
+        <div class="component-note"><?= htmlspecialchars($ohrievac['poznamka']) ?></div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // KOMÍNOVÝ TERMOSTAT
+    $termostat = $sekcieData['kominovy_termostat'] ?? [];
+    if (!empty($termostat['typ']) || !empty($termostat['stav'])):
+    ?>
+    <div class="single-component">
+        <div class="single-component-title">Komínový termostat</div>
+        <div class="single-component-content">
+            <div class="single-component-specs">
+                <?php if (!empty($termostat['typ'])): ?>
+                <strong>Stav:</strong> <?= htmlspecialchars(getTypLabel('termostat', $termostat['typ'])) ?>
+                <?php endif; ?>
+            </div>
+            <div class="single-component-state">
+                <?php if (!empty($termostat['stav'])): ?>
+                <span class="state-badge state-<?= $termostat['stav'] ?>"><?= htmlspecialchars(getStavLabel($termostat['stav'])) ?></span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php if (!empty($termostat['poznamka'])): ?>
+        <div class="component-note"><?= htmlspecialchars($termostat['poznamka']) ?></div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Poznámky, zhodnotenie, odporúčania -->
     <div class="notes-section">

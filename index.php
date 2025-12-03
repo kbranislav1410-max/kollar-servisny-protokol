@@ -352,72 +352,77 @@ function finalizeReport(): void
         $interneOznacenie = $device['interne_oznacenie'] ?? '';
     }
     
-    // Pripraviť sekcie JSON pre uloženie všetkých komponentov
+    // Pripraviť sekcie JSON pre uloženie všetkých komponentov s detailnými údajmi
     $sekcieData = [
         'klapky' => [
             'typ' => $report['klapky_typ'] ?? '',
-            'privod' => $report['klapky_pr'] ?? '',
-            'odvod' => $report['klapky_od'] ?? ''
+            'servo_typ' => $report['klapky_servo_typ'] ?? '',
+            'moment' => $report['klapky_moment'] ?? '',
+            'privod_stav' => $report['klapky_pr_stav'] ?? '',
+            'privod_poznamka' => $report['klapky_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['klapky_od_stav'] ?? '',
+            'odvod_poznamka' => $report['klapky_od_poznamka'] ?? ''
         ],
-        'filtracia' => [
-            'typ' => $report['filtracia_typ'] ?? '',
-            'privod' => $report['filtracia_pr'] ?? '',
-            'odvod' => $report['filtracia_od'] ?? ''
+        'filter' => [
+            'typ' => $report['filter_typ'] ?? '',
+            'rozmer' => $report['filter_rozmer'] ?? '',
+            'privod_stav' => $report['filter_pr_stav'] ?? '',
+            'privod_poznamka' => $report['filter_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['filter_od_stav'] ?? '',
+            'odvod_poznamka' => $report['filter_od_poznamka'] ?? ''
+        ],
+        'rekuperator' => [
+            'typ' => $report['rekuperator_typ'] ?? '',
+            'privod_stav' => $report['rekuperator_pr_stav'] ?? '',
+            'privod_poznamka' => $report['rekuperator_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['rekuperator_od_stav'] ?? '',
+            'odvod_poznamka' => $report['rekuperator_od_poznamka'] ?? ''
         ],
         'recirkulacia' => [
             'typ' => $report['recirkulacia_typ'] ?? '',
-            'privod' => $report['recirkulacia_pr'] ?? '',
-            'odvod' => $report['recirkulacia_od'] ?? ''
-        ],
-        'rekuperacia' => [
-            'typ' => $report['rekuperacia_typ'] ?? '',
-            'privod' => $report['rekuperacia_pr'] ?? '',
-            'odvod' => $report['rekuperacia_od'] ?? ''
+            'privod_stav' => $report['recirkulacia_pr_stav'] ?? '',
+            'privod_poznamka' => $report['recirkulacia_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['recirkulacia_od_stav'] ?? '',
+            'odvod_poznamka' => $report['recirkulacia_od_poznamka'] ?? ''
         ],
         'ventilator' => [
             'typ' => $report['ventilator_typ'] ?? '',
-            'privod' => $report['ventilator_pr'] ?? '',
-            'odvod' => $report['ventilator_od'] ?? ''
+            'pohon' => $report['ventilator_pohon'] ?? '',
+            'remenica_typ' => $report['ventilator_remenica_typ'] ?? '',
+            'privod_stav' => $report['ventilator_pr_stav'] ?? '',
+            'privod_poznamka' => $report['ventilator_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['ventilator_od_stav'] ?? '',
+            'odvod_poznamka' => $report['ventilator_od_poznamka'] ?? ''
         ],
         'el_motor' => [
-            'typ' => $report['el_motor_typ'] ?? '',
-            'privod' => $report['el_motor_pr'] ?? '',
-            'odvod' => $report['el_motor_od'] ?? ''
-        ],
-        'remene' => [
-            'typ' => $report['remene_typ'] ?? '',
-            'privod' => $report['remene_pr'] ?? '',
-            'odvod' => $report['remene_od'] ?? ''
+            'vykon' => $report['motor_vykon'] ?? '',
+            'pohon' => $report['motor_pohon'] ?? '',
+            'remenica_typ' => $report['motor_remenica_typ'] ?? '',
+            'privod_stav' => $report['motor_pr_stav'] ?? '',
+            'privod_poznamka' => $report['motor_pr_poznamka'] ?? '',
+            'odvod_stav' => $report['motor_od_stav'] ?? '',
+            'odvod_poznamka' => $report['motor_od_poznamka'] ?? ''
         ],
         'chladic' => [
             'typ' => $report['chladic_typ'] ?? '',
-            'privod' => $report['chladic_pr'] ?? '',
-            'odvod' => $report['chladic_od'] ?? ''
+            'spec' => $report['chladic_spec'] ?? '',
+            'vykon' => $report['chladic_vykon'] ?? '',
+            'stav' => $report['chladic_stav'] ?? '',
+            'poznamka' => $report['chladic_poznamka'] ?? ''
         ],
         'ohrievac' => [
             'typ' => $report['ohrievac_typ'] ?? '',
-            'privod' => $report['ohrievac_pr'] ?? '',
-            'odvod' => $report['ohrievac_od'] ?? ''
+            'vykon' => $report['ohrievac_vykon'] ?? '',
+            'plyn_typ' => $report['ohrievac_plyn_typ'] ?? '',
+            'bypass' => $report['ohrievac_bypass'] ?? '',
+            'bypass_servo' => $report['ohrievac_bypass_servo'] ?? '',
+            'stav' => $report['ohrievac_stav'] ?? '',
+            'poznamka' => $report['ohrievac_poznamka'] ?? ''
         ],
-        'bypass_klapka' => [
-            'typ' => $report['bypass_klapka_typ'] ?? '',
-            'stav' => $report['bypass_klapka_stav'] ?? ''
-        ],
-        'bypass_servo' => [
-            'typ' => $report['bypass_servo_typ'] ?? '',
-            'stav' => $report['bypass_servo_stav'] ?? ''
-        ],
-        'termostat' => [
-            'typ' => $report['termostat_typ'] ?? '',
-            'stav' => $report['termostat_stav'] ?? ''
-        ],
-        'plynovy_horak' => [
-            'typ' => $report['plynovy_horak_typ'] ?? '',
-            'stav' => $report['plynovy_horak_stav'] ?? ''
-        ],
-        'mar' => [
-            'typ' => $report['mar_typ'] ?? '',
-            'stav' => $report['mar_stav'] ?? ''
+        'kominovy_termostat' => [
+            'typ' => $report['kominovy_termostat'] ?? '',
+            'stav' => $report['kominovy_termostat_stav'] ?? '',
+            'poznamka' => $report['kominovy_termostat_poznamka'] ?? ''
         ]
     ];
     
