@@ -49,6 +49,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'send_email':
             sendReportEmail();
             break;
+        case 'update_customer':
+            updateCustomer();
+            break;
+        case 'delete_customer':
+            deleteCustomer();
+            break;
+        case 'update_location':
+            updateLocation();
+            break;
+        case 'delete_location':
+            deleteLocation();
+            break;
+        case 'update_device':
+            updateDevice();
+            break;
+        case 'delete_device':
+            deleteDevice();
+            break;
+        case 'delete_report':
+            deleteReport();
+            break;
     }
 }
 
@@ -183,6 +204,260 @@ function addDevice(): void
     
     header('Content-Type: application/json');
     echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+function updateCustomer(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID zákazníka']);
+        exit;
+    }
+    
+    $stmt = $pdo->prepare("
+        UPDATE customers SET 
+            nazov_firmy = ?, ico = ?, dic = ?, ic_dph = ?, 
+            sidlo = ?, kontakt_osoba = ?, telefon = ?, email = ?
+        WHERE id = ?
+    ");
+    
+    $stmt->execute([
+        post('nazov_firmy'),
+        post('ico'),
+        post('dic'),
+        post('ic_dph'),
+        post('sidlo'),
+        post('kontakt_osoba'),
+        post('telefon'),
+        post('email'),
+        $id,
+    ]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function deleteCustomer(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID zákazníka']);
+        exit;
+    }
+    
+    // Skontrolovať, či zákazník nemá protokoly
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM reports WHERE customer_id = ?");
+    $stmt->execute([$id]);
+    $hasReports = $stmt->fetch()['count'] > 0;
+    
+    if ($hasReports) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Zákazník má protokoly a nemôže byť odstránený. Najprv odstráňte všetky protokoly.']);
+        exit;
+    }
+    
+    // Odstrániť zariadenia
+    $stmt = $pdo->prepare("DELETE FROM devices WHERE location_id IN (SELECT id FROM locations WHERE customer_id = ?)");
+    $stmt->execute([$id]);
+    
+    // Odstrániť prevádzky
+    $stmt = $pdo->prepare("DELETE FROM locations WHERE customer_id = ?");
+    $stmt->execute([$id]);
+    
+    // Odstrániť zákazníka
+    $stmt = $pdo->prepare("DELETE FROM customers WHERE id = ?");
+    $stmt->execute([$id]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function updateLocation(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID prevádzky']);
+        exit;
+    }
+    
+    $stmt = $pdo->prepare("
+        UPDATE locations SET nazov = ?, adresa = ?, mesto = ?, poznamka = ?
+        WHERE id = ?
+    ");
+    
+    $stmt->execute([
+        post('nazov'),
+        post('adresa'),
+        post('mesto'),
+        post('poznamka', ''),
+        $id,
+    ]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function deleteLocation(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID prevádzky']);
+        exit;
+    }
+    
+    // Skontrolovať, či prevádzka nemá protokoly
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM reports WHERE location_id = ?");
+    $stmt->execute([$id]);
+    $hasReports = $stmt->fetch()['count'] > 0;
+    
+    if ($hasReports) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Prevádzka má protokoly a nemôže byť odstránená. Najprv odstráňte všetky protokoly.']);
+        exit;
+    }
+    
+    // Odstrániť zariadenia
+    $stmt = $pdo->prepare("DELETE FROM devices WHERE location_id = ?");
+    $stmt->execute([$id]);
+    
+    // Odstrániť prevádzku
+    $stmt = $pdo->prepare("DELETE FROM locations WHERE id = ?");
+    $stmt->execute([$id]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function updateDevice(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID zariadenia']);
+        exit;
+    }
+    
+    $stmt = $pdo->prepare("
+        UPDATE devices SET 
+            nazov = ?, typ = ?, vyrobne_cislo = ?, rok_vyroby = ?,
+            prevedenie = ?, vyrobca = ?, distribucia = ?,
+            servisne_stredisko = ?, servisne_stredisko_tel = ?,
+            interne_oznacenie = ?, poznamka = ?
+        WHERE id = ?
+    ");
+    
+    $stmt->execute([
+        post('nazov'),
+        post('typ'),
+        post('vyrobne_cislo'),
+        post('rok_vyroby', ''),
+        post('prevedenie', ''),
+        post('vyrobca', ''),
+        post('distribucia', ''),
+        post('servisne_stredisko', ''),
+        post('servisne_stredisko_tel', ''),
+        post('interne_oznacenie', ''),
+        post('poznamka', ''),
+        $id,
+    ]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function deleteDevice(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID zariadenia']);
+        exit;
+    }
+    
+    // Skontrolovať, či zariadenie nemá protokoly
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM reports WHERE device_id = ?");
+    $stmt->execute([$id]);
+    $hasReports = $stmt->fetch()['count'] > 0;
+    
+    if ($hasReports) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Zariadenie má protokoly a nemôže byť odstránené. Najprv odstráňte všetky protokoly.']);
+        exit;
+    }
+    
+    // Odstrániť zariadenie
+    $stmt = $pdo->prepare("DELETE FROM devices WHERE id = ?");
+    $stmt->execute([$id]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+function deleteReport(): void
+{
+    $pdo = getDbConnection();
+    $id = (int)post('id', 0);
+    
+    if (!$id) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Chýba ID protokolu']);
+        exit;
+    }
+    
+    // Získať PDF cestu pre zmazanie súboru
+    $stmt = $pdo->prepare("SELECT pdf_path FROM reports WHERE id = ?");
+    $stmt->execute([$id]);
+    $report = $stmt->fetch();
+    
+    if ($report && $report['pdf_path']) {
+        $pdfPath = BASE_PATH . '/' . $report['pdf_path'];
+        if (file_exists($pdfPath)) {
+            unlink($pdfPath);
+        }
+    }
+    
+    // Odstrániť prílohy (fotky)
+    $stmt = $pdo->prepare("SELECT file_path FROM attachments WHERE report_id = ?");
+    $stmt->execute([$id]);
+    $attachments = $stmt->fetchAll();
+    foreach ($attachments as $att) {
+        $filePath = BASE_PATH . '/' . $att['file_path'];
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+    }
+    $stmt = $pdo->prepare("DELETE FROM attachments WHERE report_id = ?");
+    $stmt->execute([$id]);
+    
+    // Odstrániť protokol
+    $stmt = $pdo->prepare("DELETE FROM reports WHERE id = ?");
+    $stmt->execute([$id]);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
     exit;
 }
 
@@ -1550,6 +1825,10 @@ $pageView = $pageView ?? 'home';
                     <span class="page-type-label">Detail zákazníka</span>
                     <h1 id="customerName">Načítavam...</h1>
                 </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="showEditCustomerModal()">Upraviť</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteCustomer()">Odstrániť</button>
+                </div>
             </div>
             
             <div class="customer-info" id="customerInfo">
@@ -1586,6 +1865,10 @@ $pageView = $pageView ?? 'home';
                     <span class="page-type-label">Detail prevádzky</span>
                     <h1 id="locationName">Načítavam...</h1>
                 </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="showEditLocationModal()">Upraviť</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteLocation()">Odstrániť</button>
+                </div>
             </div>
             
             <div class="location-info" id="locationInfo">
@@ -1621,6 +1904,10 @@ $pageView = $pageView ?? 'home';
                 <div class="page-title-section">
                     <span class="page-type-label">Detail zariadenia</span>
                     <h1 id="deviceName">Načítavam...</h1>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="showEditDeviceModal()">Upraviť</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteDevice()">Odstrániť</button>
                 </div>
             </div>
             
@@ -3375,6 +3662,648 @@ $pageView = $pageView ?? 'home';
                 .catch(err => alert('Chyba pripojenia'));
             });
         }
+        
+        // ========== CRUD FUNCTIONS ==========
+        
+        // Current data for editing
+        let currentCustomer = null;
+        let currentLocation = null;
+        let currentDevice = null;
+        
+        // CUSTOMER CRUD
+        function showEditCustomerModal() {
+            if (!currentCustomer) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'editModal';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Upraviť zákazníka</h3>
+                        <button class="modal-close" onclick="closeModal()">×</button>
+                    </div>
+                    <form id="editCustomerForm">
+                        <input type="hidden" name="id" value="${currentCustomer.id}">
+                        <div class="form-group">
+                            <label>Názov firmy *</label>
+                            <input type="text" name="nazov_firmy" value="${escapeHtml(currentCustomer.nazov_firmy)}" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>IČO</label>
+                                <input type="text" name="ico" value="${escapeHtml(currentCustomer.ico || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>DIČ</label>
+                                <input type="text" name="dic" value="${escapeHtml(currentCustomer.dic || '')}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>IČ DPH</label>
+                            <input type="text" name="ic_dph" value="${escapeHtml(currentCustomer.ic_dph || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Sídlo</label>
+                            <input type="text" name="sidlo" value="${escapeHtml(currentCustomer.sidlo || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Kontaktná osoba</label>
+                            <input type="text" name="kontakt_osoba" value="${escapeHtml(currentCustomer.kontakt_osoba || '')}">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Telefón</label>
+                                <input type="tel" name="telefon" value="${escapeHtml(currentCustomer.telefon || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" value="${escapeHtml(currentCustomer.email || '')}">
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" onclick="closeModal()">Zrušiť</button>
+                            <button type="submit" class="btn btn-primary">Uložiť zmeny</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('editCustomerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('action', 'update_customer');
+                
+                fetch('index.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        closeModal();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        loadCustomerDetail(urlParams.get('customer_id'));
+                        alert('Zákazník bol aktualizovaný');
+                    } else {
+                        alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                    }
+                })
+                .catch(err => alert('Chyba pripojenia'));
+            });
+        }
+        
+        function confirmDeleteCustomer() {
+            if (!currentCustomer) return;
+            if (!confirm('Naozaj chcete odstrániť tohto zákazníka? Budú odstránené aj všetky prevádzky a zariadenia bez protokolov.')) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_customer');
+            formData.append('id', currentCustomer.id);
+            
+            fetch('index.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Zákazník bol odstránený');
+                    window.location.href = 'index.php?action=customers';
+                } else {
+                    alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                }
+            })
+            .catch(err => alert('Chyba pripojenia'));
+        }
+        
+        // LOCATION CRUD
+        function showEditLocationModal() {
+            if (!currentLocation) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'editModal';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Upraviť prevádzku</h3>
+                        <button class="modal-close" onclick="closeModal()">×</button>
+                    </div>
+                    <form id="editLocationForm">
+                        <input type="hidden" name="id" value="${currentLocation.id}">
+                        <div class="form-group">
+                            <label>Názov prevádzky *</label>
+                            <input type="text" name="nazov" value="${escapeHtml(currentLocation.nazov)}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Adresa</label>
+                            <input type="text" name="adresa" value="${escapeHtml(currentLocation.adresa || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Mesto</label>
+                            <input type="text" name="mesto" value="${escapeHtml(currentLocation.mesto || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Poznámka</label>
+                            <textarea name="poznamka">${escapeHtml(currentLocation.poznamka || '')}</textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" onclick="closeModal()">Zrušiť</button>
+                            <button type="submit" class="btn btn-primary">Uložiť zmeny</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('editLocationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('action', 'update_location');
+                
+                fetch('index.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        closeModal();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        loadLocationDetail(urlParams.get('location_id'));
+                        alert('Prevádzka bola aktualizovaná');
+                    } else {
+                        alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                    }
+                })
+                .catch(err => alert('Chyba pripojenia'));
+            });
+        }
+        
+        function confirmDeleteLocation() {
+            if (!currentLocation) return;
+            if (!confirm('Naozaj chcete odstrániť túto prevádzku? Budú odstránené aj všetky zariadenia bez protokolov.')) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_location');
+            formData.append('id', currentLocation.id);
+            
+            fetch('index.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Prevádzka bola odstránená');
+                    window.location.href = 'index.php?action=customer_detail&customer_id=' + currentLocation.customer_id;
+                } else {
+                    alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                }
+            })
+            .catch(err => alert('Chyba pripojenia'));
+        }
+        
+        // DEVICE CRUD
+        function showEditDeviceModal() {
+            if (!currentDevice) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'editModal';
+            modal.innerHTML = `
+                <div class="modal modal-large">
+                    <div class="modal-header">
+                        <h3>Upraviť zariadenie</h3>
+                        <button class="modal-close" onclick="closeModal()">×</button>
+                    </div>
+                    <form id="editDeviceForm">
+                        <input type="hidden" name="id" value="${currentDevice.id}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Názov zariadenia *</label>
+                                <input type="text" name="nazov" value="${escapeHtml(currentDevice.nazov)}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Interné označenie</label>
+                                <input type="text" name="interne_oznacenie" value="${escapeHtml(currentDevice.interne_oznacenie || '')}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Typ / Model</label>
+                                <input type="text" name="typ" value="${escapeHtml(currentDevice.typ || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>Prevedenie</label>
+                                <select name="prevedenie">
+                                    <option value="">-- Vyberte --</option>
+                                    <option value="interierove" ${currentDevice.prevedenie === 'interierove' ? 'selected' : ''}>Interiérové</option>
+                                    <option value="exterierove" ${currentDevice.prevedenie === 'exterierove' ? 'selected' : ''}>Exteriérové</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Výrobné číslo</label>
+                                <input type="text" name="vyrobne_cislo" value="${escapeHtml(currentDevice.vyrobne_cislo || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>Rok výroby</label>
+                                <input type="text" name="rok_vyroby" value="${escapeHtml(currentDevice.rok_vyroby || '')}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Výrobca</label>
+                                <input type="text" name="vyrobca" value="${escapeHtml(currentDevice.vyrobca || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>Distribúcia pre SR</label>
+                                <input type="text" name="distribucia" value="${escapeHtml(currentDevice.distribucia || '')}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Servisné stredisko</label>
+                                <input type="text" name="servisne_stredisko" value="${escapeHtml(currentDevice.servisne_stredisko || '')}">
+                            </div>
+                            <div class="form-group">
+                                <label>Tel. servisného strediska</label>
+                                <input type="text" name="servisne_stredisko_tel" value="${escapeHtml(currentDevice.servisne_stredisko_tel || '')}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Poznámka</label>
+                            <textarea name="poznamka">${escapeHtml(currentDevice.poznamka || '')}</textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" onclick="closeModal()">Zrušiť</button>
+                            <button type="submit" class="btn btn-primary">Uložiť zmeny</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('editDeviceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('action', 'update_device');
+                
+                fetch('index.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        closeModal();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        loadDeviceDetail(urlParams.get('device_id'));
+                        alert('Zariadenie bolo aktualizované');
+                    } else {
+                        alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                    }
+                })
+                .catch(err => alert('Chyba pripojenia'));
+            });
+        }
+        
+        function confirmDeleteDevice() {
+            if (!currentDevice) return;
+            if (!confirm('Naozaj chcete odstrániť toto zariadenie?')) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_device');
+            formData.append('id', currentDevice.id);
+            
+            fetch('index.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Zariadenie bolo odstránené');
+                    window.location.href = 'index.php?action=location_detail&location_id=' + currentDevice.location_id;
+                } else {
+                    alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                }
+            })
+            .catch(err => alert('Chyba pripojenia'));
+        }
+        
+        // Delete report
+        function confirmDeleteReport(reportId, redirectUrl) {
+            if (!confirm('Naozaj chcete odstrániť tento protokol? Budú odstránené aj všetky prílohy a PDF.')) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_report');
+            formData.append('id', reportId);
+            
+            fetch('index.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Protokol bol odstránený');
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    alert('Chyba: ' + (result.error || 'Neznáma chyba'));
+                }
+            })
+            .catch(err => alert('Chyba pripojenia'));
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('editModal');
+            if (modal) modal.remove();
+        }
+        
+        // Update loadCustomerDetail to store current customer
+        const originalLoadCustomerDetail = loadCustomerDetail;
+        loadCustomerDetail = function(customerId) {
+            fetch('index.php?action=api_customer_detail&customer_id=' + customerId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Zákazník nebol nájdený');
+                        return;
+                    }
+                    currentCustomer = data.customer;
+                    
+                    // Set customer name
+                    document.getElementById('customerName').textContent = data.customer.nazov_firmy;
+                    
+                    // Build customer info HTML
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += '<div class="info-item"><span class="label">IČO:</span><span class="value">' + (data.customer.ico || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">DIČ:</span><span class="value">' + (data.customer.dic || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">IČ DPH:</span><span class="value">' + (data.customer.ic_dph || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Sídlo:</span><span class="value">' + (data.customer.sidlo || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Kontaktná osoba:</span><span class="value">' + (data.customer.kontakt_osoba || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Telefón:</span><span class="value">' + (data.customer.telefon || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Email:</span><span class="value">' + (data.customer.email || '-') + '</span></div>';
+                    infoHtml += '</div>';
+                    document.getElementById('customerInfo').innerHTML = infoHtml;
+                    
+                    // Build locations and devices tree
+                    let locHtml = '';
+                    if (data.locations.length === 0) {
+                        locHtml = '<p class="no-data">Žiadne prevádzky</p>';
+                    } else {
+                        locHtml = '<div class="expandable-list">';
+                        data.locations.forEach(loc => {
+                            locHtml += `
+                                <div class="expandable-card location-expandable">
+                                    <div class="card-header clickable" onclick="window.location.href='index.php?action=location_detail&location_id=${loc.id}'">
+                                        <div class="card-title">
+                                            <h4>${escapeHtml(loc.nazov)}</h4>
+                                            <span class="card-subtitle">${loc.adresa || ''} ${loc.mesto || ''}</span>
+                                        </div>
+                                        <div class="card-meta">
+                                            <span class="badge">${loc.devices.length} zariadení</span>
+                                            <span class="arrow">→</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-devices">`;
+                            
+                            if (loc.devices.length === 0) {
+                                locHtml += '<p class="no-data small">Žiadne zariadenia na tejto prevádzke</p>';
+                            } else {
+                                locHtml += '<div class="devices-grid">';
+                                loc.devices.forEach(d => {
+                                    locHtml += `
+                                        <div class="device-mini-card clickable" onclick="event.stopPropagation(); window.location.href='index.php?action=device_detail&device_id=${d.id}'">
+                                            <div class="device-info">
+                                                <strong>${escapeHtml(d.nazov)}</strong>
+                                                ${d.typ ? '<span class="device-type">' + escapeHtml(d.typ) + '</span>' : ''}
+                                            </div>
+                                            <span class="arrow">→</span>
+                                        </div>`;
+                                });
+                                locHtml += '</div>';
+                            }
+                            
+                            locHtml += '</div></div>';
+                        });
+                        locHtml += '</div>';
+                    }
+                    document.getElementById('locationsContent').innerHTML = locHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+            
+            // Load reports
+            fetch('index.php?action=api_customer_reports&customer_id=' + customerId)
+                .then(response => response.json())
+                .then(reports => {
+                    let html = '';
+                    if (reports.length === 0) {
+                        html = '<p class="no-data">Žiadne protokoly</p>';
+                    } else {
+                        html = '<div class="reports-table"><table>';
+                        html += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Prevádzka</th><th>Zariadenie</th><th>Akcie</th></tr></thead>';
+                        html += '<tbody>';
+                        reports.forEach(r => {
+                            html += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.location_name || '-'}</td>
+                                <td>${r.device_name || '-'}</td>
+                                <td>
+                                    <a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a>
+                                    <button class="btn btn-sm btn-danger" onclick="confirmDeleteReport(${r.id}, 'index.php?action=customer_detail&customer_id=${customerId}')">×</button>
+                                </td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                    }
+                    document.getElementById('reportsContent').innerHTML = html;
+                })
+                .catch(err => console.error('Chyba:', err));
+        };
+        
+        // Update loadLocationDetail to store current location
+        const originalLoadLocationDetail = loadLocationDetail;
+        loadLocationDetail = function(locationId) {
+            fetch('index.php?action=api_location_detail&location_id=' + locationId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Prevádzka nebola nájdená');
+                        return;
+                    }
+                    currentLocation = data.location;
+                    
+                    // Update back link
+                    document.getElementById('backToCustomerLink').href = 'index.php?action=customer_detail&customer_id=' + data.location.customer_id;
+                    
+                    // Set location name
+                    document.getElementById('locationName').textContent = data.location.nazov;
+                    
+                    // Build location info
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += '<div class="info-item"><span class="label">Zákazník:</span><span class="value">' + escapeHtml(data.location.customer_name) + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Adresa:</span><span class="value">' + (data.location.adresa || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Mesto:</span><span class="value">' + (data.location.mesto || '-') + '</span></div>';
+                    if (data.location.poznamka) {
+                        infoHtml += '<div class="info-item full"><span class="label">Poznámka:</span><span class="value">' + escapeHtml(data.location.poznamka) + '</span></div>';
+                    }
+                    infoHtml += '</div>';
+                    document.getElementById('locationInfo').innerHTML = infoHtml;
+                    
+                    // Build devices list
+                    let devHtml = '';
+                    if (data.devices.length === 0) {
+                        devHtml = '<p class="no-data">Žiadne zariadenia</p>';
+                    } else {
+                        devHtml = '<div class="devices-grid large">';
+                        data.devices.forEach(d => {
+                            devHtml += `
+                                <div class="device-card clickable" onclick="window.location.href='index.php?action=device_detail&device_id=${d.id}'">
+                                    <div class="device-header">
+                                        <h4>${escapeHtml(d.nazov)}</h4>
+                                        ${d.interne_oznacenie ? '<span class="device-designation">[' + escapeHtml(d.interne_oznacenie) + ']</span>' : ''}
+                                    </div>
+                                    <div class="device-body">
+                                        ${d.typ ? '<p>Typ: ' + escapeHtml(d.typ) + '</p>' : ''}
+                                        <p class="device-reports-count">${d.reports_count} protokolov</p>
+                                    </div>
+                                    <span class="arrow">→</span>
+                                </div>`;
+                        });
+                        devHtml += '</div>';
+                    }
+                    document.getElementById('devicesContent').innerHTML = devHtml;
+                    
+                    // Build reports list
+                    let repHtml = '';
+                    if (data.reports.length === 0) {
+                        repHtml = '<p class="no-data">Žiadne protokoly</p>';
+                    } else {
+                        repHtml = '<div class="reports-table"><table>';
+                        repHtml += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Zariadenie</th><th>Akcie</th></tr></thead>';
+                        repHtml += '<tbody>';
+                        data.reports.forEach(r => {
+                            repHtml += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.device_name || '-'}</td>
+                                <td>
+                                    <a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a>
+                                    <button class="btn btn-sm btn-danger" onclick="confirmDeleteReport(${r.id}, 'index.php?action=location_detail&location_id=${locationId}')">×</button>
+                                </td>
+                            </tr>`;
+                        });
+                        repHtml += '</tbody></table></div>';
+                    }
+                    document.getElementById('locationReportsContent').innerHTML = repHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+        };
+        
+        // Update loadDeviceDetail to store current device
+        const originalLoadDeviceDetail = loadDeviceDetail;
+        loadDeviceDetail = function(deviceId) {
+            fetch('index.php?action=api_device_detail&device_id=' + deviceId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Zariadenie nebolo nájdené');
+                        return;
+                    }
+                    currentDevice = data.device;
+                    
+                    // Update back link
+                    document.getElementById('backToLocationLink').href = 'index.php?action=location_detail&location_id=' + data.device.location_id;
+                    
+                    // Set device name
+                    let deviceTitle = data.device.nazov;
+                    if (data.device.interne_oznacenie) {
+                        deviceTitle += ' [' + data.device.interne_oznacenie + ']';
+                    }
+                    document.getElementById('deviceName').textContent = deviceTitle;
+                    
+                    // Build device info
+                    let infoHtml = '<div class="info-grid">';
+                    infoHtml += '<div class="info-item"><span class="label">Zákazník:</span><span class="value">' + escapeHtml(data.device.customer_name) + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Prevádzka:</span><span class="value">' + escapeHtml(data.device.location_name) + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Typ/Model:</span><span class="value">' + (data.device.typ || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Prevedenie:</span><span class="value">' + (data.device.prevedenie || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Výrobné číslo:</span><span class="value">' + (data.device.vyrobne_cislo || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Rok výroby:</span><span class="value">' + (data.device.rok_vyroby || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Výrobca:</span><span class="value">' + (data.device.vyrobca || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Distribúcia:</span><span class="value">' + (data.device.distribucia || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Servisné stredisko:</span><span class="value">' + (data.device.servisne_stredisko || '-') + '</span></div>';
+                    infoHtml += '<div class="info-item"><span class="label">Tel. strediska:</span><span class="value">' + (data.device.servisne_stredisko_tel || '-') + '</span></div>';
+                    infoHtml += '</div>';
+                    
+                    // Add service status
+                    if (data.service_status) {
+                        const status = data.service_status;
+                        infoHtml += `<div class="service-status-box status-${status.color}">
+                            <h4>Stav pravidelnej prehliadky</h4>
+                            <div class="status-details">
+                                <div class="status-item">
+                                    <span class="label">Posledný servis:</span>
+                                    <span class="value">${status.last_service}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Platnosť do:</span>
+                                    <span class="value">${status.platnost_do}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Stav:</span>
+                                    <span class="value status-badge status-${status.color}">${status.text}${status.days > 0 ? ' (' + status.days + ' dní)' : ''}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    } else {
+                        infoHtml += `<div class="service-status-box status-gray">
+                            <h4>Stav pravidelnej prehliadky</h4>
+                            <p class="no-data">Žiadna pravidelná prehliadka zatiaľ nebola vykonaná</p>
+                        </div>`;
+                    }
+                    
+                    document.getElementById('deviceInfo').innerHTML = infoHtml;
+                    
+                    // Build reports list with delete button
+                    let repHtml = '';
+                    if (data.reports.length === 0) {
+                        repHtml = '<p class="no-data">Žiadne protokoly pre toto zariadenie</p>';
+                    } else {
+                        repHtml = '<div class="reports-table"><table>';
+                        repHtml += '<thead><tr><th>Číslo protokolu</th><th>Typ</th><th>Dátum</th><th>Platnosť do</th><th>Servis vykonal</th><th>Akcie</th></tr></thead>';
+                        repHtml += '<tbody>';
+                        data.reports.forEach(r => {
+                            const typeLabel = r.typ_servisu === 'porucha' ? '<span class="badge-sm badge-red">Porucha</span>' : '<span class="badge-sm badge-green">Prehliadka</span>';
+                            repHtml += `<tr>
+                                <td>${r.cislo_protokolu}</td>
+                                <td>${typeLabel}</td>
+                                <td>${r.datum}</td>
+                                <td>${r.platnost_do || '-'}</td>
+                                <td>${r.servis_vykonal || '-'}</td>
+                                <td>
+                                    <a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a>
+                                    <button class="btn btn-sm btn-danger" onclick="confirmDeleteReport(${r.id}, 'index.php?action=device_detail&device_id=${deviceId}')">×</button>
+                                </td>
+                            </tr>`;
+                        });
+                        repHtml += '</tbody></table></div>';
+                    }
+                    document.getElementById('deviceReportsContent').innerHTML = repHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+        };
     </script>
 </body>
 </html>
