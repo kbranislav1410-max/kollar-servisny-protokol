@@ -6,6 +6,8 @@
 let signaturePadTechnik = null;
 let signaturePadZakaznik = null;
 let uploadedPhotos = [];
+let uploadedPhotosBefore = [];
+let uploadedPhotosAfter = [];
 
 /**
  * Prepnutie collapsible sekcie
@@ -102,11 +104,19 @@ function loadDevices(locationId) {
             const select = document.getElementById('device_select');
             if (!select) return;
             
-            select.innerHTML = '<option value="">-- Vyberte zariadenie (voliteľné) --</option>';
+            select.innerHTML = '<option value="">-- Vyberte zariadenie --</option>';
             devices.forEach(d => {
                 const option = document.createElement('option');
                 option.value = d.id;
-                option.textContent = `${d.nazov}${d.typ ? ' (' + d.typ + ')' : ''}`;
+                // Zobrazíme interné označenie ak existuje, inak typ
+                let label = d.nazov;
+                if (d.interne_oznacenie) {
+                    label += ` [${d.interne_oznacenie}]`;
+                }
+                if (d.typ) {
+                    label += ` (${d.typ})`;
+                }
+                option.textContent = label;
                 select.appendChild(option);
             });
             
@@ -388,27 +398,75 @@ function setupFormHandlers() {
  * Nastavenie nahrávania fotiek
  */
 function setupPhotoUpload() {
-    // Camera input - opens device camera directly
+    // Camera input - opens device camera directly (legacy)
     const cameraInput = document.getElementById('cameraInput');
     if (cameraInput) {
         cameraInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
         });
     }
     
-    // Gallery input - for selecting existing photos
+    // Gallery input - for selecting existing photos (legacy)
     const galleryInput = document.getElementById('galleryInput');
     if (galleryInput) {
         galleryInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
+        });
+    }
+    
+    // Before photos - camera
+    const cameraInputBefore = document.getElementById('cameraInputBefore');
+    if (cameraInputBefore) {
+        cameraInputBefore.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'before');
+            }
+            this.value = '';
+        });
+    }
+    
+    // Before photos - gallery
+    const galleryInputBefore = document.getElementById('galleryInputBefore');
+    if (galleryInputBefore) {
+        galleryInputBefore.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'before');
+            }
+            this.value = '';
+        });
+    }
+    
+    // After photos - camera
+    const cameraInputAfter = document.getElementById('cameraInputAfter');
+    if (cameraInputAfter) {
+        cameraInputAfter.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'after');
+            }
+            this.value = '';
+        });
+    }
+    
+    // After photos - gallery
+    const galleryInputAfter = document.getElementById('galleryInputAfter');
+    if (galleryInputAfter) {
+        galleryInputAfter.addEventListener('change', function() {
+            const files = this.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadPhoto(files[i], 'after');
+            }
+            this.value = '';
         });
     }
     
@@ -418,7 +476,7 @@ function setupPhotoUpload() {
         photoInput.addEventListener('change', function() {
             const files = this.files;
             for (let i = 0; i < files.length; i++) {
-                uploadPhoto(files[i]);
+                uploadPhoto(files[i], 'general');
             }
             this.value = ''; // Reset input
         });
@@ -426,7 +484,7 @@ function setupPhotoUpload() {
 }
 
 /**
- * Otvorenie fotoaparátu
+ * Otvorenie fotoaparátu (legacy)
  */
 function openCamera() {
     const cameraInput = document.getElementById('cameraInput');
@@ -436,9 +494,26 @@ function openCamera() {
 }
 
 /**
- * Nahratie jednej fotky
+ * Otvorenie fotoaparátu pre konkrétny typ
  */
-function uploadPhoto(file) {
+function openCameraForType(photoType) {
+    let inputId = 'cameraInput';
+    if (photoType === 'before') {
+        inputId = 'cameraInputBefore';
+    } else if (photoType === 'after') {
+        inputId = 'cameraInputAfter';
+    }
+    
+    const cameraInput = document.getElementById(inputId);
+    if (cameraInput) {
+        cameraInput.click();
+    }
+}
+
+/**
+ * Nahratie jednej fotky s typom
+ */
+function uploadPhoto(file, photoType = 'general') {
     if (file.size > 5 * 1024 * 1024) {
         alert('Súbor ' + file.name + ' je príliš veľký (max 5MB)');
         return;
@@ -447,6 +522,7 @@ function uploadPhoto(file) {
     const formData = new FormData();
     formData.append('action', 'upload_photo');
     formData.append('photo', file);
+    formData.append('photo_type', photoType);
     
     fetch('index.php', {
         method: 'POST',
@@ -455,11 +531,23 @@ function uploadPhoto(file) {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            uploadedPhotos.push({
+            const photoData = {
                 filename: result.filename,
-                name: file.name
-            });
-            updatePhotoPreview();
+                name: file.name,
+                photo_type: photoType
+            };
+            
+            // Uloženie do správneho zoznamu
+            if (photoType === 'before') {
+                uploadedPhotosBefore.push(photoData);
+                updatePhotoPreviewForType('before');
+            } else if (photoType === 'after') {
+                uploadedPhotosAfter.push(photoData);
+                updatePhotoPreviewForType('after');
+            } else {
+                uploadedPhotos.push(photoData);
+                updatePhotoPreview();
+            }
         } else {
             alert('Chyba: ' + (result.error || 'Nepodarilo sa nahrať súbor'));
         }
@@ -471,7 +559,48 @@ function uploadPhoto(file) {
 }
 
 /**
- * Aktualizácia náhľadu fotiek
+ * Aktualizácia náhľadu fotiek pre konkrétny typ
+ */
+function updatePhotoPreviewForType(photoType) {
+    let preview, countEl, photos;
+    
+    if (photoType === 'before') {
+        preview = document.getElementById('photoPreviewBefore');
+        countEl = document.getElementById('photoCountBefore');
+        photos = uploadedPhotosBefore;
+    } else if (photoType === 'after') {
+        preview = document.getElementById('photoPreviewAfter');
+        countEl = document.getElementById('photoCountAfter');
+        photos = uploadedPhotosAfter;
+    } else {
+        return updatePhotoPreview();
+    }
+    
+    if (!preview) return;
+    
+    preview.innerHTML = '';
+    photos.forEach((photo, index) => {
+        const div = document.createElement('div');
+        div.className = 'photo-item';
+        div.innerHTML = `
+            <img src="uploads/photos/${escapeHtml(photo.filename)}" alt="${escapeHtml(photo.name)}">
+            <button type="button" class="remove-photo" onclick="removePhotoByType('${photoType}', ${index})">×</button>
+        `;
+        preview.appendChild(div);
+    });
+    
+    if (countEl) {
+        if (photos.length > 0) {
+            countEl.textContent = `${photos.length} ${photos.length === 1 ? 'fotografia' : (photos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.style.display = 'block';
+        } else {
+            countEl.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Aktualizácia náhľadu fotiek (legacy)
  */
 function updatePhotoPreview() {
     const preview = document.getElementById('photoPreview');
@@ -482,8 +611,8 @@ function updatePhotoPreview() {
         const div = document.createElement('div');
         div.className = 'photo-item';
         div.innerHTML = `
-            <img src="uploads/photos/${photo.filename}" alt="${photo.name}">
-            <button class="remove-photo" onclick="removePhoto(${index})">×</button>
+            <img src="uploads/photos/${escapeHtml(photo.filename)}" alt="${escapeHtml(photo.name)}">
+            <button type="button" class="remove-photo" onclick="removePhoto(${index})">×</button>
         `;
         preview.appendChild(div);
     });
@@ -492,7 +621,7 @@ function updatePhotoPreview() {
     const countEl = document.getElementById('photoCount');
     if (countEl) {
         if (uploadedPhotos.length > 0) {
-            countEl.textContent = `📷 ${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'fotografia' : (uploadedPhotos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
+            countEl.textContent = `${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'fotografia' : (uploadedPhotos.length < 5 ? 'fotografie' : 'fotografií')} nahraných`;
             countEl.style.display = 'block';
         } else {
             countEl.style.display = 'none';
@@ -501,7 +630,7 @@ function updatePhotoPreview() {
 }
 
 /**
- * Odstránenie fotky
+ * Odstránenie fotky (legacy)
  */
 function removePhoto(index) {
     uploadedPhotos.splice(index, 1);
@@ -509,10 +638,47 @@ function removePhoto(index) {
 }
 
 /**
+ * Odstránenie fotky podľa typu
+ */
+function removePhotoByType(photoType, index) {
+    if (photoType === 'before') {
+        uploadedPhotosBefore.splice(index, 1);
+        updatePhotoPreviewForType('before');
+    } else if (photoType === 'after') {
+        uploadedPhotosAfter.splice(index, 1);
+        updatePhotoPreviewForType('after');
+    } else {
+        removePhoto(index);
+    }
+}
+
+/**
+ * Helper function to escape HTML - using string replacement for better performance
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/[&<>"']/g, function(match) {
+        const escapeMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        };
+        return escapeMap[match];
+    });
+}
+
+/**
  * Prechod na ďalší krok
  */
 function nextStep(currentStepIndex) {
-    // Validácia a uloženie dát aktuálneho kroku
+    // Validácia dát aktuálneho kroku
+    if (!validateStep(currentStepIndex)) {
+        return;
+    }
+    
+    // Zbieranie dát aktuálneho kroku
     const stepData = collectStepData(currentStepIndex);
     
     // Uloženie do session na serveri
@@ -540,12 +706,45 @@ function nextStep(currentStepIndex) {
             updateProgressBar(result.next_step);
             
             // Ak prechádzame na krok súhrnu, aktualizovať ho
-            if (result.next_step === 5) {
+            if (result.next_step === 7) {
                 updateSummary();
             }
         }
     })
     .catch(err => console.error('Chyba:', err));
+}
+
+/**
+ * Validácia dát aktuálneho kroku
+ */
+function validateStep(stepIndex) {
+    switch (stepIndex) {
+        case 0: // Zákazník
+            const customerSelect = document.getElementById('customer_select');
+            if (!customerSelect || !customerSelect.value) {
+                alert('Prosím vyberte zákazníka');
+                return false;
+            }
+            break;
+            
+        case 1: // Prevádzka
+            const locationSelect = document.getElementById('location_select');
+            if (!locationSelect || !locationSelect.value) {
+                alert('Prosím vyberte prevádzku');
+                return false;
+            }
+            break;
+            
+        case 2: // Zariadenie - POVINNÉ
+            const deviceSelect = document.getElementById('device_select');
+            if (!deviceSelect || !deviceSelect.value) {
+                alert('Prosím vyberte zariadenie. Zariadenie je povinné pre vytvorenie protokolu.');
+                return false;
+            }
+            break;
+        // Steps 3, 4, 5 (Fotky pred, Komponenty, Fotky po) - no required validation
+    }
+    return true;
 }
 
 /**
@@ -558,6 +757,25 @@ function prevStep(currentStepIndex) {
         showStep(newStep);
         updateProgressBar(newStep);
     }
+}
+
+/**
+ * Prechod na konkrétny krok (kliknutím na číslo v progress bare)
+ */
+function goToStep(targetStep) {
+    // Môžeme ísť len na dokončené kroky alebo aktuálny
+    if (targetStep > window.currentStep) {
+        return; // Nemôžeme preskakovať dopredu
+    }
+    
+    if (targetStep === window.currentStep) {
+        return; // Už sme na tomto kroku
+    }
+    
+    // Prechod na požadovaný krok
+    window.currentStep = targetStep;
+    showStep(targetStep);
+    updateProgressBar(targetStep);
 }
 
 /**
@@ -577,9 +795,9 @@ function showStep(stepIndex) {
  */
 function updateProgressBar(currentStep) {
     document.querySelectorAll('.progress-step').forEach((step, i) => {
-        step.classList.remove('active', 'completed');
+        step.classList.remove('active', 'completed', 'clickable');
         if (i < currentStep) {
-            step.classList.add('completed');
+            step.classList.add('completed', 'clickable');
         } else if (i === currentStep) {
             step.classList.add('active');
         }
@@ -614,7 +832,11 @@ function collectStepData(stepIndex) {
             }
             break;
             
-        case 3: // Komponenty
+        case 3: // Fotky pred servisom
+            // Fotky sa ukladajú priamo pri výbere/fotení
+            break;
+            
+        case 4: // Komponenty
             const componentsForm = document.getElementById('componentsForm');
             if (componentsForm) {
                 const formData = new FormData(componentsForm);
@@ -624,8 +846,20 @@ function collectStepData(stepIndex) {
             }
             break;
             
-        case 4: // Podpisy
+        case 5: // Fotky po servise
+            // Fotky sa ukladajú priamo pri výbere/fotení
+            break;
+            
+        case 6: // Podpisy a odovzdanie
             // Podpisy sa ukladajú priamo pri kliknutí na "Uložiť podpis"
+            // Ale nové textové polia treba uložiť
+            const signaturesForm = document.getElementById('signaturesForm');
+            if (signaturesForm) {
+                const formData = new FormData(signaturesForm);
+                for (const [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+            }
             break;
     }
     
@@ -640,6 +874,17 @@ function updateSummary() {
     if (!summaryEl) return;
     
     const data = window.reportData || {};
+    const totalPhotos = uploadedPhotos.length + uploadedPhotosBefore.length + uploadedPhotosAfter.length;
+    
+    // Získať názov vybraného zariadenia z dropdownu
+    let deviceDisplay = 'Nevybrané';
+    const deviceSelect = document.getElementById('device_select');
+    if (deviceSelect && deviceSelect.value) {
+        const selectedOption = deviceSelect.options[deviceSelect.selectedIndex];
+        if (selectedOption) {
+            deviceDisplay = selectedOption.textContent;
+        }
+    }
     
     let html = `
         <div class="summary-section">
@@ -657,8 +902,20 @@ function updateSummary() {
         <div class="summary-section">
             <h4>Zariadenie</h4>
             <div class="summary-row">
-                <span class="summary-label">Zariadenie ID:</span>
-                <span class="summary-value">${data.device_id || 'Nevybrané (voliteľné)'}</span>
+                <span class="summary-label">Zariadenie:</span>
+                <span class="summary-value">${deviceDisplay}</span>
+            </div>
+        </div>
+        
+        <div class="summary-section">
+            <h4>Servisné údaje</h4>
+            <div class="summary-row">
+                <span class="summary-label">Dátum servisu:</span>
+                <span class="summary-value">${data.datum || '-'}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Servis vykonal:</span>
+                <span class="summary-value">${data.servis_vykonal || '-'}</span>
             </div>
         </div>
         
@@ -674,11 +931,11 @@ function updateSummary() {
             </div>
             <div class="summary-row">
                 <span class="summary-label">Rekuperácia:</span>
-                <span class="summary-value">${data.rekuperacia || '-'}</span>
+                <span class="summary-value">${data.rekuperacia_pr || '-'} / ${data.rekuperacia_od || '-'}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">Ventilátor:</span>
-                <span class="summary-value">${data.ventilator || '-'}</span>
+                <span class="summary-value">${data.ventilator_pr || '-'} / ${data.ventilator_od || '-'}</span>
             </div>
         </div>
         
@@ -697,8 +954,16 @@ function updateSummary() {
         <div class="summary-section">
             <h4>Fotografie</h4>
             <div class="summary-row">
-                <span class="summary-label">Počet:</span>
-                <span class="summary-value">${uploadedPhotos.length} súborov</span>
+                <span class="summary-label">Pred servisom:</span>
+                <span class="summary-value">${uploadedPhotosBefore.length} súborov</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Po servise:</span>
+                <span class="summary-value">${uploadedPhotosAfter.length} súborov</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Celkom:</span>
+                <span class="summary-value">${totalPhotos} súborov</span>
             </div>
         </div>
     `;
@@ -809,4 +1074,66 @@ function sendEmail() {
         }
         console.error(err);
     });
+}
+
+/**
+ * Conditional field toggles for Step 4 components
+ */
+
+// Toggle Klapky servo fields
+function toggleKlapkyServo(selectEl) {
+    const servoFields = document.getElementById('klapky_servo_fields');
+    const momentField = document.getElementById('klapky_moment_field');
+    
+    if (selectEl.value === 'so_servopohonom') {
+        if (servoFields) servoFields.style.display = 'block';
+        if (momentField) momentField.style.display = 'block';
+    } else {
+        if (servoFields) servoFields.style.display = 'none';
+        if (momentField) momentField.style.display = 'none';
+    }
+}
+
+// Toggle Ventilátor remenica field
+function toggleVentilatorRemenica(selectEl) {
+    const remenicaField = document.getElementById('ventilator_remenica_field');
+    
+    if (selectEl.value === 'sprevodovany') {
+        if (remenicaField) remenicaField.style.display = 'block';
+    } else {
+        if (remenicaField) remenicaField.style.display = 'none';
+    }
+}
+
+// Toggle Motor remenica field
+function toggleMotorRemenica(selectEl) {
+    const remenicaField = document.getElementById('motor_remenica_field');
+    
+    if (selectEl.value === 'sprevodovany') {
+        if (remenicaField) remenicaField.style.display = 'block';
+    } else {
+        if (remenicaField) remenicaField.style.display = 'none';
+    }
+}
+
+// Toggle Ohrievač fields based on type
+function toggleOhrievacFields(selectEl) {
+    const plynovyFields = document.getElementById('ohrievac_plynovy_fields');
+    
+    if (selectEl.value === 'plynovy') {
+        if (plynovyFields) plynovyFields.style.display = 'block';
+    } else {
+        if (plynovyFields) plynovyFields.style.display = 'none';
+    }
+}
+
+// Toggle Ohrievač bypass servo field
+function toggleOhrievacBypass(selectEl) {
+    const bypassServoField = document.getElementById('ohrievac_bypass_servo_field');
+    
+    if (selectEl.value === 's_bypasom') {
+        if (bypassServoField) bypassServoField.style.display = 'block';
+    } else {
+        if (bypassServoField) bypassServoField.style.display = 'none';
+    }
 }

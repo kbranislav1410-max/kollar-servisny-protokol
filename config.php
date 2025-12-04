@@ -6,6 +6,12 @@
 // Základ cesty k súborom (relatívna k tomuto súboru)
 define('BASE_PATH', __DIR__);
 
+// Web URL base path (pre assets a interné odkazy)
+// Automatická detekcia: na localhoste prázdne, na produkcii v podadresári
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$baseUrl = ($scriptDir === '/' || $scriptDir === '\\') ? '' : rtrim($scriptDir, '/') . '/';
+define('BASE_URL', $baseUrl);
+
 // Databáza SQLite
 define('DB_PATH', BASE_PATH . '/data/servisny_protokol.db');
 
