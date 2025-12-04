@@ -2987,12 +2987,12 @@ $pageView = $pageView ?? 'home';
                     html += '<table class="simple-table expiring-table"><thead><tr><th>Zariadenie</th><th>Zákazník</th><th>Prevádzka</th><th>Posledný servis</th><th>Platnosť do</th><th>Stav</th></tr></thead><tbody>';
                     data.devices.forEach(d => {
                         html += `<tr class="clickable" onclick="window.location.href='index.php?action=device_detail&device_id=${d.id}'">
-                            <td><strong>${escapeHtml(d.nazov)}</strong><br><small>${d.interne_oznacenie || ''}</small></td>
-                            <td>${escapeHtml(d.nazov_firmy || '-')}</td>
-                            <td>${escapeHtml(d.location_name || '-')}</td>
-                            <td>${d.last_service || '-'}</td>
-                            <td>${d.platnost_do}</td>
-                            <td><span class="status-badge status-${d.status_color}">${d.status_text}</span></td>
+                            <td data-label="Zariadenie"><strong>${escapeHtml(d.nazov)}</strong><br><small>${d.interne_oznacenie || ''}</small></td>
+                            <td data-label="Zákazník">${escapeHtml(d.nazov_firmy || '-')}</td>
+                            <td data-label="Prevádzka">${escapeHtml(d.location_name || '-')}</td>
+                            <td data-label="Posledný servis">${d.last_service || '-'}</td>
+                            <td data-label="Platnosť do">${d.platnost_do}</td>
+                            <td data-label="Stav"><span class="status-badge status-${d.status_color}">${d.status_text}</span></td>
                         </tr>`;
                     });
                     html += '</tbody></table>';

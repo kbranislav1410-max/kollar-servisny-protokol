@@ -2305,6 +2305,8 @@ select {
     
     .chart-bars {
         height: 150px;
+        overflow-x: auto;
+        padding-bottom: 10px;
     }
     
     .chart-label {
@@ -2314,5 +2316,258 @@ select {
     .expiring-alert {
         flex-direction: column;
         text-align: center;
+    }
+    
+    /* Statistics page mobile enhancements */
+    .statistics-page {
+        padding: 0;
+    }
+    
+    .statistics-page .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .statistics-page .stat-card {
+        padding: 15px 10px;
+    }
+    
+    .statistics-page .stat-number {
+        font-size: 24px;
+    }
+    
+    .statistics-page .stat-icon {
+        font-size: 24px;
+    }
+    
+    /* Period filter mobile */
+    .period-filter {
+        padding: 15px;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .period-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .custom-period .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .custom-period .btn {
+        width: 100%;
+    }
+    
+    /* Period stats mobile */
+    .period-stat {
+        padding: 15px;
+    }
+    
+    .period-stat .value {
+        font-size: 28px;
+    }
+    
+    .period-stat .label {
+        font-size: 12px;
+    }
+    
+    /* Type breakdown mobile */
+    .type-bars {
+        gap: 20px;
+    }
+    
+    .type-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .type-bar .type-label {
+        width: 100%;
+        font-size: 14px;
+    }
+    
+    .bar-container {
+        width: 100%;
+        height: 20px;
+    }
+    
+    .type-percent {
+        width: auto;
+        text-align: left;
+    }
+    
+    /* Monthly chart mobile */
+    .chart-bar-group {
+        min-width: 25px;
+    }
+    
+    .chart-bar-stack {
+        max-width: 25px;
+    }
+    
+    .chart-value {
+        font-size: 10px;
+    }
+    
+    .chart-legend {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .legend-item {
+        font-size: 12px;
+    }
+    
+    /* Dashboard cards mobile */
+    .dashboard-grid {
+        gap: 15px;
+    }
+    
+    .dashboard-card {
+        padding: 15px;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    
+    /* Expiring filter mobile */
+    .expiring-filter {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .expiring-filter select {
+        width: 100%;
+    }
+    
+    /* Simple table mobile */
+    .simple-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+    
+    .simple-table th,
+    .simple-table td {
+        padding: 10px 12px;
+    }
+    
+    /* Expiring table mobile - convert to cards */
+    .expiring-table {
+        display: block;
+    }
+    
+    .expiring-table thead {
+        display: none;
+    }
+    
+    .expiring-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .expiring-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        white-space: normal;
+    }
+    
+    .expiring-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .expiring-table tbody td:last-child {
+        border-bottom: none;
+    }
+    
+    .expiring-table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #7f8c8d;
+        font-size: 11px;
+    }
+    
+    /* Service status box mobile */
+    .service-status-box {
+        padding: 15px;
+    }
+    
+    .status-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    /* Monthly stats preview */
+    .stat-item {
+        padding: 12px;
+    }
+    
+    .stat-item .stat-value {
+        font-size: 24px;
+    }
+    
+    .stat-item .stat-desc {
+        font-size: 11px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .statistics-page .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .statistics-page .stat-number {
+        font-size: 28px;
+    }
+    
+    .chart-bars {
+        height: 120px;
+    }
+    
+    .chart-bar-group {
+        min-width: 20px;
+    }
+    
+    .chart-bar-stack {
+        max-width: 20px;
+    }
+    
+    .chart-label {
+        font-size: 8px;
+    }
+    
+    .chart-value {
+        font-size: 9px;
+    }
+    
+    .period-stat .value {
+        font-size: 24px;
+    }
+    
+    /* Hide legend items text on very small screens, show only dots */
+    .chart-legend {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 }
