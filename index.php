@@ -1580,16 +1580,16 @@ $pageView = $pageView ?? 'home';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servisný Protokol MVP</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
 </head>
-<body>
+<body class="servisny-protokol-app">
     <nav class="sidebar">
         <h2>Menu</h2>
         <ul>
-            <li><a href="index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
-            <li><a href="index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
-            <li><a href="index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' ? 'active' : '' ?>">Zákazníci</a></li>
-            <li><a href="index.php?action=statistics" class="<?= $pageView === 'statistics' ? 'active' : '' ?>">Štatistiky</a></li>
+            <li><a href="<?= BASE_URL ?>index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' ? 'active' : '' ?>">Zákazníci</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?action=statistics" class="<?= $pageView === 'statistics' ? 'active' : '' ?>">Štatistiky</a></li>
         </ul>
     </nav>
 
@@ -3022,9 +3022,12 @@ $pageView = $pageView ?? 'home';
         <?php endif; ?>
     </main>
 
-    <script src="assets/js/signature_pad.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="<?= BASE_URL ?>assets/js/signature_pad.js"></script>
+    <script src="<?= BASE_URL ?>assets/js/app.js"></script>
     <script>
+        // Base URL for API calls
+        window.BASE_URL = '<?= BASE_URL ?>';
+        
         // Inicializácia s dátami zo session
         window.reportData = <?= json_encode($reportData) ?>;
         window.currentStep = <?= $currentStep ?>;
@@ -3062,7 +3065,7 @@ $pageView = $pageView ?? 'home';
         
         // Dashboard funkcie
         function loadDashboardStats() {
-            fetch('index.php?action=api_stats')
+            fetch(window.BASE_URL + 'index.php?action=api_stats')
                 .then(response => response.json())
                 .then(stats => {
                     document.getElementById('statCustomers').textContent = stats.customers;
@@ -3311,7 +3314,7 @@ $pageView = $pageView ?? 'home';
         
         // Customers list funkcie
         function loadCustomersList() {
-            fetch('index.php?action=api_customers')
+            fetch(window.BASE_URL + 'index.php?action=api_customers')
                 .then(response => response.json())
                 .then(customers => {
                     window.allCustomers = customers;
@@ -3367,7 +3370,7 @@ $pageView = $pageView ?? 'home';
         // Customer detail funkcie
         function loadCustomerDetail(customerId) {
             // Načítanie detailu zákazníka
-            fetch('index.php?action=api_customer_detail&customer_id=' + customerId)
+            fetch(window.BASE_URL + 'index.php?action=api_customer_detail&customer_id=' + customerId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -3436,7 +3439,7 @@ $pageView = $pageView ?? 'home';
                 .catch(err => console.error('Chyba:', err));
             
             // Načítanie protokolov zákazníka
-            fetch('index.php?action=api_customer_reports&customer_id=' + customerId)
+            fetch(window.BASE_URL + 'index.php?action=api_customer_reports&customer_id=' + customerId)
                 .then(response => response.json())
                 .then(reports => {
                     let html = '';
@@ -3464,7 +3467,7 @@ $pageView = $pageView ?? 'home';
         
         // Location detail funkcie
         function loadLocationDetail(locationId) {
-            fetch('index.php?action=api_location_detail&location_id=' + locationId)
+            fetch(window.BASE_URL + 'index.php?action=api_location_detail&location_id=' + locationId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -3542,7 +3545,7 @@ $pageView = $pageView ?? 'home';
         
         // Device detail funkcie
         function loadDeviceDetail(deviceId) {
-            fetch('index.php?action=api_device_detail&device_id=' + deviceId)
+            fetch(window.BASE_URL + 'index.php?action=api_device_detail&device_id=' + deviceId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -3644,7 +3647,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData(this);
                 formData.append('action', 'add_customer');
                 
-                fetch('index.php', {
+                fetch(window.BASE_URL + 'index.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -3673,6 +3676,9 @@ $pageView = $pageView ?? 'home';
         // CUSTOMER CRUD
         function showEditCustomerModal() {
             if (!currentCustomer) return;
+            
+            // Remove any existing modal first
+            closeModal();
             
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
@@ -3735,7 +3741,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData(this);
                 formData.append('action', 'update_customer');
                 
-                fetch('index.php', {
+                fetch(window.BASE_URL + 'index.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -3762,7 +3768,7 @@ $pageView = $pageView ?? 'home';
             formData.append('action', 'delete_customer');
             formData.append('id', currentCustomer.id);
             
-            fetch('index.php', {
+            fetch(window.BASE_URL + 'index.php', {
                 method: 'POST',
                 body: formData
             })
@@ -3781,6 +3787,9 @@ $pageView = $pageView ?? 'home';
         // LOCATION CRUD
         function showEditLocationModal() {
             if (!currentLocation) return;
+            
+            // Remove any existing modal first
+            closeModal();
             
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
@@ -3823,7 +3832,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData(this);
                 formData.append('action', 'update_location');
                 
-                fetch('index.php', {
+                fetch(window.BASE_URL + 'index.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -3850,7 +3859,7 @@ $pageView = $pageView ?? 'home';
             formData.append('action', 'delete_location');
             formData.append('id', currentLocation.id);
             
-            fetch('index.php', {
+            fetch(window.BASE_URL + 'index.php', {
                 method: 'POST',
                 body: formData
             })
@@ -3869,6 +3878,9 @@ $pageView = $pageView ?? 'home';
         // DEVICE CRUD
         function showEditDeviceModal() {
             if (!currentDevice) return;
+            
+            // Remove any existing modal first
+            closeModal();
             
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
@@ -3953,7 +3965,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData(this);
                 formData.append('action', 'update_device');
                 
-                fetch('index.php', {
+                fetch(window.BASE_URL + 'index.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -3980,7 +3992,7 @@ $pageView = $pageView ?? 'home';
             formData.append('action', 'delete_device');
             formData.append('id', currentDevice.id);
             
-            fetch('index.php', {
+            fetch(window.BASE_URL + 'index.php', {
                 method: 'POST',
                 body: formData
             })
@@ -4004,7 +4016,7 @@ $pageView = $pageView ?? 'home';
             formData.append('action', 'delete_report');
             formData.append('id', reportId);
             
-            fetch('index.php', {
+            fetch(window.BASE_URL + 'index.php', {
                 method: 'POST',
                 body: formData
             })
@@ -4032,7 +4044,7 @@ $pageView = $pageView ?? 'home';
         // Update loadCustomerDetail to store current customer
         const originalLoadCustomerDetail = loadCustomerDetail;
         loadCustomerDetail = function(customerId) {
-            fetch('index.php?action=api_customer_detail&customer_id=' + customerId)
+            fetch(window.BASE_URL + 'index.php?action=api_customer_detail&customer_id=' + customerId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -4103,7 +4115,7 @@ $pageView = $pageView ?? 'home';
                 .catch(err => console.error('Chyba:', err));
             
             // Load reports
-            fetch('index.php?action=api_customer_reports&customer_id=' + customerId)
+            fetch(window.BASE_URL + 'index.php?action=api_customer_reports&customer_id=' + customerId)
                 .then(response => response.json())
                 .then(reports => {
                     let html = '';
@@ -4135,7 +4147,7 @@ $pageView = $pageView ?? 'home';
         // Update loadLocationDetail to store current location
         const originalLoadLocationDetail = loadLocationDetail;
         loadLocationDetail = function(locationId) {
-            fetch('index.php?action=api_location_detail&location_id=' + locationId)
+            fetch(window.BASE_URL + 'index.php?action=api_location_detail&location_id=' + locationId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -4214,7 +4226,7 @@ $pageView = $pageView ?? 'home';
         // Update loadDeviceDetail to store current device
         const originalLoadDeviceDetail = loadDeviceDetail;
         loadDeviceDetail = function(deviceId) {
-            fetch('index.php?action=api_device_detail&device_id=' + deviceId)
+            fetch(window.BASE_URL + 'index.php?action=api_device_detail&device_id=' + deviceId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {

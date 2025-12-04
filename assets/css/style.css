@@ -1,24 +1,26 @@
 /**
  * Servisný Protokol MVP - Hlavné štýly
+ * All styles are scoped to .servisny-protokol-app to avoid conflicts with parent sites
  */
 
 /* Reset a základné štýly */
-* {
+.servisny-protokol-app * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: #f5f6fa;
-    color: #2c3e50;
-    line-height: 1.6;
+.servisny-protokol-app,
+body.servisny-protokol-app {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
+    background: #f5f6fa !important;
+    color: #2c3e50 !important;
+    line-height: 1.6 !important;
     min-height: 100vh;
 }
 
 /* Sidebar */
-.sidebar {
+.servisny-protokol-app .sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -31,22 +33,22 @@ body {
     z-index: 1000;
 }
 
-.sidebar h2 {
+.servisny-protokol-app .sidebar h2 {
     font-size: 18px;
     margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.sidebar ul {
+.servisny-protokol-app .sidebar ul {
     list-style: none;
 }
 
-.sidebar ul li {
+.servisny-protokol-app .sidebar ul li {
     margin-bottom: 8px;
 }
 
-.sidebar ul li a {
+.servisny-protokol-app .sidebar ul li a {
     color: rgba(255,255,255,0.8);
     text-decoration: none;
     display: block;
@@ -55,38 +57,43 @@ body {
     transition: all 0.2s ease;
 }
 
-.sidebar ul li a:hover {
+.servisny-protokol-app .sidebar ul li a:hover {
     background: rgba(255,255,255,0.1);
     color: white;
 }
 
+.servisny-protokol-app .sidebar ul li a.active {
+    background: #3498db;
+    color: white;
+}
+
 /* Main content */
-.content {
+.servisny-protokol-app .content {
     margin-left: 220px;
     padding: 30px 40px;
     max-width: 900px;
 }
 
-h1 {
+.servisny-protokol-app h1 {
     font-size: 28px;
     margin-bottom: 25px;
     color: #2c3e50;
 }
 
-h2 {
+.servisny-protokol-app h2 {
     font-size: 22px;
     margin-bottom: 20px;
     color: #34495e;
 }
 
-h3 {
+.servisny-protokol-app h3 {
     font-size: 16px;
     margin: 20px 0 12px;
     color: #7f8c8d;
 }
 
 /* Progress bar */
-.progress-bar {
+.servisny-protokol-app .progress-bar {
     background: white;
     border-radius: 10px;
     padding: 20px;
@@ -94,13 +101,13 @@ h3 {
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.progress-steps {
+.servisny-protokol-app .progress-steps {
     display: flex;
     justify-content: space-between;
     position: relative;
 }
 
-.progress-steps::before {
+.servisny-protokol-app .progress-steps::before {
     content: '';
     position: absolute;
     top: 20px;
@@ -209,120 +216,126 @@ h3 {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Form elements */
-.form-group {
+/* Form elements - scoped */
+.servisny-protokol-app .form-group {
     margin-bottom: 15px;
 }
 
-.form-group label {
+.servisny-protokol-app .form-group label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
     color: #34495e;
 }
 
-.form-row {
+.servisny-protokol-app .form-row {
     display: flex;
     gap: 15px;
 }
 
-.form-row .form-group {
+.servisny-protokol-app .form-row .form-group {
     flex: 1;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-input[type="file"],
-textarea,
-select {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #ecf0f1;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.2s ease;
+.servisny-protokol-app input[type="text"],
+.servisny-protokol-app input[type="email"],
+.servisny-protokol-app input[type="tel"],
+.servisny-protokol-app input[type="date"],
+.servisny-protokol-app input[type="file"],
+.servisny-protokol-app input[type="number"],
+.servisny-protokol-app textarea,
+.servisny-protokol-app select {
+    width: 100% !important;
+    padding: 12px 15px !important;
+    border: 2px solid #ecf0f1 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s ease !important;
+    background: white !important;
+    color: #333 !important;
+    font-family: inherit !important;
+    box-sizing: border-box !important;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-    outline: none;
-    border-color: #3498db;
+.servisny-protokol-app input:focus,
+.servisny-protokol-app textarea:focus,
+.servisny-protokol-app select:focus {
+    outline: none !important;
+    border-color: #3498db !important;
 }
 
-textarea {
+.servisny-protokol-app textarea {
     min-height: 100px;
     resize: vertical;
 }
 
-select {
+.servisny-protokol-app select {
     cursor: pointer;
     background: white;
 }
 
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
+/* Buttons - scoped to prevent conflicts with parent site */
+.servisny-protokol-app .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px 24px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.btn-primary {
-    background: #3498db;
-    color: white;
+.servisny-protokol-app .btn-primary {
+    background: #3498db !important;
+    color: white !important;
 }
 
-.btn-primary:hover {
-    background: #2980b9;
+.servisny-protokol-app .btn-primary:hover {
+    background: #2980b9 !important;
 }
 
-.btn-secondary {
-    background: #95a5a6;
-    color: white;
+.servisny-protokol-app .btn-secondary {
+    background: #95a5a6 !important;
+    color: white !important;
 }
 
-.btn-secondary:hover {
-    background: #7f8c8d;
+.servisny-protokol-app .btn-secondary:hover {
+    background: #7f8c8d !important;
 }
 
-.btn-success {
-    background: #27ae60;
-    color: white;
+.servisny-protokol-app .btn-success {
+    background: #27ae60 !important;
+    color: white !important;
 }
 
-.btn-success:hover {
-    background: #219a52;
+.servisny-protokol-app .btn-success:hover {
+    background: #219a52 !important;
 }
 
-.btn-outline {
-    background: transparent;
-    border: 2px solid #bdc3c7;
-    color: #7f8c8d;
+.servisny-protokol-app .btn-outline {
+    background: transparent !important;
+    border: 2px solid #bdc3c7 !important;
+    color: #7f8c8d !important;
 }
 
-.btn-outline:hover {
-    border-color: #95a5a6;
-    color: #34495e;
+.servisny-protokol-app .btn-outline:hover {
+    border-color: #95a5a6 !important;
+    color: #34495e !important;
 }
 
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 12px;
+.servisny-protokol-app .btn-sm {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
 }
 
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.servisny-protokol-app .btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
 }
 
 /* Navigation */
@@ -2573,89 +2586,116 @@ select {
 }
 
 
-/* Modal Styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
+/* Modal Styles - High specificity to override parent site styles */
+.servisny-protokol-app .modal-overlay,
+body.servisny-protokol-app .modal-overlay,
+#editModal.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    padding: 20px !important;
+    margin: 0 !important;
 }
 
-.modal {
-    background: white;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+.servisny-protokol-app .modal-overlay .modal,
+body.servisny-protokol-app .modal-overlay .modal,
+#editModal .modal {
+    background: white !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+    position: relative !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.modal.modal-large {
-    max-width: 700px;
+.servisny-protokol-app .modal-overlay .modal.modal-large,
+#editModal .modal.modal-large {
+    max-width: 700px !important;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
+.servisny-protokol-app .modal-overlay .modal-header,
+#editModal .modal-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px !important;
+    border-bottom: 1px solid #eee !important;
+    background: #f8f9fa !important;
+    border-radius: 12px 12px 0 0 !important;
 }
 
-.modal-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #333;
+.servisny-protokol-app .modal-overlay .modal-header h3,
+#editModal .modal-header h3 {
+    margin: 0 !important;
+    font-size: 18px !important;
+    color: #333 !important;
+    font-weight: 600 !important;
 }
 
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #999;
-    padding: 0;
-    line-height: 1;
+.servisny-protokol-app .modal-overlay .modal-close,
+#editModal .modal-close {
+    background: none !important;
+    border: none !important;
+    font-size: 28px !important;
+    cursor: pointer !important;
+    color: #999 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-.modal-close:hover {
-    color: #333;
+.servisny-protokol-app .modal-overlay .modal-close:hover,
+#editModal .modal-close:hover {
+    color: #333 !important;
 }
 
-.modal form {
-    padding: 20px;
+.servisny-protokol-app .modal-overlay .modal form,
+#editModal .modal form {
+    padding: 20px !important;
+    background: white !important;
 }
 
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 20px;
-    margin-top: 20px;
-    border-top: 1px solid #eee;
+.servisny-protokol-app .modal-overlay .modal-actions,
+#editModal .modal-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    padding-top: 20px !important;
+    margin-top: 20px !important;
+    border-top: 1px solid #eee !important;
 }
 
-/* Danger Button */
-.btn-danger {
-    background: #e74c3c;
-    color: white;
-    border: none;
+/* Danger Button - scoped */
+.servisny-protokol-app .btn-danger {
+    background: #e74c3c !important;
+    color: white !important;
+    border: none !important;
 }
 
-.btn-danger:hover {
-    background: #c0392b;
+.servisny-protokol-app .btn-danger:hover {
+    background: #c0392b !important;
 }
 
-.btn-sm {
-    padding: 6px 12px;
+.servisny-protokol-app .btn-sm {
+    padding: 6px 12px !important;
     font-size: 12px;
 }
 
@@ -2733,5 +2773,62 @@ select {
     .page-header .page-actions .btn {
         flex: 1;
     }
+}
+
+/* ============================================
+   ISOLATION RESET FOR PRODUCTION DEPLOYMENT
+   Ensures styles work correctly when embedded in parent sites
+   ============================================ */
+
+/* Ensure the app container is isolated from parent site styles */
+body.servisny-protokol-app {
+    all: unset;
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
+    background: #f5f6fa !important;
+    color: #2c3e50 !important;
+    line-height: 1.6 !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Force modal to appear above everything including parent site elements */
+body.servisny-protokol-app #editModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 999999 !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Ensure buttons in page actions are properly styled */
+body.servisny-protokol-app .page-actions .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+body.servisny-protokol-app .page-actions .btn-primary {
+    background: #3498db !important;
+    color: white !important;
+    border: none !important;
+}
+
+body.servisny-protokol-app .page-actions .btn-danger {
+    background: #e74c3c !important;
+    color: white !important;
+    border: none !important;
 }
 
