@@ -2832,3 +2832,92 @@ body.servisny-protokol-app .page-actions .btn-danger {
     border: none !important;
 }
 
+/* Component Photos Styling */
+.component-photos {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.component-photos h5 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.photo-upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-upload {
+    padding: 8px 16px;
+    font-size: 14px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 150px;
+}
+
+.btn-upload:hover {
+    background: #2980b9;
+}
+
+.photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.photo-preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+}
+
+.photo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-preview-item .photo-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Belt fields styling */
+.conditional-field {
+    display: none;
+}
+
+.form-row.conditional-field {
+    display: none;
+}
+
+.form-row.conditional-field[style*="flex"] {
+    display: flex !important;
+}
+

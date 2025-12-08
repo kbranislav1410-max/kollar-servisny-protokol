@@ -635,8 +635,10 @@ function finalizeReport(): void
             'moment' => $report['klapky_moment'] ?? '',
             'privod_stav' => $report['klapky_pr_stav'] ?? '',
             'privod_poznamka' => $report['klapky_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['klapky_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['klapky_od_stav'] ?? '',
             'odvod_poznamka' => $report['klapky_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['klapky_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['klapky_zhodnotenie'] ?? '',
             'odporucanie' => $report['klapky_odporucanie'] ?? ''
         ],
@@ -645,8 +647,10 @@ function finalizeReport(): void
             'rozmer' => $report['filter_rozmer'] ?? '',
             'privod_stav' => $report['filter_pr_stav'] ?? '',
             'privod_poznamka' => $report['filter_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['filter_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['filter_od_stav'] ?? '',
             'odvod_poznamka' => $report['filter_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['filter_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['filter_zhodnotenie'] ?? '',
             'odporucanie' => $report['filter_odporucanie'] ?? ''
         ],
@@ -654,8 +658,10 @@ function finalizeReport(): void
             'typ' => $report['rekuperator_typ'] ?? '',
             'privod_stav' => $report['rekuperator_pr_stav'] ?? '',
             'privod_poznamka' => $report['rekuperator_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['rekuperator_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['rekuperator_od_stav'] ?? '',
             'odvod_poznamka' => $report['rekuperator_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['rekuperator_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['rekuperator_zhodnotenie'] ?? '',
             'odporucanie' => $report['rekuperator_odporucanie'] ?? ''
         ],
@@ -663,8 +669,10 @@ function finalizeReport(): void
             'typ' => $report['recirkulacia_typ'] ?? '',
             'privod_stav' => $report['recirkulacia_pr_stav'] ?? '',
             'privod_poznamka' => $report['recirkulacia_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['recirkulacia_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['recirkulacia_od_stav'] ?? '',
             'odvod_poznamka' => $report['recirkulacia_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['recirkulacia_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['recirkulacia_zhodnotenie'] ?? '',
             'odporucanie' => $report['recirkulacia_odporucanie'] ?? ''
         ],
@@ -672,10 +680,14 @@ function finalizeReport(): void
             'typ' => $report['ventilator_typ'] ?? '',
             'pohon' => $report['ventilator_pohon'] ?? '',
             'remenica_typ' => $report['ventilator_remenica_typ'] ?? '',
+            'remen_typ' => $report['ventilator_remen_typ'] ?? '',
+            'pocet_remenov' => $report['ventilator_pocet_remenov'] ?? '',
             'privod_stav' => $report['ventilator_pr_stav'] ?? '',
             'privod_poznamka' => $report['ventilator_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['ventilator_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['ventilator_od_stav'] ?? '',
             'odvod_poznamka' => $report['ventilator_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['ventilator_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['ventilator_zhodnotenie'] ?? '',
             'odporucanie' => $report['ventilator_odporucanie'] ?? ''
         ],
@@ -683,10 +695,14 @@ function finalizeReport(): void
             'vykon' => $report['motor_vykon'] ?? '',
             'pohon' => $report['motor_pohon'] ?? '',
             'remenica_typ' => $report['motor_remenica_typ'] ?? '',
+            'remen_typ' => $report['motor_remen_typ'] ?? '',
+            'pocet_remenov' => $report['motor_pocet_remenov'] ?? '',
             'privod_stav' => $report['motor_pr_stav'] ?? '',
             'privod_poznamka' => $report['motor_pr_poznamka'] ?? '',
+            'privod_vykonany_servis' => $report['motor_pr_vykonany_servis'] ?? '',
             'odvod_stav' => $report['motor_od_stav'] ?? '',
             'odvod_poznamka' => $report['motor_od_poznamka'] ?? '',
+            'odvod_vykonany_servis' => $report['motor_od_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['motor_zhodnotenie'] ?? '',
             'odporucanie' => $report['motor_odporucanie'] ?? ''
         ],
@@ -2252,6 +2268,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="klapky_pr_poznamka" placeholder="Poznámka k prívodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="klapky_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
                             </div>
                             <div class="odv-section">
                                 <h5>ODVOD</h5>
@@ -2272,6 +2294,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="klapky_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="klapky_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2285,6 +2313,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="klapky_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputKlapky').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputKlapky" accept="image/*" capture="environment" style="display: none;" data-section-key="klapky" onchange="handleComponentPhotoUpload(this)">
+                                <div id="klapkyPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -2332,6 +2369,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="filter_pr_poznamka" placeholder="Poznámka k prívodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="filter_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
                             </div>
                             <div class="odv-section">
                                 <h5>ODVOD</h5>
@@ -2352,6 +2395,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="filter_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="filter_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2365,6 +2414,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="filter_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputFilter').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputFilter" accept="image/*" capture="environment" style="display: none;" data-section-key="filter" onchange="handleComponentPhotoUpload(this)">
+                                <div id="filterPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -2406,6 +2464,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="rekuperator_pr_poznamka" placeholder="Poznámka k prívodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="rekuperator_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
                             </div>
                             <div class="odv-section">
                                 <h5>ODVOD</h5>
@@ -2426,6 +2490,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="rekuperator_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="rekuperator_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2439,6 +2509,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="rekuperator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputRekuperator').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputRekuperator" accept="image/*" capture="environment" style="display: none;" data-section-key="rekuperator" onchange="handleComponentPhotoUpload(this)">
+                                <div id="rekuperatorPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -2480,6 +2559,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="recirkulacia_pr_poznamka" placeholder="Poznámka k prívodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="recirkulacia_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
                             </div>
                             <div class="odv-section">
                                 <h5>ODVOD</h5>
@@ -2500,6 +2585,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="recirkulacia_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="recirkulacia_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2513,6 +2604,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="recirkulacia_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputRecirkulacia').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputRecirkulacia" accept="image/*" capture="environment" style="display: none;" data-section-key="recirkulacia" onchange="handleComponentPhotoUpload(this)">
+                                <div id="recirkulaciaPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -2542,6 +2642,16 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="ventilator_remenica_typ" placeholder="Typ remenice">
                             </div>
                         </div>
+                        <div class="form-row conditional-field" id="ventilator_belt_fields" style="display:none;">
+                            <div class="form-group">
+                                <label>Typ remeňa</label>
+                                <input type="text" name="ventilator_remen_typ" placeholder="Typ remeňa">
+                            </div>
+                            <div class="form-group">
+                                <label>Počet remeňov</label>
+                                <input type="number" name="ventilator_pocet_remenov" placeholder="Počet remeňov" min="1">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2560,6 +2670,12 @@ $pageView = $pageView ?? 'home';
                                     <div class="form-group">
                                         <label>Poznámka</label>
                                         <input type="text" name="ventilator_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="ventilator_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
                                     </div>
                                 </div>
                             </div>
@@ -2582,6 +2698,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="ventilator_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="ventilator_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2595,6 +2717,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="ventilator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputVentilator').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputVentilator" accept="image/*" capture="environment" style="display: none;" data-section-key="ventilator" onchange="handleComponentPhotoUpload(this)">
+                                <div id="ventilatorPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -2624,6 +2755,16 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="motor_remenica" placeholder="Typ remenice">
                             </div>
                         </div>
+                        <div class="form-row conditional-field" id="motor_belt_fields" style="display:none;">
+                            <div class="form-group">
+                                <label>Typ remeňa</label>
+                                <input type="text" name="motor_remen_typ" placeholder="Typ remeňa">
+                            </div>
+                            <div class="form-group">
+                                <label>Počet remeňov</label>
+                                <input type="number" name="motor_pocet_remenov" placeholder="Počet remeňov" min="1">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2642,6 +2783,12 @@ $pageView = $pageView ?? 'home';
                                     <div class="form-group">
                                         <label>Poznámka</label>
                                         <input type="text" name="motor_pr_poznamka" placeholder="Poznámka k prívodu">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="motor_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
                                     </div>
                                 </div>
                             </div>
@@ -2664,6 +2811,12 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="motor_od_poznamka" placeholder="Poznámka k odvodu">
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Vykonaný servis</label>
+                                        <input type="text" name="motor_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2677,6 +2830,15 @@ $pageView = $pageView ?? 'home';
                                     <label>Odporúčanie</label>
                                     <textarea name="motor_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputMotor').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputMotor" accept="image/*" capture="environment" style="display: none;" data-section-key="el_motor" onchange="handleComponentPhotoUpload(this)">
+                                <div id="motorPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -4316,6 +4478,93 @@ $pageView = $pageView ?? 'home';
                 })
                 .catch(err => console.error('Chyba:', err));
         };
+        
+        // Toggle functions for conditional fields
+        function toggleKlapkyServo(selectEl) {
+            const value = selectEl.value;
+            const servoFields = document.getElementById('klapky_servo_fields');
+            const momentField = document.getElementById('klapky_moment_field');
+            if (value === 'so_servopohonom') {
+                if (servoFields) servoFields.style.display = 'block';
+                if (momentField) momentField.style.display = 'block';
+            } else {
+                if (servoFields) servoFields.style.display = 'none';
+                if (momentField) momentField.style.display = 'none';
+            }
+        }
+        
+        function toggleVentilatorRemenica(selectEl) {
+            const value = selectEl.value;
+            const remenicaField = document.getElementById('ventilator_remenica_field');
+            const beltFields = document.getElementById('ventilator_belt_fields');
+            if (value === 'sprevodovany') {
+                if (remenicaField) remenicaField.style.display = 'block';
+                if (beltFields) beltFields.style.display = 'flex';
+            } else {
+                if (remenicaField) remenicaField.style.display = 'none';
+                if (beltFields) beltFields.style.display = 'none';
+            }
+        }
+        
+        function toggleMotorRemenica(selectEl) {
+            const value = selectEl.value;
+            const remenicaField = document.getElementById('motor_remenica_field');
+            const beltFields = document.getElementById('motor_belt_fields');
+            if (value === 'sprevodovany') {
+                if (remenicaField) remenicaField.style.display = 'block';
+                if (beltFields) beltFields.style.display = 'flex';
+            } else {
+                if (remenicaField) remenicaField.style.display = 'none';
+                if (beltFields) beltFields.style.display = 'none';
+            }
+        }
+        
+        // Component photo upload handler
+        function handleComponentPhotoUpload(inputEl) {
+            const files = inputEl.files;
+            if (!files || files.length === 0) return;
+            
+            const sectionKey = inputEl.getAttribute('data-section-key');
+            const previewContainer = document.getElementById(sectionKey + 'PhotosPreview');
+            
+            // Upload each file
+            Array.from(files).forEach(file => {
+                const formData = new FormData();
+                formData.append('photo', file);
+                formData.append('action', 'upload_photo');
+                formData.append('photo_type', 'general');
+                formData.append('section_key', sectionKey);
+                
+                fetch('index.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add preview
+                        const preview = document.createElement('div');
+                        preview.className = 'photo-preview-item';
+                        preview.innerHTML = `
+                            <img src="uploads/photos/${data.filename}" alt="Component photo">
+                            <span class="photo-name">${file.name}</span>
+                        `;
+                        if (previewContainer) {
+                            previewContainer.appendChild(preview);
+                        }
+                    } else {
+                        alert('Chyba pri nahrávaní: ' + (data.error || 'Neznáma chyba'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    alert('Chyba pri nahrávaní fotografie');
+                });
+            });
+            
+            // Clear input
+            inputEl.value = '';
+        }
     </script>
 </body>
 </html>
