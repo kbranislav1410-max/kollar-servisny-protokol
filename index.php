@@ -633,48 +633,52 @@ function finalizeReport(): void
             'typ' => $report['klapky_typ'] ?? '',
             'servo_typ' => $report['klapky_servo_typ'] ?? '',
             'moment' => $report['klapky_moment'] ?? '',
+            'poznamka' => $report['klapky_poznamka'] ?? '',
             'privod_stav' => $report['klapky_pr_stav'] ?? '',
-            'privod_poznamka' => $report['klapky_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['klapky_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['klapky_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['klapky_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['klapky_od_stav'] ?? '',
-            'odvod_poznamka' => $report['klapky_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['klapky_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['klapky_zhodnotenie'] ?? '',
-            'odporucanie' => $report['klapky_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['klapky_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['klapky_od_odporucanie'] ?? ''
         ],
         'filter' => [
             'typ' => $report['filter_typ'] ?? '',
             'rozmer' => $report['filter_rozmer'] ?? '',
+            'poznamka' => $report['filter_poznamka'] ?? '',
             'privod_stav' => $report['filter_pr_stav'] ?? '',
-            'privod_poznamka' => $report['filter_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['filter_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['filter_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['filter_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['filter_od_stav'] ?? '',
-            'odvod_poznamka' => $report['filter_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['filter_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['filter_zhodnotenie'] ?? '',
-            'odporucanie' => $report['filter_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['filter_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['filter_od_odporucanie'] ?? ''
         ],
         'rekuperator' => [
             'typ' => $report['rekuperator_typ'] ?? '',
+            'poznamka' => $report['rekuperator_poznamka'] ?? '',
             'privod_stav' => $report['rekuperator_pr_stav'] ?? '',
-            'privod_poznamka' => $report['rekuperator_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['rekuperator_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['rekuperator_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['rekuperator_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['rekuperator_od_stav'] ?? '',
-            'odvod_poznamka' => $report['rekuperator_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['rekuperator_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['rekuperator_zhodnotenie'] ?? '',
-            'odporucanie' => $report['rekuperator_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['rekuperator_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['rekuperator_od_odporucanie'] ?? ''
         ],
         'recirkulacia' => [
             'typ' => $report['recirkulacia_typ'] ?? '',
+            'poznamka' => $report['recirkulacia_poznamka'] ?? '',
             'privod_stav' => $report['recirkulacia_pr_stav'] ?? '',
-            'privod_poznamka' => $report['recirkulacia_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['recirkulacia_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['recirkulacia_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['recirkulacia_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['recirkulacia_od_stav'] ?? '',
-            'odvod_poznamka' => $report['recirkulacia_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['recirkulacia_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['recirkulacia_zhodnotenie'] ?? '',
-            'odporucanie' => $report['recirkulacia_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['recirkulacia_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['recirkulacia_od_odporucanie'] ?? ''
         ],
         'ventilator' => [
             'typ' => $report['ventilator_typ'] ?? '',
@@ -682,14 +686,15 @@ function finalizeReport(): void
             'remenica_typ' => $report['ventilator_remenica_typ'] ?? '',
             'remen_typ' => $report['ventilator_remen_typ'] ?? '',
             'pocet_remenov' => $report['ventilator_pocet_remenov'] ?? '',
+            'poznamka' => $report['ventilator_poznamka'] ?? '',
             'privod_stav' => $report['ventilator_pr_stav'] ?? '',
-            'privod_poznamka' => $report['ventilator_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['ventilator_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['ventilator_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['ventilator_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['ventilator_od_stav'] ?? '',
-            'odvod_poznamka' => $report['ventilator_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['ventilator_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['ventilator_zhodnotenie'] ?? '',
-            'odporucanie' => $report['ventilator_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['ventilator_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['ventilator_od_odporucanie'] ?? ''
         ],
         'el_motor' => [
             'vykon' => $report['motor_vykon'] ?? '',
@@ -697,14 +702,15 @@ function finalizeReport(): void
             'remenica_typ' => $report['motor_remenica_typ'] ?? '',
             'remen_typ' => $report['motor_remen_typ'] ?? '',
             'pocet_remenov' => $report['motor_pocet_remenov'] ?? '',
+            'poznamka' => $report['motor_poznamka'] ?? '',
             'privod_stav' => $report['motor_pr_stav'] ?? '',
-            'privod_poznamka' => $report['motor_pr_poznamka'] ?? '',
             'privod_vykonany_servis' => $report['motor_pr_vykonany_servis'] ?? '',
+            'privod_zhodnotenie' => $report['motor_pr_zhodnotenie'] ?? '',
+            'privod_odporucanie' => $report['motor_pr_odporucanie'] ?? '',
             'odvod_stav' => $report['motor_od_stav'] ?? '',
-            'odvod_poznamka' => $report['motor_od_poznamka'] ?? '',
             'odvod_vykonany_servis' => $report['motor_od_vykonany_servis'] ?? '',
-            'zhodnotenie' => $report['motor_zhodnotenie'] ?? '',
-            'odporucanie' => $report['motor_odporucanie'] ?? ''
+            'odvod_zhodnotenie' => $report['motor_od_zhodnotenie'] ?? '',
+            'odvod_odporucanie' => $report['motor_od_odporucanie'] ?? ''
         ],
         'chladic' => [
             'typ' => $report['chladic_typ'] ?? '',
@@ -712,6 +718,7 @@ function finalizeReport(): void
             'vykon' => $report['chladic_vykon'] ?? '',
             'stav' => $report['chladic_stav'] ?? '',
             'poznamka' => $report['chladic_poznamka'] ?? '',
+            'vykonany_servis' => $report['chladic_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['chladic_zhodnotenie'] ?? '',
             'odporucanie' => $report['chladic_odporucanie'] ?? ''
         ],
@@ -723,6 +730,7 @@ function finalizeReport(): void
             'bypass_servo' => $report['ohrievac_bypass_servo'] ?? '',
             'stav' => $report['ohrievac_stav'] ?? '',
             'poznamka' => $report['ohrievac_poznamka'] ?? '',
+            'vykonany_servis' => $report['ohrievac_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['ohrievac_zhodnotenie'] ?? '',
             'odporucanie' => $report['ohrievac_odporucanie'] ?? ''
         ],
@@ -730,6 +738,7 @@ function finalizeReport(): void
             'typ' => $report['kominovy_termostat'] ?? '',
             'stav' => $report['kominovy_termostat_stav'] ?? '',
             'poznamka' => $report['kominovy_termostat_poznamka'] ?? '',
+            'vykonany_servis' => $report['termostat_vykonany_servis'] ?? '',
             'zhodnotenie' => $report['termostat_zhodnotenie'] ?? '',
             'odporucanie' => $report['termostat_odporucanie'] ?? ''
         ]
@@ -2248,6 +2257,13 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="klapky_moment" placeholder="Napr. 10 Nm">
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="klapky_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2263,15 +2279,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="klapky_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="klapky_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="klapky_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="klapky_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2289,10 +2313,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="klapky_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2300,18 +2320,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="klapky_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="klapky_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="klapky_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="klapky_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="klapky_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2349,6 +2368,13 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="filter_rozmer" placeholder="Napr. 592x592x300">
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="filter_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2364,15 +2390,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="filter_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="filter_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="filter_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="filter_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2390,10 +2424,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="filter_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2401,18 +2431,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="filter_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="filter_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="filter_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="filter_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="filter_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2444,6 +2473,13 @@ $pageView = $pageView ?? 'home';
                                 </select>
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="rekuperator_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2459,15 +2495,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="rekuperator_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="rekuperator_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="rekuperator_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="rekuperator_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2485,10 +2529,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="rekuperator_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2496,18 +2536,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="rekuperator_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="rekuperator_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="rekuperator_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="rekuperator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="rekuperator_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2539,6 +2578,13 @@ $pageView = $pageView ?? 'home';
                                 </select>
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="recirkulacia_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2554,15 +2600,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="recirkulacia_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="recirkulacia_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="recirkulacia_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="recirkulacia_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2580,10 +2634,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="recirkulacia_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2591,18 +2641,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="recirkulacia_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="recirkulacia_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="recirkulacia_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="recirkulacia_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="recirkulacia_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2652,6 +2701,13 @@ $pageView = $pageView ?? 'home';
                                 <input type="number" name="ventilator_pocet_remenov" placeholder="Počet remeňov" min="1">
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="ventilator_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2667,15 +2723,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="ventilator_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="ventilator_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="ventilator_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="ventilator_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2693,10 +2757,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="ventilator_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2704,18 +2764,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="ventilator_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="ventilator_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="ventilator_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="ventilator_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="ventilator_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2765,6 +2824,13 @@ $pageView = $pageView ?? 'home';
                                 <input type="number" name="motor_pocet_remenov" placeholder="Počet remeňov" min="1">
                             </div>
                         </div>
+                        <!-- Poznámka spoločná pre prívod aj odvod -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poznámka</label>
+                                <input type="text" name="motor_poznamka" placeholder="Poznámka k celému komponentu">
+                            </div>
+                        </div>
                         <div class="priv-odv-section">
                             <div class="priv-section">
                                 <h5>PRÍVOD</h5>
@@ -2780,15 +2846,23 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="motor_pr_poznamka" placeholder="Poznámka k prívodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Vykonaný servis</label>
                                         <input type="text" name="motor_pr_vykonany_servis" placeholder="Vykonaný servis na prívode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="motor_pr_zhodnotenie" placeholder="Zhodnotenie stavu prívodu..." rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="motor_pr_odporucanie" placeholder="Odporúčanie pre prívod..." rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -2806,10 +2880,6 @@ $pageView = $pageView ?? 'home';
                                             <option value="poskodeny">Poškodený</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Poznámka</label>
-                                        <input type="text" name="motor_od_poznamka" placeholder="Poznámka k odvodu">
-                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -2817,18 +2887,17 @@ $pageView = $pageView ?? 'home';
                                         <input type="text" name="motor_od_vykonany_servis" placeholder="Vykonaný servis na odvode">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="motor_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="motor_od_zhodnotenie" placeholder="Zhodnotenie stavu odvodu..." rows="2"></textarea>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="motor_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="motor_od_odporucanie" placeholder="Odporúčanie pre odvod..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2889,6 +2958,12 @@ $pageView = $pageView ?? 'home';
                             <div class="form-group">
                                 <label>Poznámka</label>
                                 <input type="text" name="chladic_poznamka" placeholder="Poznámka k chladiču">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Vykonaný servis</label>
+                                <input type="text" name="chladic_vykonany_servis" placeholder="Vykonaný servis">
                             </div>
                         </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
@@ -2976,6 +3051,12 @@ $pageView = $pageView ?? 'home';
                                 <input type="text" name="ohrievac_poznamka" placeholder="Poznámka k ohrievaču">
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Vykonaný servis</label>
+                                <input type="text" name="ohrievac_vykonany_servis" placeholder="Vykonaný servis">
+                            </div>
+                        </div>
                         <!-- Zhodnotenie a odporúčanie pre komponent -->
                         <div class="component-evaluation">
                             <div class="form-row">
@@ -3001,38 +3082,48 @@ $pageView = $pageView ?? 'home';
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Komínový termostat</label>
-                                <select name="kominovy_termostat">
+                                <select name="kominovy_termostat" id="kominovy_termostat_select" onchange="toggleKominovyTermostatFields(this)">
                                     <option value="">-- Vyberte --</option>
                                     <option value="ma">Má</option>
                                     <option value="nema">Nemá</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>Stav</label>
-                                <select name="kominovy_termostat_stav">
-                                    <option value="">-- Vyberte stav --</option>
-                                    <option value="cisty">Čistý</option>
-                                    <option value="mierne_znecisteny">Mierne znečistený</option>
-                                    <option value="znecisteny">Znečistený</option>
-                                    <option value="silno_znecisteny">Silno znečistený</option>
-                                    <option value="poskodeny">Poškodený</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Poznámka</label>
-                                <input type="text" name="kominovy_termostat_poznamka" placeholder="Poznámka">
-                            </div>
                         </div>
-                        <!-- Zhodnotenie a odporúčanie pre komponent -->
-                        <div class="component-evaluation">
+                        <div id="kominovy_termostat_fields">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Zhodnotenie stavu</label>
-                                    <textarea name="termostat_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                    <label>Stav</label>
+                                    <select name="kominovy_termostat_stav" id="kominovy_termostat_stav">
+                                        <option value="">-- Vyberte stav --</option>
+                                        <option value="cisty">Čistý</option>
+                                        <option value="mierne_znecisteny">Mierne znečistený</option>
+                                        <option value="znecisteny">Znečistený</option>
+                                        <option value="silno_znecisteny">Silno znečistený</option>
+                                        <option value="poskodeny">Poškodený</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Odporúčanie</label>
-                                    <textarea name="termostat_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                    <label>Poznámka</label>
+                                    <input type="text" name="kominovy_termostat_poznamka" id="kominovy_termostat_poznamka" placeholder="Poznámka">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Vykonaný servis</label>
+                                    <input type="text" name="termostat_vykonany_servis" id="termostat_vykonany_servis" placeholder="Vykonaný servis">
+                                </div>
+                            </div>
+                            <!-- Zhodnotenie a odporúčanie pre komponent -->
+                            <div class="component-evaluation">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Zhodnotenie stavu</label>
+                                        <textarea name="termostat_zhodnotenie" id="termostat_zhodnotenie" placeholder="Zhodnotenie stavu komponentu..." rows="2"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Odporúčanie</label>
+                                        <textarea name="termostat_odporucanie" id="termostat_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -4516,6 +4607,45 @@ $pageView = $pageView ?? 'home';
             } else {
                 if (remenicaField) remenicaField.style.display = 'none';
                 if (beltFields) beltFields.style.display = 'none';
+            }
+        }
+        
+        function toggleKominovyTermostatFields(selectEl) {
+            const value = selectEl.value;
+            const fieldsContainer = document.getElementById('kominovy_termostat_fields');
+            const fieldsToDisable = [
+                'kominovy_termostat_stav',
+                'kominovy_termostat_poznamka',
+                'termostat_vykonany_servis',
+                'termostat_zhodnotenie',
+                'termostat_odporucanie'
+            ];
+            
+            if (value === 'nema') {
+                // Disable and clear all fields
+                fieldsToDisable.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.disabled = true;
+                        field.value = '';
+                    }
+                });
+                if (fieldsContainer) {
+                    fieldsContainer.style.opacity = '0.5';
+                    fieldsContainer.style.pointerEvents = 'none';
+                }
+            } else {
+                // Enable all fields
+                fieldsToDisable.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.disabled = false;
+                    }
+                });
+                if (fieldsContainer) {
+                    fieldsContainer.style.opacity = '1';
+                    fieldsContainer.style.pointerEvents = 'auto';
+                }
             }
         }
         
