@@ -515,11 +515,11 @@ function uploadPhoto(): void
     }
     
     $file = $_FILES['photo'];
-    $photoType = post('photo_type', 'general'); // 'before', 'after', or 'general'
+    $photoType = post('photo_type', 'general'); // 'before', 'after', 'general', or 'component'
     $sectionKey = post('section_key', '');
     
     // Validácia photo_type
-    $allowedTypes = ['before', 'after', 'general'];
+    $allowedTypes = ['before', 'after', 'general', 'component'];
     if (!in_array($photoType, $allowedTypes)) {
         $photoType = 'general';
     }
@@ -1382,6 +1382,19 @@ function getDeviceDetail(): void
     ");
     $stmt->execute([$deviceId]);
     $reports = $stmt->fetchAll();
+    
+    // Load attachments for each report with url property
+    foreach ($reports as &$report) {
+        $stmt = $pdo->prepare("SELECT * FROM attachments WHERE report_id = ? ORDER BY created_at");
+        $stmt->execute([$report['id']]);
+        $attachments = $stmt->fetchAll();
+        
+        // Add url property to each attachment
+        foreach ($attachments as &$attachment) {
+            $attachment['url'] = $attachment['file_path'];
+        }
+        $report['attachments'] = $attachments;
+    }
     
     // Posledný pravidelný servis a jeho platnosť
     $stmt = $pdo->prepare("
@@ -2989,6 +3002,15 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputChladic').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputChladic" accept="image/*" capture="environment" style="display: none;" data-section-key="chladic" onchange="handleComponentPhotoUpload(this)">
+                                <div id="chladicPhotosPreview" class="photos-preview"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3080,6 +3102,15 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputOhrievac').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputOhrievac" accept="image/*" capture="environment" style="display: none;" data-section-key="ohrievac" onchange="handleComponentPhotoUpload(this)">
+                                <div id="ohrievacPhotosPreview" class="photos-preview"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3134,6 +3165,15 @@ $pageView = $pageView ?? 'home';
                                         <label>Odporúčanie</label>
                                         <textarea name="termostat_odporucanie" id="termostat_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Fotografie komponentu -->
+                            <div class="component-photos">
+                                <h5>Fotografie komponentu</h5>
+                                <div class="photo-upload-section">
+                                    <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputTermostat').click()">📷 Odfotiť</button>
+                                    <input type="file" id="cameraInputTermostat" accept="image/*" capture="environment" style="display: none;" data-section-key="kominovy_termostat" onchange="handleComponentPhotoUpload(this)">
+                                    <div id="kominovy_termostatPhotosPreview" class="photos-preview"></div>
                                 </div>
                             </div>
                         </div>
@@ -4672,7 +4712,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData();
                 formData.append('photo', file);
                 formData.append('action', 'upload_photo');
-                formData.append('photo_type', 'general');
+                formData.append('photo_type', 'component');
                 formData.append('section_key', sectionKey);
                 
                 fetch('index.php', {
