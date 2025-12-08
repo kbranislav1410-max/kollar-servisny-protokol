@@ -515,11 +515,11 @@ function uploadPhoto(): void
     }
     
     $file = $_FILES['photo'];
-    $photoType = post('photo_type', 'general'); // 'before', 'after', or 'general'
+    $photoType = post('photo_type', 'general'); // 'before', 'after', 'general', or 'component'
     $sectionKey = post('section_key', '');
     
     // Validácia photo_type
-    $allowedTypes = ['before', 'after', 'general'];
+    $allowedTypes = ['before', 'after', 'general', 'component'];
     if (!in_array($photoType, $allowedTypes)) {
         $photoType = 'general';
     }
@@ -1115,6 +1115,9 @@ switch ($action) {
     case 'api_device_reports':
         getDeviceReports();
         break;
+    case 'api_report_detail':
+        getReportDetail();
+        break;
     case 'api_stats':
         getStats();
         break;
@@ -1147,6 +1150,9 @@ switch ($action) {
         break;
     case 'device_detail':
         $pageView = 'device_detail';
+        break;
+    case 'report_detail':
+        $pageView = 'report_detail';
         break;
     case 'statistics':
         $pageView = 'statistics';
@@ -1383,6 +1389,19 @@ function getDeviceDetail(): void
     $stmt->execute([$deviceId]);
     $reports = $stmt->fetchAll();
     
+    // Load attachments for each report with url property
+    foreach ($reports as &$report) {
+        $stmt = $pdo->prepare("SELECT * FROM attachments WHERE report_id = ? ORDER BY created_at");
+        $stmt->execute([$report['id']]);
+        $attachments = $stmt->fetchAll();
+        
+        // Add url property to each attachment
+        foreach ($attachments as &$attachment) {
+            $attachment['url'] = $attachment['file_path'];
+        }
+        $report['attachments'] = $attachments;
+    }
+    
     // Posledný pravidelný servis a jeho platnosť
     $stmt = $pdo->prepare("
         SELECT datum, platnost_do, typ_servisu
@@ -1439,6 +1458,83 @@ function getDeviceReports(): void
     
     header('Content-Type: application/json');
     echo json_encode($stmt->fetchAll());
+    exit;
+}
+
+function getReportDetail(): void
+{
+    $reportId = (int)get('report_id', 0);
+    
+    $pdo = getDbConnection();
+    
+    // Report with related data
+    $stmt = $pdo->prepare("
+        SELECT r.*, 
+               c.nazov_firmy, c.ico, c.dic, c.ic_dph, c.sidlo, c.kontakt_osoba, c.telefon, c.email, c.id as customer_id,
+               l.nazov as location_name, l.adresa as location_adresa, l.mesto as location_mesto, l.id as location_id,
+               d.nazov as device_name, d.typ as device_typ, d.vyrobne_cislo as device_vyrobne_cislo,
+               d.rok_vyroby as device_rok_vyroby, d.prevedenie as device_prevedenie,
+               d.vyrobca as device_vyrobca, d.distribucia as device_distribucia,
+               d.servisne_stredisko as device_servisne_stredisko, d.servisne_stredisko_tel as device_servisne_stredisko_tel,
+               d.interne_oznacenie as device_interne_oznacenie, d.id as device_id
+        FROM reports r
+        LEFT JOIN customers c ON r.customer_id = c.id
+        LEFT JOIN locations l ON r.location_id = l.id
+        LEFT JOIN devices d ON r.device_id = d.id
+        WHERE r.id = ?
+    ");
+    $stmt->execute([$reportId]);
+    $report = $stmt->fetch();
+    
+    if (!$report) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Report not found']);
+        exit;
+    }
+    
+    // Load attachments with url property
+    $stmt = $pdo->prepare("SELECT * FROM attachments WHERE report_id = ? ORDER BY photo_type, created_at");
+    $stmt->execute([$reportId]);
+    $attachments = $stmt->fetchAll();
+    
+    // Add url property to each attachment and group by type
+    $photosBefore = [];
+    $photosAfter = [];
+    $photosGeneral = [];
+    $componentPhotos = [];
+    
+    foreach ($attachments as $att) {
+        $att['url'] = $att['file_path'];
+        $photoType = $att['photo_type'] ?? 'general';
+        $sectionKey = $att['section_key'] ?? '';
+        
+        if ($photoType === 'before') {
+            $photosBefore[] = $att;
+        } elseif ($photoType === 'after') {
+            $photosAfter[] = $att;
+        } elseif ($photoType === 'component' && !empty($sectionKey)) {
+            if (!isset($componentPhotos[$sectionKey])) {
+                $componentPhotos[$sectionKey] = [];
+            }
+            $componentPhotos[$sectionKey][] = $att;
+        } else {
+            $photosGeneral[] = $att;
+        }
+    }
+    
+    $report['attachments'] = $attachments;
+    $report['photos_before'] = $photosBefore;
+    $report['photos_after'] = $photosAfter;
+    $report['photos_general'] = $photosGeneral;
+    $report['component_photos'] = $componentPhotos;
+    
+    // Parse sekcie_json if present
+    if (!empty($report['sekcie_json'])) {
+        $report['sekcie_data'] = json_decode($report['sekcie_json'], true);
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($report);
     exit;
 }
 
@@ -1623,7 +1719,7 @@ $pageView = $pageView ?? 'home';
         <ul>
             <li><a href="<?= BASE_URL ?>index.php" class="<?= $pageView === 'home' ? 'active' : '' ?>">Domov</a></li>
             <li><a href="<?= BASE_URL ?>index.php?action=new_report" class="<?= $pageView === 'protocol' ? 'active' : '' ?>">Servisný protokol</a></li>
-            <li><a href="<?= BASE_URL ?>index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' ? 'active' : '' ?>">Zákazníci</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?action=customers" class="<?= $pageView === 'customers' || $pageView === 'customer_detail' || $pageView === 'location_detail' || $pageView === 'device_detail' || $pageView === 'report_detail' ? 'active' : '' ?>">Zákazníci</a></li>
             <li><a href="<?= BASE_URL ?>index.php?action=statistics" class="<?= $pageView === 'statistics' ? 'active' : '' ?>">Štatistiky</a></li>
         </ul>
     </nav>
@@ -1953,6 +2049,48 @@ $pageView = $pageView ?? 'home';
             <h3>Protokoly pre toto zariadenie</h3>
             <div id="deviceReportsContent">
                 <p class="loading">Načítavam...</p>
+            </div>
+        </div>
+        
+        <?php elseif ($pageView === 'report_detail'): ?>
+        <!-- REPORT DETAIL -->
+        <div class="report-detail-page">
+            <div class="page-header">
+                <a href="#" id="backToDeviceLink" class="back-link">← Späť na zariadenie</a>
+                <div class="page-title-section">
+                    <span class="page-type-label">Detail protokolu</span>
+                    <h1 id="reportNumber">Načítavam...</h1>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="downloadPdfBtn" onclick="downloadReportPdf()">📄 Stiahnuť PDF</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteReport()">Odstrániť</button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showReportTab('info')">Základné údaje</button>
+                <button class="tab-btn" onclick="showReportTab('components')">Komponenty</button>
+                <button class="tab-btn" onclick="showReportTab('photos')">Fotografie</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-info">
+                <div id="reportInfoContent">
+                    <p class="loading">Načítavam údaje protokolu...</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tab-components">
+                <h3>Stav komponentov</h3>
+                <div id="reportComponentsContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tab-photos">
+                <h3>Fotografie</h3>
+                <div id="reportPhotosContent">
+                    <p class="loading">Načítavam...</p>
+                </div>
             </div>
         </div>
         
@@ -2989,6 +3127,15 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputChladic').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputChladic" accept="image/*" capture="environment" style="display: none;" data-section-key="chladic" onchange="handleComponentPhotoUpload(this)">
+                                <div id="chladicPhotosPreview" class="photos-preview"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3080,6 +3227,15 @@ $pageView = $pageView ?? 'home';
                                 </div>
                             </div>
                         </div>
+                        <!-- Fotografie komponentu -->
+                        <div class="component-photos">
+                            <h5>Fotografie komponentu</h5>
+                            <div class="photo-upload-section">
+                                <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputOhrievac').click()">📷 Odfotiť</button>
+                                <input type="file" id="cameraInputOhrievac" accept="image/*" capture="environment" style="display: none;" data-section-key="ohrievac" onchange="handleComponentPhotoUpload(this)">
+                                <div id="ohrievacPhotosPreview" class="photos-preview"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3134,6 +3290,15 @@ $pageView = $pageView ?? 'home';
                                         <label>Odporúčanie</label>
                                         <textarea name="termostat_odporucanie" id="termostat_odporucanie" placeholder="Odporúčanie pre zákazníka..." rows="2"></textarea>
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Fotografie komponentu -->
+                            <div class="component-photos">
+                                <h5>Fotografie komponentu</h5>
+                                <div class="photo-upload-section">
+                                    <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputTermostat').click()">📷 Odfotiť</button>
+                                    <input type="file" id="cameraInputTermostat" accept="image/*" capture="environment" style="display: none;" data-section-key="kominovy_termostat" onchange="handleComponentPhotoUpload(this)">
+                                    <div id="kominovy_termostatPhotosPreview" class="photos-preview"></div>
                                 </div>
                             </div>
                         </div>
@@ -3319,6 +3484,12 @@ $pageView = $pageView ?? 'home';
                 const deviceId = urlParams.get('device_id');
                 if (deviceId) {
                     loadDeviceDetail(deviceId);
+                }
+            } else if (window.pageView === 'report_detail') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const reportId = urlParams.get('report_id');
+                if (reportId) {
+                    loadReportDetail(reportId);
                 }
             } else if (window.pageView === 'statistics') {
                 loadDetailedStats('month');
@@ -3713,12 +3884,12 @@ $pageView = $pageView ?? 'home';
                         html += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Prevádzka</th><th>Zariadenie</th><th>Akcia</th></tr></thead>';
                         html += '<tbody>';
                         reports.forEach(r => {
-                            html += `<tr>
-                                <td>${r.cislo_protokolu}</td>
+                            html += `<tr onclick="window.location.href='index.php?action=report_detail&report_id=${r.id}'" style="cursor: pointer;">
+                                <td><a href="index.php?action=report_detail&report_id=${r.id}">${r.cislo_protokolu}</a></td>
                                 <td>${r.datum}</td>
                                 <td>${r.location_name || '-'}</td>
                                 <td>${r.device_name || '-'}</td>
-                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
+                                <td onclick="event.stopPropagation();"><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
                             </tr>`;
                         });
                         html += '</tbody></table></div>';
@@ -3785,11 +3956,11 @@ $pageView = $pageView ?? 'home';
                         repHtml += '<thead><tr><th>Číslo</th><th>Dátum</th><th>Zariadenie</th><th>Akcia</th></tr></thead>';
                         repHtml += '<tbody>';
                         data.reports.forEach(r => {
-                            repHtml += `<tr>
-                                <td>${r.cislo_protokolu}</td>
+                            repHtml += `<tr onclick="window.location.href='index.php?action=report_detail&report_id=${r.id}'" style="cursor: pointer;">
+                                <td><a href="index.php?action=report_detail&report_id=${r.id}">${r.cislo_protokolu}</a></td>
                                 <td>${r.datum}</td>
                                 <td>${r.device_name || '-'}</td>
-                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
+                                <td onclick="event.stopPropagation();"><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
                             </tr>`;
                         });
                         repHtml += '</tbody></table></div>';
@@ -3872,13 +4043,13 @@ $pageView = $pageView ?? 'home';
                         repHtml += '<tbody>';
                         data.reports.forEach(r => {
                             const typeLabel = r.typ_servisu === 'porucha' ? '<span class="badge-sm badge-red">Porucha</span>' : '<span class="badge-sm badge-green">Prehliadka</span>';
-                            repHtml += `<tr>
-                                <td>${r.cislo_protokolu}</td>
+                            repHtml += `<tr onclick="window.location.href='index.php?action=report_detail&report_id=${r.id}'" style="cursor: pointer;">
+                                <td><a href="index.php?action=report_detail&report_id=${r.id}">${r.cislo_protokolu}</a></td>
                                 <td>${typeLabel}</td>
                                 <td>${r.datum}</td>
                                 <td>${r.platnost_do || '-'}</td>
                                 <td>${r.servis_vykonal || '-'}</td>
-                                <td><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
+                                <td onclick="event.stopPropagation();"><a href="index.php?action=download_pdf&report_id=${r.id}" class="btn btn-sm">PDF</a></td>
                             </tr>`;
                         });
                         repHtml += '</tbody></table></div>';
@@ -3886,6 +4057,202 @@ $pageView = $pageView ?? 'home';
                     document.getElementById('deviceReportsContent').innerHTML = repHtml;
                 })
                 .catch(err => console.error('Chyba:', err));
+        }
+        
+        function loadReportDetail(reportId) {
+            window.currentReportId = reportId;
+            fetch(window.BASE_URL + 'index.php?action=api_report_detail&report_id=' + reportId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Protokol nebol nájdený');
+                        return;
+                    }
+                    
+                    // Set report number
+                    document.getElementById('reportNumber').textContent = data.cislo_protokolu || 'N/A';
+                    
+                    // Set back link to device
+                    if (data.device_id) {
+                        document.getElementById('backToDeviceLink').href = 'index.php?action=device_detail&device_id=' + data.device_id;
+                    }
+                    
+                    // Basic info tab
+                    let infoHtml = '<div class="info-grid">';
+                    
+                    // Report info
+                    infoHtml += '<div class="info-section"><h4>Základné údaje protokolu</h4>';
+                    infoHtml += `<div class="info-item"><strong>Číslo protokolu:</strong> ${data.cislo_protokolu || '-'}</div>`;
+                    const typeLabel = data.typ_servisu === 'porucha' ? '<span class="badge badge-red">Porucha / Oprava</span>' : '<span class="badge badge-green">Pravidelný servis</span>';
+                    infoHtml += `<div class="info-item"><strong>Typ servisu:</strong> ${typeLabel}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Dátum servisu:</strong> ${data.datum || '-'}</div>`;
+                    if (data.typ_servisu === 'pravidelny' && data.platnost_do) {
+                        infoHtml += `<div class="info-item"><strong>Platnosť do:</strong> ${data.platnost_do}</div>`;
+                    }
+                    infoHtml += `<div class="info-item"><strong>Servis vykonal:</strong> ${data.servis_vykonal || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Skontroloval a prevzal:</strong> ${data.skontroloval_prevzal || '-'}</div>`;
+                    infoHtml += '</div>';
+                    
+                    // Customer info
+                    infoHtml += '<div class="info-section"><h4>Zákazník</h4>';
+                    infoHtml += `<div class="info-item"><strong>Názov:</strong> ${data.nazov_firmy || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>IČO:</strong> ${data.ico || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Kontakt:</strong> ${data.telefon || '-'}${data.email ? ' / ' + data.email : ''}</div>`;
+                    infoHtml += '</div>';
+                    
+                    // Location info
+                    infoHtml += '<div class="info-section"><h4>Prevádzka</h4>';
+                    infoHtml += `<div class="info-item"><strong>Názov:</strong> ${data.location_name || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Adresa:</strong> ${data.location_adresa || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Mesto:</strong> ${data.location_mesto || '-'}</div>`;
+                    infoHtml += '</div>';
+                    
+                    // Device info
+                    infoHtml += '<div class="info-section"><h4>Zariadenie</h4>';
+                    infoHtml += `<div class="info-item"><strong>Názov:</strong> ${data.device_name || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Typ/Model:</strong> ${data.device_typ || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Výrobné číslo:</strong> ${data.device_vyrobne_cislo || '-'}</div>`;
+                    infoHtml += `<div class="info-item"><strong>Interné označenie:</strong> ${data.device_interne_oznacenie || data.interne_oznacenie || '-'}</div>`;
+                    infoHtml += '</div>';
+                    
+                    // Notes
+                    if (data.poznamka) {
+                        infoHtml += '<div class="info-section"><h4>Poznámka</h4>';
+                        infoHtml += `<div class="info-item">${escapeHtml(data.poznamka)}</div>`;
+                        infoHtml += '</div>';
+                    }
+                    
+                    infoHtml += '</div>';
+                    document.getElementById('reportInfoContent').innerHTML = infoHtml;
+                    
+                    // Components tab
+                    let compHtml = '';
+                    if (data.sekcie_data) {
+                        compHtml = renderComponentsData(data.sekcie_data, data.component_photos);
+                    } else {
+                        compHtml = '<p class="no-data">Žiadne údaje o komponentoch</p>';
+                    }
+                    document.getElementById('reportComponentsContent').innerHTML = compHtml;
+                    
+                    // Photos tab
+                    let photosHtml = '';
+                    
+                    if (data.photos_before && data.photos_before.length > 0) {
+                        photosHtml += '<div class="photos-section"><h4>Fotografie PRED servisom</h4><div class="photos-grid">';
+                        data.photos_before.forEach(p => {
+                            photosHtml += `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.file_name)}"><div class="photo-caption">${escapeHtml(p.file_name)}</div></div>`;
+                        });
+                        photosHtml += '</div></div>';
+                    }
+                    
+                    if (data.photos_after && data.photos_after.length > 0) {
+                        photosHtml += '<div class="photos-section"><h4>Fotografie PO servise</h4><div class="photos-grid">';
+                        data.photos_after.forEach(p => {
+                            photosHtml += `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.file_name)}"><div class="photo-caption">${escapeHtml(p.file_name)}</div></div>`;
+                        });
+                        photosHtml += '</div></div>';
+                    }
+                    
+                    if (data.component_photos && Object.keys(data.component_photos).length > 0) {
+                        photosHtml += '<div class="photos-section"><h4>Fotografie komponentov</h4>';
+                        for (const [key, photos] of Object.entries(data.component_photos)) {
+                            photosHtml += `<h5>${getComponentLabel(key)}</h5><div class="photos-grid">`;
+                            photos.forEach(p => {
+                                photosHtml += `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.file_name)}"><div class="photo-caption">${escapeHtml(p.file_name)}</div></div>`;
+                            });
+                            photosHtml += '</div>';
+                        }
+                        photosHtml += '</div>';
+                    }
+                    
+                    if (data.photos_general && data.photos_general.length > 0) {
+                        photosHtml += '<div class="photos-section"><h4>Ostatné fotografie</h4><div class="photos-grid">';
+                        data.photos_general.forEach(p => {
+                            photosHtml += `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.file_name)}"><div class="photo-caption">${escapeHtml(p.file_name)}</div></div>`;
+                        });
+                        photosHtml += '</div></div>';
+                    }
+                    
+                    if (!photosHtml) {
+                        photosHtml = '<p class="no-data">Žiadne fotografie</p>';
+                    }
+                    
+                    document.getElementById('reportPhotosContent').innerHTML = photosHtml;
+                })
+                .catch(err => console.error('Chyba:', err));
+        }
+        
+        function renderComponentsData(sekcieData, componentPhotos) {
+            let html = '<div class="components-list">';
+            
+            const componentLabels = {
+                'klapky': 'Klapky',
+                'filter': 'Filter',
+                'rekuperator': 'Rekuperátor',
+                'recirkulacia': 'Recirkulácia',
+                'ventilator': 'Ventilátor',
+                'el_motor': 'Elektro motor',
+                'chladic': 'Chladič',
+                'ohrievac': 'Ohrievač',
+                'kominovy_termostat': 'Komínový termostat'
+            };
+            
+            for (const [key, data] of Object.entries(sekcieData)) {
+                if (!data || (typeof data === 'object' && Object.keys(data).filter(k => data[k]).length === 0)) continue;
+                
+                html += `<div class="component-detail-card">`;
+                html += `<h4>${componentLabels[key] || key}</h4>`;
+                html += '<div class="component-info">';
+                
+                // Display all non-empty fields
+                for (const [field, value] of Object.entries(data)) {
+                    if (value && value !== '') {
+                        let label = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        html += `<div class="info-item"><strong>${label}:</strong> ${escapeHtml(value)}</div>`;
+                    }
+                }
+                
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function getComponentLabel(key) {
+            const labels = {
+                'klapky': 'Klapky',
+                'filter': 'Filter',
+                'rekuperator': 'Rekuperátor',
+                'recirkulacia': 'Recirkulácia',
+                'ventilator': 'Ventilátor',
+                'el_motor': 'Elektro motor',
+                'chladic': 'Chladič',
+                'ohrievac': 'Ohrievač',
+                'kominovy_termostat': 'Komínový termostat'
+            };
+            return labels[key] || key;
+        }
+        
+        function showReportTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function downloadReportPdf() {
+            if (window.currentReportId) {
+                window.location.href = 'index.php?action=download_pdf&report_id=' + window.currentReportId;
+            }
+        }
+        
+        function confirmDeleteReport() {
+            if (confirm('Naozaj chcete odstrániť tento protokol? Táto akcia sa nedá vrátiť späť.')) {
+                // Implement delete functionality
+                alert('Funkcia odstránenia bude implementovaná');
+            }
         }
         
         function showTab(tabName) {
@@ -4672,7 +5039,7 @@ $pageView = $pageView ?? 'home';
                 const formData = new FormData();
                 formData.append('photo', file);
                 formData.append('action', 'upload_photo');
-                formData.append('photo_type', 'general');
+                formData.append('photo_type', 'component');
                 formData.append('section_key', sectionKey);
                 
                 fetch('index.php', {
