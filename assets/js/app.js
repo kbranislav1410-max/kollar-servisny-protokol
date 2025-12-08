@@ -10,6 +10,280 @@ let uploadedPhotosBefore = [];
 let uploadedPhotosAfter = [];
 
 /**
+ * API helper function to make GET requests to backend endpoints
+ * Uses existing backend endpoints via index.php?action=...
+ * 
+ * @param {string} action - The action parameter for index.php (e.g., 'api_customers', 'api_report_detail')
+ * @param {Object} params - Additional query parameters (e.g., {customer_id: 123, report_id: 456})
+ * @returns {Promise} - Promise that resolves with parsed JSON response
+ * 
+ * @example
+ * // Load customers list
+ * apiGet('api_customers').then(customers => console.log(customers));
+ * 
+ * // Load customer detail
+ * apiGet('api_customer_detail', {customer_id: 123}).then(data => console.log(data));
+ * 
+ * // Load report detail
+ * apiGet('api_report_detail', {report_id: 456}).then(report => console.log(report));
+ */
+function apiGet(action, params = {}) {
+    // Build query string from params
+    const queryParams = new URLSearchParams({ action, ...params });
+    const url = `index.php?${queryParams.toString()}`;
+    
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('API request failed:', error);
+            throw error;
+        });
+}
+
+/**
+ * SPA Helper: Populate customers view container
+ * Loads customers and displays them in a table/grid with click handlers
+ * Note: This function is designed to work with containers like #customersView or #customersList
+ * 
+ * @param {string} containerId - The ID of the container element (default: 'customersList')
+ */
+function populateCustomersView(containerId = 'customersList') {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.warn(`Container #${containerId} not found`);
+        return;
+    }
+    
+    container.innerHTML = '<p class="loading">Načítavam zákazníkov...</p>';
+    
+    apiGet('api_customers')
+        .then(customers => {
+            if (!customers || customers.length === 0) {
+                container.innerHTML = '<p class="no-data">Žiadni zákazníci</p>';
+                return;
+            }
+            
+            // Store for filtering
+            window.allCustomers = customers;
+            
+            // Render customers table/grid
+            let html = '<div class="customers-grid">';
+            customers.forEach(c => {
+                html += `
+                    <div class="customer-card" onclick="openCustomerDetail(${c.id})">
+                        <div class="customer-card-header">
+                            <h3>${escapeHtml(c.nazov_firmy)}</h3>
+                            ${c.ico ? '<span class="customer-ico">IČO: ' + escapeHtml(c.ico) + '</span>' : ''}
+                        </div>
+                        <div class="customer-card-body">
+                            ${c.sidlo ? '<p><strong>Sídlo:</strong> ' + escapeHtml(c.sidlo) + '</p>' : ''}
+                            ${c.kontakt_osoba ? '<p><strong>Kontakt:</strong> ' + escapeHtml(c.kontakt_osoba) + '</p>' : ''}
+                            ${c.telefon ? '<p><strong>Tel:</strong> ' + escapeHtml(c.telefon) + '</p>' : ''}
+                        </div>
+                        <div class="customer-card-footer">
+                            <span class="view-detail">Zobraziť detail →</span>
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            container.innerHTML = '<p class="error">Chyba pri načítaní zákazníkov</p>';
+            console.error('Error loading customers:', error);
+        });
+}
+
+/**
+ * SPA Helper: Open customer detail in detail view
+ * Navigates to customer detail page showing locations, branches, devices, and reports
+ * 
+ * @param {number} customerId - The ID of the customer to display
+ */
+function openCustomerDetail(customerId) {
+    // Navigate to customer detail page
+    window.location.href = `index.php?action=customer_detail&customer_id=${customerId}`;
+}
+
+/**
+ * SPA Helper: Open report detail in detail view
+ * Displays report information including components, photos, and Download PDF button
+ * 
+ * @param {number} reportId - The ID of the report to display
+ * @param {string} containerId - The ID of the container element (default: 'detailView')
+ */
+function openReportDetail(reportId, containerId = 'detailView') {
+    // If containerId exists, use SPA-style loading
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = '<p class="loading">Načítavam protokol...</p>';
+        
+        apiGet('api_report_detail', { report_id: reportId })
+            .then(report => {
+                renderReportDetail(report, container);
+            })
+            .catch(error => {
+                container.innerHTML = '<p class="error">Chyba pri načítaní protokolu</p>';
+                console.error('Error loading report:', error);
+            });
+    } else {
+        // Otherwise navigate to report detail page
+        window.location.href = `index.php?action=report_detail&report_id=${reportId}`;
+    }
+}
+
+/**
+ * SPA Helper: Render report detail view
+ * Displays components, photos, and Download PDF button
+ * Uses data URIs provided by backend (p.dataUri) or URL/path (p.url/p.path)
+ * 
+ * @param {Object} report - The report data object
+ * @param {HTMLElement} container - The container element to render into
+ */
+function renderReportDetail(report, container) {
+    if (!report || report.error) {
+        container.innerHTML = '<p class="error">Protokol nebol nájdený</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="report-detail">
+            <div class="report-header">
+                <h2>Protokol č. ${escapeHtml(report.cislo_protokolu || 'N/A')}</h2>
+                <button class="btn btn-primary" onclick="downloadReportPDF(${report.id})">
+                    📥 Stiahnuť PDF
+                </button>
+            </div>
+            
+            <div class="report-info">
+                <h3>Základné údaje</h3>
+                <div class="info-grid">
+                    <div class="info-item"><strong>Dátum:</strong> ${escapeHtml(report.datum || '-')}</div>
+                    <div class="info-item"><strong>Zákazník:</strong> ${escapeHtml(report.nazov_firmy || '-')}</div>
+                    <div class="info-item"><strong>Zariadenie:</strong> ${escapeHtml(report.device_name || '-')}</div>
+                </div>
+            </div>`;
+    
+    // Render components if available
+    if (report.sekcie_data) {
+        html += '<div class="report-components"><h3>Komponenty</h3>';
+        html += renderComponents(report.sekcie_data);
+        html += '</div>';
+    }
+    
+    // Render photos if available
+    html += '<div class="report-photos"><h3>Fotografie</h3>';
+    
+    if (report.photos_before && report.photos_before.length > 0) {
+        html += '<h4>Fotografie PRED servisom</h4>';
+        html += renderPhotosGrid(report.photos_before);
+    }
+    
+    if (report.photos_after && report.photos_after.length > 0) {
+        html += '<h4>Fotografie PO servise</h4>';
+        html += renderPhotosGrid(report.photos_after);
+    }
+    
+    if (report.photos_general && report.photos_general.length > 0) {
+        html += '<h4>Ostatné fotografie</h4>';
+        html += renderPhotosGrid(report.photos_general);
+    }
+    
+    if (report.component_photos && Object.keys(report.component_photos).length > 0) {
+        html += '<h4>Fotografie komponentov</h4>';
+        for (const [key, photos] of Object.entries(report.component_photos)) {
+            html += `<h5>${escapeHtml(key)}</h5>`;
+            html += renderPhotosGrid(photos);
+        }
+    }
+    
+    html += '</div></div>';
+    
+    container.innerHTML = html;
+}
+
+/**
+ * Helper: Render photos grid for browser display
+ * Uses data URIs (p.dataUri) or URL/path (p.url or p.path) from backend
+ * 
+ * @param {Array} photos - Array of photo objects
+ * @returns {string} HTML for photos grid
+ */
+function renderPhotosGrid(photos) {
+    if (!photos || photos.length === 0) {
+        return '<p class="no-data">Žiadne fotografie</p>';
+    }
+    
+    let html = '<div class="photos-grid">';
+    photos.forEach(p => {
+        // Support multiple formats: dataUri, url, or path
+        const imgSrc = p.dataUri || p.url || p.path || '';
+        const fileName = p.file_name || p.filename || 'Fotografia';
+        
+        if (imgSrc) {
+            html += `
+                <div class="photo-item">
+                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(fileName)}" loading="lazy">
+                    <div class="photo-caption">${escapeHtml(fileName)}</div>
+                </div>`;
+        }
+    });
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Helper: Render components data
+ * 
+ * @param {Object} sekcieData - Components data object
+ * @returns {string} HTML for components display
+ */
+function renderComponents(sekcieData) {
+    if (!sekcieData || Object.keys(sekcieData).length === 0) {
+        return '<p class="no-data">Žiadne údaje o komponentoch</p>';
+    }
+    
+    let html = '<div class="components-list">';
+    for (const [key, data] of Object.entries(sekcieData)) {
+        if (!data || (typeof data === 'object' && Object.keys(data).filter(k => data[k]).length === 0)) {
+            continue;
+        }
+        
+        html += `<div class="component-card"><h4>${escapeHtml(key)}</h4>`;
+        html += '<div class="component-info">';
+        
+        if (typeof data === 'object') {
+            for (const [field, value] of Object.entries(data)) {
+                if (value && value !== '') {
+                    html += `<div class="info-item"><strong>${escapeHtml(field)}:</strong> ${escapeHtml(value)}</div>`;
+                }
+            }
+        } else {
+            html += `<div class="info-item">${escapeHtml(data)}</div>`;
+        }
+        
+        html += '</div></div>';
+    }
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Helper: Download report PDF
+ * Navigates to downloadReportPDF endpoint with report ID
+ * 
+ * @param {number} reportId - The ID of the report to download
+ */
+function downloadReportPDF(reportId) {
+    window.location.href = `index.php?action=download_pdf&report_id=${reportId}`;
+}
+
+/**
  * Prepnutie collapsible sekcie
  */
 function toggleCollapsible(button) {

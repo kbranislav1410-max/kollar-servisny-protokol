@@ -113,10 +113,80 @@ if (!isset($componentPhotos)) {
     $componentPhotos = [];
 }
 
-// Helper function to render component photos
+/**
+ * Render a single photo as an <img> tag with inline styles for PDF layout
+ * Uses data URI from getImageDataUri() and includes fallback for failed loads
+ * 
+ * @param string $photoPath Full path to photo file
+ * @param string $fileName Optional filename for fallback display
+ * @return string HTML img tag with inline styles or fallback message
+ */
+function renderPhotoImgTag($photoPath, $fileName = '') {
+    $dataUri = getImageDataUri($photoPath);
+    
+    if ($dataUri) {
+        // Return img tag with sensible inline styles for PDF layout
+        return '<img src="' . $dataUri . '" alt="' . htmlspecialchars($fileName) . '" style="max-width: 100%; max-height: 90px; margin: 2px; border: 1px solid #e0e0e0; object-fit: contain;">';
+    } else {
+        // Fallback when image cannot be loaded - show filename
+        $displayName = $fileName ?: basename($photoPath);
+        return '<div style="background: #f0f0f0; padding: 10px; font-size: 7pt; text-align: center;">' . htmlspecialchars($displayName) . '</div>';
+    }
+}
+
+/**
+ * Render photos section with title and photo grid
+ * 
+ * @param string $title Section title (e.g., "Fotografie PRED servisom")
+ * @param array $photosArray Array of photo entries (can be strings or arrays with path/filename)
+ * @return string HTML for the complete photo section
+ */
+function renderPhotoSection($title, $photosArray) {
+    if (empty($photosArray)) {
+        return '';
+    }
+    
+    $html = '<div class="photos-section">';
+    $html .= '<div class="photos-row">';
+    $html .= '<div class="photos-row-title">' . htmlspecialchars($title) . '</div>';
+    $html .= '<div class="photos-grid">';
+    
+    foreach ($photosArray as $photo) {
+        // Support both string paths and array entries with ['path', 'filename'] or ['file_path', 'file_name']
+        if (is_string($photo)) {
+            $photoPath = BASE_PATH . '/' . $photo;
+            $fileName = basename($photo);
+        } elseif (is_array($photo)) {
+            // Support both 'path' and 'file_path' keys
+            $relativePath = $photo['file_path'] ?? $photo['path'] ?? '';
+            $photoPath = BASE_PATH . '/' . $relativePath;
+            $fileName = $photo['file_name'] ?? $photo['filename'] ?? basename($relativePath);
+        } else {
+            continue; // Skip invalid entries
+        }
+        
+        $html .= '<div class="photo-item">';
+        $html .= renderPhotoImgTag($photoPath, $fileName);
+        $html .= '</div>';
+    }
+    
+    $html .= '</div>';
+    $html .= '</div>';
+    $html .= '</div>';
+    
+    return $html;
+}
+
+/**
+ * Helper function to render component photos
+ * Iterates through component photos and uses renderPhotoImgTag for each
+ * Supports photo entries that are either strings (path) or arrays with ['path','filename']
+ * Returns empty string with fallback message when no photos exist
+ */
 function renderComponentPhotos($componentKey) {
     global $componentPhotos;
     
+    // Return empty string if no photos for this component
     if (empty($componentPhotos[$componentKey])) {
         return '';
     }
@@ -125,16 +195,22 @@ function renderComponentPhotos($componentKey) {
     $html .= '<div class="component-photos-title">Fotografie komponentu</div>';
     $html .= '<div class="photos-grid">';
     
-    foreach ($componentPhotos[$componentKey] as $att) {
-        $photoPath = BASE_PATH . '/' . $att['file_path'];
-        $photoDataUri = getImageDataUri($photoPath);
+    foreach ($componentPhotos[$componentKey] as $photo) {
+        // Support both string paths and array entries
+        if (is_string($photo)) {
+            $photoPath = BASE_PATH . '/' . $photo;
+            $fileName = basename($photo);
+        } elseif (is_array($photo)) {
+            // Support both 'path' and 'file_path' keys for flexibility
+            $relativePath = $photo['file_path'] ?? $photo['path'] ?? '';
+            $photoPath = BASE_PATH . '/' . $relativePath;
+            $fileName = $photo['file_name'] ?? $photo['filename'] ?? basename($relativePath);
+        } else {
+            continue; // Skip invalid entries
+        }
         
         $html .= '<div class="photo-item">';
-        if ($photoDataUri) {
-            $html .= '<img src="' . $photoDataUri . '" alt="' . htmlspecialchars($att['file_name']) . '">';
-        } else {
-            $html .= '<div style="background: #f0f0f0; padding: 10px; font-size: 7pt;">' . htmlspecialchars($att['file_name']) . '</div>';
-        }
+        $html .= renderPhotoImgTag($photoPath, $fileName);
         $html .= '</div>';
     }
     
@@ -1252,73 +1328,13 @@ function renderComponentPhotos($componentKey) {
     </div>
 
     <!-- Fotografie - PRED servisom -->
-    <?php if (!empty($photosBefore)): ?>
-    <div class="photos-section">
-        <div class="photos-row">
-            <div class="photos-row-title">Fotografie PRED servisom</div>
-            <div class="photos-grid">
-                <?php foreach ($photosBefore as $att): 
-                    $photoPath = BASE_PATH . '/' . $att['file_path'];
-                    $photoDataUri = getImageDataUri($photoPath);
-                ?>
-                <div class="photo-item">
-                    <?php if ($photoDataUri): ?>
-                    <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
-                    <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
-                    <?php endif; ?>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?php echo renderPhotoSection('Fotografie PRED servisom', $photosBefore); ?>
 
     <!-- Fotografie - PO servise -->
-    <?php if (!empty($photosAfter)): ?>
-    <div class="photos-section">
-        <div class="photos-row">
-            <div class="photos-row-title">Fotografie PO servise</div>
-            <div class="photos-grid">
-                <?php foreach ($photosAfter as $att): 
-                    $photoPath = BASE_PATH . '/' . $att['file_path'];
-                    $photoDataUri = getImageDataUri($photoPath);
-                ?>
-                <div class="photo-item">
-                    <?php if ($photoDataUri): ?>
-                    <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
-                    <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
-                    <?php endif; ?>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?php echo renderPhotoSection('Fotografie PO servise', $photosAfter); ?>
 
     <!-- Fotografie - všeobecné (legacy) -->
-    <?php if (!empty($photosGeneral)): ?>
-    <div class="photos-section">
-        <div class="photos-row">
-            <div class="photos-row-title">Fotografie zariadenia</div>
-            <div class="photos-grid">
-                <?php foreach ($photosGeneral as $att): 
-                    $photoPath = BASE_PATH . '/' . $att['file_path'];
-                    $photoDataUri = getImageDataUri($photoPath);
-                ?>
-                <div class="photo-item">
-                    <?php if ($photoDataUri): ?>
-                    <img src="<?= $photoDataUri ?>" alt="<?= htmlspecialchars($att['file_name']) ?>">
-                    <?php else: ?>
-                    <div style="background: #f0f0f0; padding: 10px; font-size: 7pt;"><?= htmlspecialchars($att['file_name']) ?></div>
-                    <?php endif; ?>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?php echo renderPhotoSection('Fotografie zariadenia', $photosGeneral); ?>
 
     <!-- Podpisy -->
     <div class="signatures-section">
