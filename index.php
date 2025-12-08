@@ -881,16 +881,26 @@ function generatePdf(int $reportId, string $cisloProtokolu): ?string
     $stmt->execute([$reportId]);
     $attachments = $stmt->fetchAll();
     
-    // Rozdelenie príloh podľa typu
+    // Rozdelenie príloh podľa typu a komponentu
     $photosBefore = [];
     $photosAfter = [];
     $photosGeneral = [];
+    $componentPhotos = []; // Photos organized by component section_key
+    
     foreach ($attachments as $att) {
         $photoType = $att['photo_type'] ?? 'general';
+        $sectionKey = $att['section_key'] ?? '';
+        
         if ($photoType === 'before') {
             $photosBefore[] = $att;
         } elseif ($photoType === 'after') {
             $photosAfter[] = $att;
+        } elseif ($photoType === 'component' && !empty($sectionKey)) {
+            // Group component photos by section_key
+            if (!isset($componentPhotos[$sectionKey])) {
+                $componentPhotos[$sectionKey] = [];
+            }
+            $componentPhotos[$sectionKey][] = $att;
         } else {
             $photosGeneral[] = $att;
         }

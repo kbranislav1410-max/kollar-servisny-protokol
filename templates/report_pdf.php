@@ -109,6 +109,40 @@ if (!isset($photosAfter)) {
 if (!isset($photosGeneral)) {
     $photosGeneral = [];
 }
+if (!isset($componentPhotos)) {
+    $componentPhotos = [];
+}
+
+// Helper function to render component photos
+function renderComponentPhotos($componentKey) {
+    global $componentPhotos;
+    
+    if (empty($componentPhotos[$componentKey])) {
+        return '';
+    }
+    
+    $html = '<div class="component-photos-section">';
+    $html .= '<div class="component-photos-title">Fotografie komponentu</div>';
+    $html .= '<div class="photos-grid">';
+    
+    foreach ($componentPhotos[$componentKey] as $att) {
+        $photoPath = BASE_PATH . '/' . $att['file_path'];
+        $photoDataUri = getImageDataUri($photoPath);
+        
+        $html .= '<div class="photo-item">';
+        if ($photoDataUri) {
+            $html .= '<img src="' . $photoDataUri . '" alt="' . htmlspecialchars($att['file_name']) . '">';
+        } else {
+            $html .= '<div style="background: #f0f0f0; padding: 10px; font-size: 7pt;">' . htmlspecialchars($att['file_name']) . '</div>';
+        }
+        $html .= '</div>';
+    }
+    
+    $html .= '</div>';
+    $html .= '</div>';
+    
+    return $html;
+}
 ?>
     <style>
         * {
@@ -357,6 +391,19 @@ if (!isset($photosGeneral)) {
         .photos-section {
             margin-bottom: 12px;
             page-break-inside: avoid;
+        }
+        .component-photos-section {
+            margin-top: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+        .component-photos-title {
+            font-weight: bold;
+            font-size: 7pt;
+            margin-bottom: 6px;
+            color: #2c3e50;
         }
         .photos-grid {
             display: block;
@@ -618,6 +665,11 @@ if (!isset($photosGeneral)) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($klapky['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($klapky['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -627,39 +679,36 @@ if (!isset($photosGeneral)) {
                     <td>
                         <?php if (!empty($klapky['privod_stav'])): ?>
                         <span class="state-badge state-<?= $klapky['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($klapky['privod_stav'])) ?></span>
-                        <?php if (!empty($klapky['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($klapky['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($klapky['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($klapky['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($klapky['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($klapky['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($klapky['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($klapky['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($klapky['privod_stav']) && empty($klapky['privod_vykonany_servis']) && empty($klapky['privod_zhodnotenie']) && empty($klapky['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($klapky['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $klapky['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($klapky['odvod_stav'])) ?></span>
-                        <?php if (!empty($klapky['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($klapky['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($klapky['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($klapky['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($klapky['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($klapky['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($klapky['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($klapky['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($klapky['odvod_stav']) && empty($klapky['odvod_vykonany_servis']) && empty($klapky['odvod_zhodnotenie']) && empty($klapky['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($klapky['zhodnotenie']) || !empty($klapky['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($klapky['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($klapky['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($klapky['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($klapky['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('klapky'); ?>
         </div>
     </div>
     <?php endif; ?>
