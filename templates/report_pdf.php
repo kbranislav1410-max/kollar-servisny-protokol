@@ -739,6 +739,11 @@ function renderComponentPhotos($componentKey) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($filter['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($filter['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -748,39 +753,36 @@ function renderComponentPhotos($componentKey) {
                     <td>
                         <?php if (!empty($filter['privod_stav'])): ?>
                         <span class="state-badge state-<?= $filter['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($filter['privod_stav'])) ?></span>
-                        <?php if (!empty($filter['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($filter['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($filter['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($filter['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($filter['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($filter['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($filter['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($filter['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($filter['privod_stav']) && empty($filter['privod_vykonany_servis']) && empty($filter['privod_zhodnotenie']) && empty($filter['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($filter['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $filter['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($filter['odvod_stav'])) ?></span>
-                        <?php if (!empty($filter['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($filter['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($filter['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($filter['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($filter['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($filter['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($filter['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($filter['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($filter['odvod_stav']) && empty($filter['odvod_vykonany_servis']) && empty($filter['odvod_zhodnotenie']) && empty($filter['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($filter['zhodnotenie']) || !empty($filter['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($filter['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($filter['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($filter['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($filter['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('filter'); ?>
         </div>
     </div>
     <?php endif; ?>
@@ -803,6 +805,11 @@ function renderComponentPhotos($componentKey) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($rekuperator['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($rekuperator['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -812,39 +819,36 @@ function renderComponentPhotos($componentKey) {
                     <td>
                         <?php if (!empty($rekuperator['privod_stav'])): ?>
                         <span class="state-badge state-<?= $rekuperator['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($rekuperator['privod_stav'])) ?></span>
-                        <?php if (!empty($rekuperator['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($rekuperator['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($rekuperator['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($rekuperator['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($rekuperator['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($rekuperator['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($rekuperator['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($rekuperator['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($rekuperator['privod_stav']) && empty($rekuperator['privod_vykonany_servis']) && empty($rekuperator['privod_zhodnotenie']) && empty($rekuperator['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($rekuperator['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $rekuperator['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($rekuperator['odvod_stav'])) ?></span>
-                        <?php if (!empty($rekuperator['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($rekuperator['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($rekuperator['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($rekuperator['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($rekuperator['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($rekuperator['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($rekuperator['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($rekuperator['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($rekuperator['odvod_stav']) && empty($rekuperator['odvod_vykonany_servis']) && empty($rekuperator['odvod_zhodnotenie']) && empty($rekuperator['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($rekuperator['zhodnotenie']) || !empty($rekuperator['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($rekuperator['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($rekuperator['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($rekuperator['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($rekuperator['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('rekuperator'); ?>
         </div>
     </div>
     <?php endif; ?>
@@ -867,6 +871,11 @@ function renderComponentPhotos($componentKey) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($recirkulacia['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($recirkulacia['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -876,39 +885,36 @@ function renderComponentPhotos($componentKey) {
                     <td>
                         <?php if (!empty($recirkulacia['privod_stav'])): ?>
                         <span class="state-badge state-<?= $recirkulacia['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($recirkulacia['privod_stav'])) ?></span>
-                        <?php if (!empty($recirkulacia['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($recirkulacia['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($recirkulacia['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($recirkulacia['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($recirkulacia['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($recirkulacia['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($recirkulacia['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($recirkulacia['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($recirkulacia['privod_stav']) && empty($recirkulacia['privod_vykonany_servis']) && empty($recirkulacia['privod_zhodnotenie']) && empty($recirkulacia['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($recirkulacia['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $recirkulacia['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($recirkulacia['odvod_stav'])) ?></span>
-                        <?php if (!empty($recirkulacia['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($recirkulacia['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($recirkulacia['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($recirkulacia['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($recirkulacia['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($recirkulacia['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($recirkulacia['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($recirkulacia['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($recirkulacia['odvod_stav']) && empty($recirkulacia['odvod_vykonany_servis']) && empty($recirkulacia['odvod_zhodnotenie']) && empty($recirkulacia['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($recirkulacia['zhodnotenie']) || !empty($recirkulacia['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($recirkulacia['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($recirkulacia['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($recirkulacia['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($recirkulacia['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('recirkulacia'); ?>
         </div>
     </div>
     <?php endif; ?>
@@ -945,6 +951,11 @@ function renderComponentPhotos($componentKey) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($ventilator['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($ventilator['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -954,39 +965,36 @@ function renderComponentPhotos($componentKey) {
                     <td>
                         <?php if (!empty($ventilator['privod_stav'])): ?>
                         <span class="state-badge state-<?= $ventilator['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($ventilator['privod_stav'])) ?></span>
-                        <?php if (!empty($ventilator['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($ventilator['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($ventilator['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($ventilator['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($ventilator['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($ventilator['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($ventilator['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($ventilator['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($ventilator['privod_stav']) && empty($ventilator['privod_vykonany_servis']) && empty($ventilator['privod_zhodnotenie']) && empty($ventilator['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($ventilator['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $ventilator['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($ventilator['odvod_stav'])) ?></span>
-                        <?php if (!empty($ventilator['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($ventilator['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($ventilator['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($ventilator['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($ventilator['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($ventilator['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($ventilator['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($ventilator['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($ventilator['odvod_stav']) && empty($ventilator['odvod_vykonany_servis']) && empty($ventilator['odvod_zhodnotenie']) && empty($ventilator['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($ventilator['zhodnotenie']) || !empty($ventilator['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($ventilator['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($ventilator['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($ventilator['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($ventilator['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('ventilator'); ?>
         </div>
     </div>
     <?php endif; ?>
@@ -1023,6 +1031,11 @@ function renderComponentPhotos($componentKey) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php if (!empty($motor['poznamka'])): ?>
+            <div class="component-note" style="margin-bottom: 8px;">
+                <strong>Poznámka:</strong> <?= htmlspecialchars($motor['poznamka']) ?>
+            </div>
+            <?php endif; ?>
             <table class="priv-odv-table">
                 <tr>
                     <th>PRÍVOD</th>
@@ -1032,39 +1045,36 @@ function renderComponentPhotos($componentKey) {
                     <td>
                         <?php if (!empty($motor['privod_stav'])): ?>
                         <span class="state-badge state-<?= $motor['privod_stav'] ?>"><?= htmlspecialchars(getStavLabel($motor['privod_stav'])) ?></span>
-                        <?php if (!empty($motor['privod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($motor['privod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($motor['privod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($motor['privod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($motor['privod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($motor['privod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($motor['privod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($motor['privod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($motor['privod_stav']) && empty($motor['privod_vykonany_servis']) && empty($motor['privod_zhodnotenie']) && empty($motor['privod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($motor['odvod_stav'])): ?>
                         <span class="state-badge state-<?= $motor['odvod_stav'] ?>"><?= htmlspecialchars(getStavLabel($motor['odvod_stav'])) ?></span>
-                        <?php if (!empty($motor['odvod_poznamka'])): ?>
-                        <div class="component-note"><?= htmlspecialchars($motor['odvod_poznamka']) ?></div>
                         <?php endif; ?>
-                        <?php else: ?>-<?php endif; ?>
+                        <?php if (!empty($motor['odvod_vykonany_servis'])): ?>
+                        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($motor['odvod_vykonany_servis']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($motor['odvod_zhodnotenie'])): ?>
+                        <div class="component-note"><strong>Zhodnotenie:</strong> <?= htmlspecialchars($motor['odvod_zhodnotenie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (!empty($motor['odvod_odporucanie'])): ?>
+                        <div class="component-note"><strong>Odporúčanie:</strong> <?= htmlspecialchars($motor['odvod_odporucanie']) ?></div>
+                        <?php endif; ?>
+                        <?php if (empty($motor['odvod_stav']) && empty($motor['odvod_vykonany_servis']) && empty($motor['odvod_zhodnotenie']) && empty($motor['odvod_odporucanie'])): ?>-<?php endif; ?>
                     </td>
                 </tr>
             </table>
-            <?php if (!empty($motor['zhodnotenie']) || !empty($motor['odporucanie'])): ?>
-            <div class="component-evaluation">
-                <div class="component-evaluation-row">
-                    <?php if (!empty($motor['zhodnotenie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Zhodnotenie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($motor['zhodnotenie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($motor['odporucanie'])): ?>
-                    <div class="component-eval-item">
-                        <div class="eval-label">Odporúčanie:</div>
-                        <div class="eval-value"><?= htmlspecialchars($motor['odporucanie']) ?></div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+            <?php echo renderComponentPhotos('el_motor'); ?>
         </div>
     </div>
     <?php endif; ?>
@@ -1100,6 +1110,9 @@ function renderComponentPhotos($componentKey) {
         <?php if (!empty($chladic['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($chladic['poznamka']) ?></div>
         <?php endif; ?>
+        <?php if (!empty($chladic['vykonany_servis'])): ?>
+        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($chladic['vykonany_servis']) ?></div>
+        <?php endif; ?>
         <?php if (!empty($chladic['zhodnotenie']) || !empty($chladic['odporucanie'])): ?>
         <div class="component-evaluation">
             <div class="component-evaluation-row">
@@ -1118,6 +1131,7 @@ function renderComponentPhotos($componentKey) {
             </div>
         </div>
         <?php endif; ?>
+        <?php echo renderComponentPhotos('chladic'); ?>
     </div>
     <?php endif; ?>
 
@@ -1157,6 +1171,9 @@ function renderComponentPhotos($componentKey) {
         <?php if (!empty($ohrievac['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($ohrievac['poznamka']) ?></div>
         <?php endif; ?>
+        <?php if (!empty($ohrievac['vykonany_servis'])): ?>
+        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($ohrievac['vykonany_servis']) ?></div>
+        <?php endif; ?>
         <?php if (!empty($ohrievac['zhodnotenie']) || !empty($ohrievac['odporucanie'])): ?>
         <div class="component-evaluation">
             <div class="component-evaluation-row">
@@ -1175,6 +1192,7 @@ function renderComponentPhotos($componentKey) {
             </div>
         </div>
         <?php endif; ?>
+        <?php echo renderComponentPhotos('ohrievac'); ?>
     </div>
     <?php endif; ?>
 
@@ -1200,6 +1218,9 @@ function renderComponentPhotos($componentKey) {
         <?php if (!empty($termostat['poznamka'])): ?>
         <div class="component-note"><?= htmlspecialchars($termostat['poznamka']) ?></div>
         <?php endif; ?>
+        <?php if (!empty($termostat['vykonany_servis'])): ?>
+        <div class="component-note"><strong>Vykonaný servis:</strong> <?= htmlspecialchars($termostat['vykonany_servis']) ?></div>
+        <?php endif; ?>
         <?php if (!empty($termostat['zhodnotenie']) || !empty($termostat['odporucanie'])): ?>
         <div class="component-evaluation">
             <div class="component-evaluation-row">
@@ -1218,6 +1239,7 @@ function renderComponentPhotos($componentKey) {
             </div>
         </div>
         <?php endif; ?>
+        <?php echo renderComponentPhotos('kominovy_termostat'); ?>
     </div>
     <?php endif; ?>
 
