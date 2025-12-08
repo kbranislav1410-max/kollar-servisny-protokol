@@ -2838,7 +2838,7 @@ $pageView = $pageView ?? 'home';
                             <div class="photo-upload-section">
                                 <button type="button" class="btn btn-upload" onclick="document.getElementById('cameraInputMotor').click()">📷 Odfotiť</button>
                                 <input type="file" id="cameraInputMotor" accept="image/*" capture="environment" style="display: none;" data-section-key="el_motor" onchange="handleComponentPhotoUpload(this)">
-                                <div id="motorPhotosPreview" class="photos-preview"></div>
+                                <div id="el_motorPhotosPreview" class="photos-preview"></div>
                             </div>
                         </div>
                     </div>
@@ -4542,13 +4542,21 @@ $pageView = $pageView ?? 'home';
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Add preview
+                        // Add preview with proper escaping
                         const preview = document.createElement('div');
                         preview.className = 'photo-preview-item';
-                        preview.innerHTML = `
-                            <img src="uploads/photos/${data.filename}" alt="Component photo">
-                            <span class="photo-name">${file.name}</span>
-                        `;
+                        
+                        const img = document.createElement('img');
+                        img.src = 'uploads/photos/' + encodeURIComponent(data.filename);
+                        img.alt = 'Component photo';
+                        
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'photo-name';
+                        nameSpan.textContent = file.name;
+                        
+                        preview.appendChild(img);
+                        preview.appendChild(nameSpan);
+                        
                         if (previewContainer) {
                             previewContainer.appendChild(preview);
                         }
