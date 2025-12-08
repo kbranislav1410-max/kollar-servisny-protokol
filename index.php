@@ -4547,8 +4547,9 @@ $pageView = $pageView ?? 'home';
                         preview.className = 'photo-preview-item';
                         
                         const img = document.createElement('img');
-                        // Validate filename contains only safe characters (alphanumeric, underscore, single dot for extension)
-                        if (/^[a-zA-Z0-9_]+\.[a-zA-Z0-9]+$/.test(data.filename)) {
+                        // Validate filename contains only safe characters (alphanumeric, underscore, hyphen, dot for extension)
+                        // Allow common image extensions (2-4 chars) and prevent directory traversal
+                        if (/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]{2,4}$/.test(data.filename) && !data.filename.includes('..')) {
                             img.src = 'uploads/photos/' + encodeURIComponent(data.filename);
                         } else {
                             console.error('Invalid filename received:', data.filename);
