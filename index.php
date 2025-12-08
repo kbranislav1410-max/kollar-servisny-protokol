@@ -4541,13 +4541,20 @@ $pageView = $pageView ?? 'home';
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        // Add preview with proper escaping
+                    if (data.success && data.filename) {
+                        // Add preview with proper escaping and validation
                         const preview = document.createElement('div');
                         preview.className = 'photo-preview-item';
                         
                         const img = document.createElement('img');
-                        img.src = 'uploads/photos/' + encodeURIComponent(data.filename);
+                        // Validate filename contains only safe characters
+                        if (/^[a-zA-Z0-9_\-\.]+$/.test(data.filename)) {
+                            img.src = 'uploads/photos/' + encodeURIComponent(data.filename);
+                        } else {
+                            console.error('Invalid filename received:', data.filename);
+                            alert('Chyba: Neplatný názov súboru');
+                            return;
+                        }
                         img.alt = 'Component photo';
                         
                         const nameSpan = document.createElement('span');
@@ -4561,7 +4568,9 @@ $pageView = $pageView ?? 'home';
                             previewContainer.appendChild(preview);
                         }
                     } else {
-                        alert('Chyba pri nahrávaní: ' + (data.error || 'Neznáma chyba'));
+                        // Use textContent to safely display error
+                        const errorMsg = data.error ? String(data.error) : 'Neznáma chyba';
+                        alert('Chyba pri nahrávaní: ' + errorMsg);
                     }
                 })
                 .catch(err => {
