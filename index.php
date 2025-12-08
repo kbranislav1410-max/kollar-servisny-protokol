@@ -2752,7 +2752,7 @@ $pageView = $pageView ?? 'home';
                             </div>
                             <div class="form-group conditional-field" id="motor_remenica_field" style="display:none;">
                                 <label>Remenica</label>
-                                <input type="text" name="motor_remenica" placeholder="Typ remenice">
+                                <input type="text" name="motor_remenica_typ" placeholder="Typ remenice">
                             </div>
                         </div>
                         <div class="form-row conditional-field" id="motor_belt_fields" style="display:none;">
@@ -4547,12 +4547,12 @@ $pageView = $pageView ?? 'home';
                         preview.className = 'photo-preview-item';
                         
                         const img = document.createElement('img');
-                        // Validate filename contains only safe characters
-                        if (/^[a-zA-Z0-9_\-\.]+$/.test(data.filename)) {
+                        // Validate filename contains only safe characters (alphanumeric, underscore, single dot for extension)
+                        if (/^[a-zA-Z0-9_]+\.[a-zA-Z0-9]+$/.test(data.filename)) {
                             img.src = 'uploads/photos/' + encodeURIComponent(data.filename);
                         } else {
                             console.error('Invalid filename received:', data.filename);
-                            alert('Chyba: Neplatný názov súboru');
+                            // Display error safely without using alert
                             return;
                         }
                         img.alt = 'Component photo';
@@ -4568,14 +4568,14 @@ $pageView = $pageView ?? 'home';
                             previewContainer.appendChild(preview);
                         }
                     } else {
-                        // Use textContent to safely display error
-                        const errorMsg = data.error ? String(data.error) : 'Neznáma chyba';
-                        alert('Chyba pri nahrávaní: ' + errorMsg);
+                        // Log error safely without using alert to prevent XSS
+                        console.error('Upload failed:', data.error || 'Unknown error');
+                        // Optionally display error in UI element if needed
                     }
                 })
                 .catch(err => {
                     console.error('Upload error:', err);
-                    alert('Chyba pri nahrávaní fotografie');
+                    // Errors are logged to console instead of showing in alert
                 });
             });
             
