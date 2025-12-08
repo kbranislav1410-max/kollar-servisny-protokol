@@ -51,12 +51,13 @@ function apiGet(action, params = {}) {
  * Note: This function is designed to work with containers like #customersView or #customersList
  * 
  * @param {string} containerId - The ID of the container element (default: 'customersList')
+ * @returns {boolean} True if container found and loading started, false otherwise
  */
 function populateCustomersView(containerId = 'customersList') {
     const container = document.getElementById(containerId);
     if (!container) {
         console.warn(`Container #${containerId} not found`);
-        return;
+        return false;
     }
     
     container.innerHTML = '<p class="loading">Načítavam zákazníkov...</p>';
@@ -65,7 +66,7 @@ function populateCustomersView(containerId = 'customersList') {
         .then(customers => {
             if (!customers || customers.length === 0) {
                 container.innerHTML = '<p class="no-data">Žiadni zákazníci</p>';
-                return;
+                return true;
             }
             
             // Store for filtering
@@ -92,11 +93,15 @@ function populateCustomersView(containerId = 'customersList') {
             });
             html += '</div>';
             container.innerHTML = html;
+            return true;
         })
         .catch(error => {
             container.innerHTML = '<p class="error">Chyba pri načítaní zákazníkov</p>';
             console.error('Error loading customers:', error);
+            return false;
         });
+    
+    return true; // Loading started successfully
 }
 
 /**
@@ -275,11 +280,12 @@ function renderComponents(sekcieData) {
 
 /**
  * Helper: Download report PDF
- * Navigates to downloadReportPDF endpoint with report ID
+ * Navigates to download_pdf endpoint with report ID
  * 
  * @param {number} reportId - The ID of the report to download
  */
 function downloadReportPDF(reportId) {
+    // Using 'download_pdf' action to match backend endpoint naming
     window.location.href = `index.php?action=download_pdf&report_id=${reportId}`;
 }
 

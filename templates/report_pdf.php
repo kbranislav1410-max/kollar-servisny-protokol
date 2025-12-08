@@ -117,6 +117,9 @@ if (!isset($componentPhotos)) {
  * Render a single photo as an <img> tag with inline styles for PDF layout
  * Uses data URI from getImageDataUri() and includes fallback for failed loads
  * 
+ * Note: Requires getImageDataUri($path) function to be defined (see lines 10-20)
+ * which converts image files to base64 data URIs for PDF embedding
+ * 
  * @param string $photoPath Full path to photo file
  * @param string $fileName Optional filename for fallback display
  * @return string HTML img tag with inline styles or fallback message
